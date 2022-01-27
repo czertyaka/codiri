@@ -11,7 +11,7 @@ def _log(msg):
         print("contours: " + msg)
 
 class Contours(object):
-    """Extracts shoreline of waterbodies from GeoTIFF file as polygons"""
+    """Extracts shoreline of water bodies from GeoTIFF file as polygons"""
     approx_error = 10
 
     def __init__(self, filename):
@@ -39,7 +39,7 @@ class Contours(object):
         return pix_cnts
 
     def __coord_cnts(self, pix_cnts):
-        _log(f"Douglas-Peucker approximation algorithm elsilon = {self.approx_error}%")
+        _log(f"Douglas-Peucker approximation algorithm epsilon = {self.approx_error}%")
         self.__cnts = []
         for pix_cnt in pix_cnts:
             pix_cnt = cv.approxPolyDP(pix_cnt, self.approx_error, True)
@@ -76,4 +76,5 @@ class Contours(object):
         plt.show()
 
 if __name__ == "__main__":
-    init("water.tif")
+    cnts = Contours(r"water.tif")
+    cnts.plot_contours()
