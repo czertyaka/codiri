@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
-from contours import Contours
+from map import Map as mymap
+from shorelines import ShorelinesFinder as slfinder
 
 if __name__ == "__main__":
-    cnts = Contours(r"water.tif")
-    cnts.plot_image()
+    map = mymap(r"water.tif")
+    # map.plot()
+    slfinder(map=map, approx_error=4).plot()
