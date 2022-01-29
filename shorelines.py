@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.ticker import AutoMinorLocator
 from map import Map
+import shapely.geometry as geom
 
 def _log(msg):
         print("shorelines: " + msg)
@@ -41,6 +42,14 @@ class ShorelinesFinder(object):
         _log(f"added {len(self.__cnts)} shorelines")
         self.__cnts = np.array(self.__cnts)
 
+    def get_cnt(self, lon, lat):
+        point = geom.Point(lon, lat)
+        for cnt in self.__cnts:
+            polygon = geom.polygon.Polygon(cnt)
+            if polygon.contains(point):
+                return cnt
+        return np.array([])
+
     def plot(self):
         fig,ax = plt.subplots()
         for cnt in self.__cnts:
@@ -59,5 +68,8 @@ class ShorelinesFinder(object):
 
 if __name__ == "__main__":
     map = Map(r"water.tif")
-    finder = ShorelinesFinder(map)
+    finder = ShorelinesFinder(map=map, approx_error=3)
+    lon=6795000
+    lat=7493000
+    _log(f"shoreline contour for lon = {lon}; lat={lat}:\n{finder.get_cnt(lon=lon, lat=lat)}")
     finder.plot()
