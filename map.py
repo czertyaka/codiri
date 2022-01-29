@@ -13,22 +13,31 @@ class Map(object):
     """Contains geospatial data for area of interest"""
 
     def __init__(self, filename):
-        self.img = rsio.open(filename)
-        _log(f"opened image '{filename}'; bounds = {self.img.bounds}, crs = {self.img.crs}, "
-            f"width = {self.img.width} pix, height = {self.img.height} pix")
-        self.data = np.uint8(self.img.read(1))
-        ret, self.data = cv.threshold(self.data, 2, 0, cv.THRESH_TOZERO_INV)
+        self.__img = rsio.open(filename)
+        _log(f"opened image '{filename}'; bounds = {self.__img.bounds}, crs = {self.__img.crs}, "
+            f"width = {self.__img.width} pix, height = {self.__img.height} pix")
+        self.__data = np.uint8(self.__img.read(1))
+        ret, self.__data = cv.threshold(self.__data, 2, 0, cv.THRESH_TOZERO_INV)
         if not ret:
             _log("failed to reduce cloud/shadow/snow/ice areas")
             exit()
-        ret, self.data = cv.threshold(self.data, 1, 255, cv.THRESH_BINARY)
+        ret, self.__data = cv.threshold(self.__data, 1, 255, cv.THRESH_BINARY)
         if not ret:
             _log("failed to make image binary")
             exit()
 
+    @classmethod
     def plot(self):
-        plt.imshow(self.data)
+        plt.imshow(self.__data)
         plt.show()
+
+    @property
+    def img(self):
+        return self.__img
+
+    @property
+    def data(self):
+        return self.__data
 
 def distance(coo0, coo1, crs='EPSG:3857'):
     transformer = Transformer.from_crs(crs, 'EPSG:4326')

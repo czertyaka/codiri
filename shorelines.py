@@ -15,7 +15,7 @@ class ShorelinesFinder(object):
     """Makes polygons for all shorelines presented on map"""
 
     def __init__(self, map, approx_error=3):
-        self.approx_error = approx_error
+        self.__approx_error = approx_error
         self.__map = map
         pix_cnts = self.__find_contours()
         self.__coord_cnts(pix_cnts)
@@ -26,10 +26,10 @@ class ShorelinesFinder(object):
         return pix_cnts
 
     def __coord_cnts(self, pix_cnts):
-        _log(f"Douglas-Peucker approximation algorithm epsilon = {self.approx_error}%")
-        self.cnts = []
+        _log(f"Douglas-Peucker approximation algorithm epsilon = {self.__approx_error}%")
+        self.__cnts = []
         for pix_cnt in pix_cnts:
-            pix_cnt = cv.approxPolyDP(pix_cnt, self.approx_error, True)
+            pix_cnt = cv.approxPolyDP(pix_cnt, self.__approx_error, True)
             if len(pix_cnt) < 3:
                 continue
             coord_cnt = []
@@ -38,21 +38,23 @@ class ShorelinesFinder(object):
                 coord_vertice = self.__map.img.xy(pix_vertice[1], pix_vertice[0])
                 coord_cnt.append(coord_vertice)
             coord_cnt = np.array(coord_cnt)
-            self.cnts.append(coord_cnt)
-        _log(f"added {len(self.cnts)} shorelines")
-        self.cnts = np.array(self.cnts)
+            self.__cnts.append(coord_cnt)
+        _log(f"added {len(self.__cnts)} shorelines")
+        self.__cnts = np.array(self.__cnts)
 
+    @classmethod
     def get_cnt(self, lon, lat):
         point = geom.Point(lon, lat)
-        for cnt in self.cnts:
+        for cnt in self.__cnts:
             polygon = geom.polygon.Polygon(cnt)
             if polygon.contains(point):
                 return cnt
         return np.array([])
 
+    @classmethod
     def plot(self):
         fig,ax = plt.subplots()
-        for cnt in self.cnts:
+        for cnt in self.__cnts:
             polygon = Polygon(cnt, fill=False, ec='blue')
             ax.add_patch(polygon)
 
@@ -66,9 +68,13 @@ class ShorelinesFinder(object):
         plt.axis('scaled')
         plt.show()
 
+    @property
+    def contours(self):
+        return self.__cnts
+
 if __name__ == "__main__":
     map = Map(r"water.tif")
-    finder = ShorelinesFinder(map=map, approx_error=3)
+    finder = ShorelinesFinder(map=map, approx_error=20)
     lon=6795000
     lat=7493000
     _log(f"shoreline contour for lon = {lon}; lat={lat}:\n{finder.get_cnt(lon=lon, lat=lat)}")
