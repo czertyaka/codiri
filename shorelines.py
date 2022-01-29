@@ -27,7 +27,7 @@ class ShorelinesFinder(object):
 
     def __coord_cnts(self, pix_cnts):
         _log(f"Douglas-Peucker approximation algorithm epsilon = {self.approx_error}%")
-        self.__cnts = []
+        self.cnts = []
         for pix_cnt in pix_cnts:
             pix_cnt = cv.approxPolyDP(pix_cnt, self.approx_error, True)
             if len(pix_cnt) < 3:
@@ -38,13 +38,13 @@ class ShorelinesFinder(object):
                 coord_vertice = self.__map.img.xy(pix_vertice[1], pix_vertice[0])
                 coord_cnt.append(coord_vertice)
             coord_cnt = np.array(coord_cnt)
-            self.__cnts.append(coord_cnt)
-        _log(f"added {len(self.__cnts)} shorelines")
-        self.__cnts = np.array(self.__cnts)
+            self.cnts.append(coord_cnt)
+        _log(f"added {len(self.cnts)} shorelines")
+        self.cnts = np.array(self.cnts)
 
     def get_cnt(self, lon, lat):
         point = geom.Point(lon, lat)
-        for cnt in self.__cnts:
+        for cnt in self.cnts:
             polygon = geom.polygon.Polygon(cnt)
             if polygon.contains(point):
                 return cnt
@@ -52,7 +52,7 @@ class ShorelinesFinder(object):
 
     def plot(self):
         fig,ax = plt.subplots()
-        for cnt in self.__cnts:
+        for cnt in self.cnts:
             polygon = Polygon(cnt, fill=False, ec='blue')
             ax.add_patch(polygon)
 
