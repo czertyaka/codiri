@@ -26,7 +26,6 @@ class Map(object):
             _log("failed to make image binary")
             exit()
 
-    @classmethod
     def plot(self):
         plt.imshow(self.__data)
         plt.show()

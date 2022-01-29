@@ -42,7 +42,6 @@ class ShorelinesFinder(object):
         _log(f"added {len(self.__cnts)} shorelines")
         self.__cnts = np.array(self.__cnts)
 
-    @classmethod
     def get_cnt(self, lon, lat):
         point = geom.Point(lon, lat)
         for cnt in self.__cnts:
@@ -51,10 +50,9 @@ class ShorelinesFinder(object):
                 return cnt
         return np.array([])
 
-    @classmethod
     def plot(self):
         fig,ax = plt.subplots()
-        for cnt in self.__cnts:
+        for cnt in self.contours:
             polygon = Polygon(cnt, fill=False, ec='blue')
             ax.add_patch(polygon)
 
@@ -71,6 +69,10 @@ class ShorelinesFinder(object):
     @property
     def contours(self):
         return self.__cnts
+
+    @property
+    def map(self):
+        return self.__map
 
 if __name__ == "__main__":
     map = Map(r"water.tif")
