@@ -38,10 +38,16 @@ class Map(object):
     def data(self):
         return self.__data
 
-def distance(coo0, coo1, crs='EPSG:3857'):
+def transform_coo(coo, crs='EPSG:4326'):
+    if crs == 'EPSG:4326':
+        return coo
     transformer = Transformer.from_crs(crs, 'EPSG:4326')
-    coo0['lat'], coo0['lon'] = transformer.transform(yy = coo0['lat'], xx = coo0['lon'])
-    coo1['lat'], coo1['lon'] = transformer.transform(yy = coo1['lat'], xx = coo1['lon'])
+    coo['lat'], coo['lon'] = transformer.transform(yy = coo['lat'], xx = coo['lon'])
+    return coo
+
+def distance(coo0, coo1, crs='EPSG:4326'):
+    coo0 = transform_coo(coo0, crs)
+    coo1 = transform_coo(coo1, crs)
     geod = Geod(ellps="WGS84")
     return geod.line_length([coo0['lon'], coo1['lon']], [coo0['lat'], coo1['lat']])
 
