@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-from map import Map as mymap
-from shorelines import ShorelinesFinder as slfinder
+from map import Map as Mymap
+from shorelines import ShorelinesFinder as Finder
 
 if __name__ == "__main__":
-    map = mymap(r"water.tif")
+    map = Mymap(r"water.tif")
     # map.plot()
-    slfinder(map=map, approx_error=4).plot()
+    Finder(map=map, approx_error=4).plot()
