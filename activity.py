@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from geo import Map, transform_coo
+from geo import Map, Coordinate
 
 
 def _log(msg):
@@ -40,10 +40,10 @@ class Cell(object):
 class Measurment(object):
     """Holds info on activity measurement"""
 
-    def __init__(self, activity, coo, crs="EPSG:4326"):
+    def __init__(self, activity, coo):
         """[specific activity] = Bq/kg"""
         self.__activity = activity
-        coo = transform_coo(coo, crs)
+        coo.transform("EPSG:3857")
         self.__coo = coo
 
     @property
@@ -122,8 +122,8 @@ if __name__ == "__main__":
     activities = ActivityMap(map)
     activities.add_shoreline("B11-I", [])
     activities.add_measurment(
-        "B11-I", Measurment(0, {"lon": 60.96793, "lat": 55.71958})
+        "B11-I", Measurment(0, Coordinate(60.96793, 55.71958, "EPSG:4326"))
     )
     activities.add_measurment(
-        "B12-I", Measurment(0, {"lon": 60.96793, "lat": 55.71958})
+        "B12-I", Measurment(0, Coordinate(60.96793, 55.71958, "EPSG:4326"))
     )

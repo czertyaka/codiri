@@ -1,11 +1,10 @@
 #!/usr/bin/python3
 
-import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.ticker import AutoMinorLocator
-from geo import Map, transform_coo
+from geo import Map, Coordinate
 import shapely.geometry as geom
 
 
@@ -61,20 +60,23 @@ class ShorelinesFinder(object):
                 coord_vertice = self.__map.img.xy(
                     pix_vertice[1], pix_vertice[0]
                 )
-                coord_cnt.append(coord_vertice)
+                coord_vertice = Coordinate(
+                    coord_vertice[0], coord_vertice[1], self.__map.img.crs
+                )
+                coord_vertice.transform("EPSG:3857")
+                coord_cnt.append([coord_vertice.lon, coord_vertice.lat])
             # TODO: estimate if contour is opened
-            self.__cnts.append(ShorelineContour(points=np.array(coord_cnt)))
+            self.__cnts.append(ShorelineContour(points=coord_cnt))
         _log(f"added {len(self.__cnts)} shorelines")
-        self.__cnts = np.array(self.__cnts)
 
-    def get_cnt(self, coo, crs="EPSG:4326"):
-        coo = transform_coo(coo, crs)
-        point = geom.Point(lon, lat)
+    def get_cnt(self, coo):
+        coo.transform("EPSG:3857")
+        point = geom.Point(coo.lon, coo.lat)
         for cnt in self.__cnts:
             polygon = geom.polygon.Polygon(cnt.points)
             if polygon.contains(point):
                 return cnt
-        return np.array([])
+        return ShorelineContour([])
 
     def plot(self):
         fig, ax = plt.subplots()
@@ -104,10 +106,9 @@ class ShorelinesFinder(object):
 if __name__ == "__main__":
     map = Map(r"water.tif")
     finder = ShorelinesFinder(map=map, approx_error=1)
-    lon = 6795000
-    lat = 7493000
+    coo = Coordinate(6795000, 7493000, "EPSG:3857")
     _log(
-        f"shoreline contour for lon = {lon}; lat={lat}:\n"
-        f"{finder.get_cnt(coo={'lon': lon, 'lat': lat}, crs='EPSG:3857').points}"  # noqa: E501
+        f"shoreline contour for lon = {coo.lon}; lat={coo.lat}:\n"
+        f"{finder.get_cnt(coo).points}"
     )
     finder.plot()

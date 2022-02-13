@@ -11,6 +11,45 @@ def _log(msg):
     print("map: " + msg)
 
 
+def distance(coo0, coo1):
+    coo0.transform("EPSG:4326")
+    coo1.transform("EPSG:4326")
+    geod = Geod(ellps="WGS84")
+    return geod.line_length([coo0.lon, coo1.lon], [coo0.lat, coo1.lat])
+
+
+class Coordinate(object):
+    """Coordinate with datum switching"""
+
+    def __init__(self, lon, lat, crs):
+        self.__lon = lon
+        self.__lat = lat
+        self.__crs = crs
+
+    def transform(self, crs):
+        if crs != self.__crs:
+            transformer = Transformer.from_crs(self.__crs, crs)
+            self.__lat, self.__lon = transformer.transform(
+                yy=self.lat, xx=self.lon
+            )
+            self.__crs = crs
+
+    @property
+    def lon(self):
+        return self.__lon
+
+    @property
+    def lat(self):
+        return self.__lat
+
+    @property
+    def crs(self):
+        return self.__crs
+
+    def __str__(self):
+        return f"{{lon: {self.lon}; lat: {self.lat}; crs = {self.crs}}}"
+
+
 class Map(object):
     """Contains geospatial data for area of interest"""
 
@@ -46,36 +85,19 @@ class Map(object):
         return self.__data
 
 
-def transform_coo(coo, crs="EPSG:4326"):
-    if crs == "EPSG:4326":
-        return coo
-    transformer = Transformer.from_crs(crs, "EPSG:4326")
-    coo["lat"], coo["lon"] = transformer.transform(
-        yy=coo["lat"], xx=coo["lon"]
-    )
-    return coo
-
-
-def distance(coo0, coo1, crs="EPSG:4326"):
-    coo0 = transform_coo(coo0, crs)
-    coo1 = transform_coo(coo1, crs)
-    geod = Geod(ellps="WGS84")
-    return geod.line_length(
-        [coo0["lon"], coo1["lon"]], [coo0["lat"], coo1["lat"]]
-    )
-
-
 if __name__ == "__main__":
-    map = Map(r"water.tif")
+    mymap = Map(r"water.tif")
     height = distance(
-        {"lon": map.img.bounds.left, "lat": map.img.bounds.top},
-        {"lon": map.img.bounds.left, "lat": map.img.bounds.bottom},
-        crs=map.img.crs,
+        Coordinate(mymap.img.bounds.left, mymap.img.bounds.top, mymap.img.crs),
+        Coordinate(
+            mymap.img.bounds.left, mymap.img.bounds.bottom, mymap.img.crs
+        ),
     )
     width = distance(
-        {"lon": map.img.bounds.left, "lat": map.img.bounds.top},
-        {"lon": map.img.bounds.right, "lat": map.img.bounds.top},
-        crs=map.img.crs,
+        Coordinate(mymap.img.bounds.left, mymap.img.bounds.top, mymap.img.crs),
+        Coordinate(
+            mymap.img.bounds.right, mymap.img.bounds.top, mymap.img.crs
+        ),
     )
     _log(f"height = {height:.3f} m, width = {width:.3f} m")
-    map.plot()
+    mymap.plot()
