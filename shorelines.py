@@ -5,7 +5,7 @@ import cv2 as cv
 from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.ticker import AutoMinorLocator
-from map import Map, transform_coo
+from geo import Map, transform_coo
 import shapely.geometry as geom
 
 

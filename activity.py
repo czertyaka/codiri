@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from map import Map, transform_coo
+from geo import Map, transform_coo
 
 
 def _log(msg):
