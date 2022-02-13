@@ -83,21 +83,3 @@ class Map(object):
     @property
     def data(self):
         return self.__data
-
-
-if __name__ == "__main__":
-    mymap = Map(r"water.tif")
-    height = distance(
-        Coordinate(mymap.img.bounds.left, mymap.img.bounds.top, mymap.img.crs),
-        Coordinate(
-            mymap.img.bounds.left, mymap.img.bounds.bottom, mymap.img.crs
-        ),
-    )
-    width = distance(
-        Coordinate(mymap.img.bounds.left, mymap.img.bounds.top, mymap.img.crs),
-        Coordinate(
-            mymap.img.bounds.right, mymap.img.bounds.top, mymap.img.crs
-        ),
-    )
-    _log(f"height = {height:.3f} m, width = {width:.3f} m")
-    mymap.plot()
