@@ -15,8 +15,8 @@ def _log(msg):
 class ShorelineContour(object):
     """Holds data on single shoreline contour"""
 
-    def __init__(self, points, closed=True):
-        self.__points = points
+    def __init__(self, points=None, closed=True):
+        self.__points = points if points is not None else []
         self.__closed = closed
 
     @property
@@ -63,20 +63,19 @@ class ShorelinesFinder(object):
                 coord_vertice = Coordinate(
                     coord_vertice[0], coord_vertice[1], self.__map.img.crs
                 )
-                coord_vertice.transform("EPSG:3857")
                 coord_cnt.append([coord_vertice.lon, coord_vertice.lat])
             # TODO: estimate if contour is opened
             self.__cnts.append(ShorelineContour(points=coord_cnt))
         _log(f"added {len(self.__cnts)} shorelines")
 
     def get_cnt(self, coo):
-        coo.transform("EPSG:3857")
+        coo.transform(self.__map.img.crs)
         point = geom.Point(coo.lon, coo.lat)
         for cnt in self.__cnts:
             polygon = geom.polygon.Polygon(cnt.points)
             if polygon.contains(point):
                 return cnt
-        return ShorelineContour([])
+        return ShorelineContour()
 
     def plot(self):
         fig, ax = plt.subplots()
@@ -104,7 +103,7 @@ class ShorelinesFinder(object):
 
 
 if __name__ == "__main__":
-    map = Map(r"water.tif")
+    map = Map(r"../data/water.tif")
     finder = ShorelinesFinder(map=map, approx_error=1)
     coo = Coordinate(6795000, 7493000, "EPSG:3857")
     _log(

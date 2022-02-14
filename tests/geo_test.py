@@ -50,7 +50,7 @@ class TestMap(object):
             width=2,
             dtype="uint8",
             crs="EPSG:3857",
-            transform=[50, 0, 100, 0, -50, 100],
+            transform=rasterio.transform.Affine(25, 25, 0, -25, -25, 100),
             count=1,
         )
         dataset.write(data, 1)
