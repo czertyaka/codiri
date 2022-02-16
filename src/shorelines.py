@@ -4,7 +4,7 @@ import cv2 as cv
 from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.ticker import AutoMinorLocator
-from bottom_deposits_radiocontamination.src.geo import Coordinate
+from .geo import Coordinate
 import shapely.geometry as geom
 
 
