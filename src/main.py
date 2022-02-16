@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
-from geo import Map as Mymap
-from shorelines import ShorelinesFinder as Finder
+from bottom_deposits_radiocontamination.src.geo import Map as Mymap
+from bottom_deposits_radiocontamination.src.shorelines import (
+    ShorelinesFinder as Finder,
+)
 
 if __name__ == "__main__":
     mymap = Mymap(r"water.tif")

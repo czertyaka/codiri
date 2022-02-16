@@ -1,4 +1,8 @@
-from ..src.geo import distance, Coordinate, Map
+from bottom_deposits_radiocontamination.src.geo import (
+    distance,
+    Coordinate,
+    Map,
+)
 import pytest
 import numpy as np
 import rasterio

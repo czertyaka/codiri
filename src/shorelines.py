@@ -4,7 +4,7 @@ import cv2 as cv
 from matplotlib import pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.ticker import AutoMinorLocator
-from geo import Map, Coordinate
+from bottom_deposits_radiocontamination.src.geo import Coordinate
 import shapely.geometry as geom
 
 
@@ -18,6 +18,14 @@ class ShorelineContour(object):
     def __init__(self, points=None, closed=True):
         self.__points = points if points is not None else []
         self.__closed = closed
+
+    def __eq__(self, other):
+        return self.closed == other.closed and sorted(self.points) == sorted(
+            other.points
+        )
+
+    def __repr__(self):
+        return f"{{closed: {self.closed}; points: {self.points}}}"
 
     @property
     def points(self):
@@ -39,7 +47,7 @@ class ShorelinesFinder(object):
 
     def __find_contours(self):
         pix_cnts, hierarchy = cv.findContours(
-            self.__map.data, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE
+            self.map.data, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE
         )
         _log(f"found {len(pix_cnts)} shorelines")
         return pix_cnts
@@ -57,11 +65,11 @@ class ShorelinesFinder(object):
             coord_cnt = []
             for pix_vertice in pix_cnt:
                 pix_vertice = pix_vertice[0]
-                coord_vertice = self.__map.img.xy(
-                    pix_vertice[1], pix_vertice[0]
+                coord_vertice = self.map.img.xy(
+                    pix_vertice[1], pix_vertice[0], offset="ul"
                 )
                 coord_vertice = Coordinate(
-                    coord_vertice[0], coord_vertice[1], self.__map.img.crs
+                    coord_vertice[0], coord_vertice[1], self.map.img.crs
                 )
                 coord_cnt.append([coord_vertice.lon, coord_vertice.lat])
             # TODO: estimate if contour is opened
@@ -69,7 +77,7 @@ class ShorelinesFinder(object):
         _log(f"added {len(self.__cnts)} shorelines")
 
     def get_cnt(self, coo):
-        coo.transform(self.__map.img.crs)
+        coo.transform(self.map.img.crs)
         point = geom.Point(coo.lon, coo.lat)
         for cnt in self.__cnts:
             polygon = geom.polygon.Polygon(cnt.points)
@@ -83,8 +91,8 @@ class ShorelinesFinder(object):
             polygon = Polygon(cnt.points, fill=False, ec="blue")
             ax.add_patch(polygon)
 
-        ax.set_xlim([self.__map.img.bounds.left, self.__map.img.bounds.right])
-        ax.set_ylim([self.__map.img.bounds.bottom, self.__map.img.bounds.top])
+        ax.set_xlim([self.map.img.bounds.left, self.map.img.bounds.right])
+        ax.set_ylim([self.map.img.bounds.bottom, self.map.img.bounds.top])
         ax.xaxis.set_minor_locator(AutoMinorLocator())
         ax.yaxis.set_minor_locator(AutoMinorLocator())
         ax.tick_params(axis="both", which="both")
@@ -100,14 +108,3 @@ class ShorelinesFinder(object):
     @property
     def map(self):
         return self.__map
-
-
-if __name__ == "__main__":
-    map = Map(r"../data/water.tif")
-    finder = ShorelinesFinder(map=map, approx_error=1)
-    coo = Coordinate(6795000, 7493000, "EPSG:3857")
-    _log(
-        f"shoreline contour for lon = {coo.lon}; lat={coo.lat}:\n"
-        f"{finder.get_cnt(coo).points}"
-    )
-    finder.plot()

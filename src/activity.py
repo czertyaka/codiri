@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from geo import Map, Coordinate
+from bottom_deposits_radiocontamination.src.geo import Map, Coordinate
 
 
 def _log(msg):
