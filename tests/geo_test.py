@@ -37,7 +37,8 @@ def test_distance():
 
 class TestMap(object):
     def test_real_map(self):
-        mymap = Map("../data/water.tif")
+        directory = os.path.abspath(os.path.dirname(__file__))
+        mymap = Map(directory + "/../data/water.tif")
         assert mymap.data.dtype == "uint8"
         unique_array = np.unique(mymap.data)
         assert unique_array.size == 2
