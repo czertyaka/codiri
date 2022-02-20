@@ -62,7 +62,7 @@ def test_map_exceeding_step():
         ActivityMap(ul, lr, 100)
 
 
-def check_adding_shoreline(resolution, shorelines, ref_data):
+def check_adding_shoreline(shorelines, ref_data, resolution):
     actmap = ActivityMap(
         ul=Coordinate(lon=0, lat=resolution),
         lr=Coordinate(lon=resolution, lat=0),
@@ -74,36 +74,47 @@ def check_adding_shoreline(resolution, shorelines, ref_data):
     assert (data == ref_data).all()
 
 
+# - - - -
+# - - - -
+# - - - -
+# - - - -
 def test_add_no_shoreline_with_no_measurments():
     res = 4
     check_adding_shoreline(
-        resolution=res,
         shorelines=[{"cnt": ShorelineContour(), "measurments": []}],
         ref_data=np.zeros((res, res)).astype("uint8"),
+        resolution=res,
     )
 
 
+# - - - -
+# - - - -
+# - - - -
+# 0 1 - -
 def test_add_no_shoreline_with_measurments():
     res = 4
     check_adding_shoreline(
-        resolution=res,
         shorelines=[
             {
                 "cnt": ShorelineContour(),
                 "measurments": [
-                    Measurment(activity=0, coo=Coordinate(res / 2, res / 2)),
-                    Measurment(activity=1, coo=Coordinate(res / 2, res / 2)),
+                    Measurment(activity=0, coo=Coordinate(0, 0)),
+                    Measurment(activity=1, coo=Coordinate(1, 0)),
                 ],
             }
         ],
         ref_data=np.zeros((res, res)).astype("uint8"),
+        resolution=res,
     )
 
 
+# - - - -
+# - - - -
+# - - - -
+# - - - -
 def test_add_no_shorelines_multiple_times():
     res = 4
     check_adding_shoreline(
-        resolution=res,
         shorelines=[
             {
                 "cnt": ShorelineContour(),
@@ -115,25 +126,178 @@ def test_add_no_shorelines_multiple_times():
             },
         ],
         ref_data=np.zeros((res, res)).astype("uint8"),
+        resolution=res,
     )
 
 
+#           *
+#         * *
+# - - - -
+# - - - -
+# - - - -
+# - - - -
 def test_add_outer_shoreline():
     res = 4
     check_adding_shoreline(
-        resolution=res,
-        shorelines=[
-            {"cnt": ShorelineContour([[6, 6], [7, 7]]), "measurments": []}
-        ],
-        ref_data=np.zeros((res, res)).astype("uint8"),
-    )
-    check_adding_shoreline(
-        resolution=res,
         shorelines=[
             {
-                "cnt": ShorelineContour([[-1, -1], [5, -1], [5, 5], [-1, 5]]),
+                "cnt": ShorelineContour([[4, 4], [5, 5], [5, 4]]),
                 "measurments": [],
             }
         ],
         ref_data=np.zeros((res, res)).astype("uint8"),
+        resolution=res,
+    )
+
+
+# - - - -
+# - * * -
+# - * * -
+# - - - -
+def test_add_shoreline_with_no_measurments():
+    res = 4
+    check_adding_shoreline(
+        shorelines=[
+            {
+                "cnt": ShorelineContour([[1, 1], [2, 1], [2, 2], [1, 2]]),
+                "measurments": [],
+            }
+        ],
+        ref_data=np.zeros((res, res)).astype("uint8"),
+        resolution=res,
+    )
+
+
+# - - - -
+# - * * -
+# - 0 * -
+# - - - -
+def test_add_shoreline_with_zero_measurments():
+    res = 4
+    check_adding_shoreline(
+        shorelines=[
+            {
+                "cnt": ShorelineContour([[1, 1], [2, 1], [2, 2], [1, 2]]),
+                "measurments": [Measurment(activity=0, coo=Coordinate(1, 1))],
+            }
+        ],
+        ref_data=np.zeros((res, res)).astype("uint8"),
+        resolution=res,
+    )
+
+
+# - - - -
+# - * * -
+# - 1 * -
+# - - - -
+def test_add_shoreline():
+    res = 4
+    check_adding_shoreline(
+        shorelines=[
+            {
+                "cnt": ShorelineContour([[1, 1], [2, 1], [2, 2], [1, 2]]),
+                "measurments": [Measurment(activity=1, coo=Coordinate(1, 1))],
+            }
+        ],
+        ref_data=np.array(
+            [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]
+        ).astype("uint8"),
+        resolution=res,
+    )
+
+
+#     * * *
+# - - * - *
+# - - 1 * *
+# - - - -
+# - - - -
+def test_add_partly_inner_shoreline():
+    res = 4
+    check_adding_shoreline(
+        shorelines=[
+            {
+                "cnt": ShorelineContour([[2, 2], [4, 2], [4, 4], [2, 4]]),
+                "measurments": [Measurment(activity=1, coo=Coordinate(2, 2))],
+            }
+        ],
+        ref_data=np.array(
+            [[0, 0, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]]
+        ).astype("uint8"),
+        resolution=res,
+    )
+
+
+#           *
+#   - - - * *
+#   - - * - *
+#   - * - - *
+#   1 - - - *
+# * * * * * *
+def test_add_partly_inner_shoreline_with_no_inner_points():
+    res = 4
+    check_adding_shoreline(
+        shorelines=[
+            {
+                "cnt": ShorelineContour([[-1, -1], [4, -1], [4, 4]]),
+                "measurments": [Measurment(activity=1, coo=Coordinate(0, 0))],
+            }
+        ],
+        ref_data=np.array(
+            [[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0]]
+        ).astype("uint8"),
+        resolution=res,
+    )
+
+
+#     * * *
+# - - * - *
+# * - 2 * *
+# * * - -
+# 1 * * -
+def test_add_few_shorelines():
+    res = 4
+    check_adding_shoreline(
+        shorelines=[
+            {
+                "cnt": ShorelineContour([[0, 0], [2, 0], [0, 2]]),
+                "measurments": [Measurment(activity=1, coo=Coordinate(0, 0))],
+            },
+            {
+                "cnt": ShorelineContour([[2, 2], [4, 2], [4, 4], [2, 4]]),
+                "measurments": [Measurment(activity=2, coo=Coordinate(2, 2))],
+            },
+        ],
+        ref_data=np.array(
+            [[0, 0, 2, 0], [1, 0, 2, 2], [1, 1, 0, 0], [1, 1, 1, 0]]
+        ).astype("uint8"),
+        resolution=res,
+    )
+
+
+#     *
+# - - * -
+# * - 2 * *
+# * - - -
+# 1 * * -
+def test_add_few_not_closed_shorelines():
+    res = 4
+    check_adding_shoreline(
+        shorelines=[
+            {
+                "cnt": ShorelineContour(
+                    points=[[2, 0], [0, 0], [0, 2]], closed=False
+                ),
+                "measurments": [Measurment(activity=1, coo=Coordinate(0, 0))],
+            },
+            {
+                "cnt": ShorelineContour(
+                    points=[[2, 4], [2, 2], [4, 2]], closed=False
+                ),
+                "measurments": [Measurment(activity=2, coo=Coordinate(2, 2))],
+            },
+        ],
+        ref_data=np.array(
+            [[0, 0, 2, 0], [1, 0, 2, 2], [1, 1, 0, 0], [1, 0, 1, 0]]
+        ).astype("uint8"),
+        resolution=res,
     )
