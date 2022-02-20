@@ -301,3 +301,51 @@ def test_add_few_not_closed_shorelines():
         ).astype("uint8"),
         resolution=res,
     )
+
+
+# - - - -
+# - * 3 -
+# - 1 * -
+# - - - -
+def test_add_shoreline_with_few_measurments():
+    res = 4
+    check_adding_shoreline(
+        shorelines=[
+            {
+                "cnt": ShorelineContour([[1, 1], [1, 2], [2, 2], [2, 1]]),
+                "measurments": [
+                    Measurment(activity=1, coo=Coordinate(1, 1)),
+                    Measurment(activity=3, coo=Coordinate(2, 2)),
+                ],
+            }
+        ],
+        ref_data=np.array(
+            [[0, 0, 0, 0], [0, 2, 3, 0], [0, 1, 2, 0], [0, 0, 0, 0]]
+        ).astype("uint8"),
+        resolution=res,
+    )
+
+
+# - * - -
+# - 1 - -
+# - * 3 *
+# - - - -
+def test_add_not_closed_shoreline_with_few_measurments():
+    res = 4
+    check_adding_shoreline(
+        shorelines=[
+            {
+                "cnt": ShorelineContour(
+                    points=[[1, 3], [1, 1], [3, 1]], closed=False
+                ),
+                "measurments": [
+                    Measurment(activity=1, coo=Coordinate(1, 2)),
+                    Measurment(activity=3, coo=Coordinate(2, 1)),
+                ],
+            }
+        ],
+        ref_data=np.array(
+            [[0, 0, 0, 0], [0, 0, 1, 0], [0, 2, 3, 4], [0, 0, 0, 0]]
+        ).astype("uint8"),
+        resolution=res,
+    )
