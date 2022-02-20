@@ -3,8 +3,8 @@ from bottom_deposits_radiocontamination.src.shorelines import (
     ShorelineContour,
 )
 from bottom_deposits_radiocontamination.src.geo import Coordinate
-from numpy import array
-from rasterio import Affine, MemoryFile
+from bottom_deposits_radiocontamination.tests.mock import MockMap
+
 
 # test input is small map 4x4 pix with georeferencinging as on plot below
 # band count is 1: 0 - not a basin, 1 - basin
@@ -16,37 +16,6 @@ from rasterio import Affine, MemoryFile
 #   4|* * * *|
 #   6|* * * *|
 #    ---------
-
-
-class MockMap(object):
-    """class for mocking ..src.geo.Map"""
-
-    def __init__(self, data):
-        data = array(data).astype("uint8")
-        assert data.shape == (4, 4)
-
-        memfile = MemoryFile()
-        dataset = memfile.open(
-            driver="GTiff",
-            height=data.shape[0],
-            width=data.shape[1],
-            dtype="uint8",
-            crs="EPSG:3857",
-            transform=Affine.scale(2.0, 2.0),
-            count=1,
-        )
-        dataset.write(data, 1)
-
-        self.__data = data
-        self.__img = dataset
-
-    @property
-    def img(self):
-        return self.__img
-
-    @property
-    def data(self):
-        return self.__data
 
 
 class FinderChecker(object):
