@@ -1,40 +1,25 @@
 #!/usr/bin/python3
 
-from .geo import Map, Coordinate
+from .geo import Coordinate
+import math
+import numpy as np
+from rasterio import Affine, MemoryFile
 
 
 def _log(msg):
     print("activity: " + msg)
 
 
-class Cell(object):
-    """Presents primitive cell on activity map"""
+class ActivityMapError(Exception):
+    """Generic error for creating activity map instance"""
 
-    def __init__(self, top, bottom, right, left):
-        self.__top = top
-        self.__bottom = bottom
-        self.__right = right
-        self.__left = left
-        self.__activity = 0
+    pass
 
-    def set(self, activity):
-        self.__activity = activity
 
-    @property
-    def top(self):
-        return self.__top
+class ExceedingStepError(ActivityMapError):
+    """Image cell size exceeds one of image sizes"""
 
-    @property
-    def bottom(self):
-        return self.__bottom
-
-    @property
-    def right(self):
-        return self.__right
-
-    @property
-    def left(self):
-        return self.__left
+    pass
 
 
 class Measurment(object):
@@ -58,72 +43,43 @@ class Measurment(object):
 class ActivityMap(object):
     """Holds discretizated activity distribution"""
 
-    def __init__(self, geomap, x_cells=100, y_cells=100):
-        self.__map = geomap
-        self.__shorelines = dict()
-        self.__init_cells(x_cells, y_cells)
+    def __init__(self, ul, lr, step):
+        self.__init_img(ul, lr, step)
 
-    def add_shoreline(self, name, contour, width=2, act_depth=5):
-        """[width] = m, [activity depth] = cm"""
-        if width > self.__y_step or width > self.__x_step:
-            raise Exception(
-                f"shoreline width exceeds cell size: width = "
-                f"{width}, cell height = {self.__y_step}, cell "
-                f"width = {self.__x_step}"
-            )
-        self.__shorelines[name] = {
-            "contour": contour,
-            "width": width,
-            "act_depth": act_depth,
-            "measurements": [],
-        }
-        _log(f"adding shoreline '{name}'")
-
-    def add_measurment(self, shoreline_name, measurment):
-        if shoreline_name not in self.__shorelines:
-            _log(f"shoreline named {shoreline_name} doesn't exists")
-            return False
-        _log(
-            f"for shoreline {shoreline_name} added measurement: activity = "
-            f"{measurment.activity} Bq/kg, coo = {measurment.coo}"
-        )
-        return True
-
-    def calculate(self):
+    def add_shoreline(self, shoreline, measurments):
         pass
 
-    def __init_cells(self, x_cells, y_cells):
-        y_step = (
-            self.__map.img.bounds.top - self.__map.img.bounds.bottom
-        ) / y_cells
-        self.__y_step = y_step
-        x_step = (
-            self.__map.img.bounds.right - self.__map.img.bounds.left
-        ) / x_cells
-        self.__x_step = x_step
-        _log(
-            f"intalizing activity map: cell width = {x_step} m, cell height ="
-            f" {y_step} m"
+    def __init_img(self, ul, lr, step):
+        ul.transform("EPSG:3857")
+        lr.transform("EPSG:3857")
+        # since map can't be larger than 100 km flat Earth model is good enough
+        # here
+        x_res = abs(math.floor((lr.lon - ul.lon) / step))
+        y_res = abs(math.floor((ul.lat - lr.lat) / step))
+        if x_res == 0 or y_res == 0:
+            raise ExceedingStepError
+
+        data = np.zeros((x_res, y_res)).astype("uint8")
+
+        # lower bottom corner doesn't necessary consist with initial lower
+        # bottom
+        lr = Coordinate(
+            lon=ul.lon + x_res * step, lat=ul.lat - y_res * step, crs=lr.crs
         )
-        self.__cells = []
-        for j in range(y_cells):
-            row = []
-            left = self.__map.img.bounds.left + j * x_step
-            right = left + x_step
-            for i in range(x_cells):
-                bottom = self.__map.img.bounds.bottom + i * y_step
-                top = bottom + y_step
-                row.append(Cell(top, bottom, right, left))
-            self.__cells.append(row)
 
+        memfile = MemoryFile()
+        self.__img = memfile.open(
+            driver="GTiff",
+            height=data.shape[0],
+            width=data.shape[1],
+            dtype="uint8",
+            crs="EPSG:3857",
+            transform=Affine.translation(ul.lon, ul.lat)
+            * Affine.scale(step, -step),
+            count=1,
+        )
+        self.img.write(data, 1)
 
-if __name__ == "__main__":
-    map = Map(r"water.tif")
-    activities = ActivityMap(map)
-    activities.add_shoreline("B11-I", [])
-    activities.add_measurment(
-        "B11-I", Measurment(0, Coordinate(60.96793, 55.71958, "EPSG:4326"))
-    )
-    activities.add_measurment(
-        "B12-I", Measurment(0, Coordinate(60.96793, 55.71958, "EPSG:4326"))
-    )
+    @property
+    def img(self):
+        return self.__img

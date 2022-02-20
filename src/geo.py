@@ -21,7 +21,7 @@ def distance(coo0, coo1):
 class Coordinate(object):
     """Coordinate with datum switching"""
 
-    def __init__(self, lon, lat, crs):
+    def __init__(self, lon, lat, crs="EPSG:3857"):
         self.__lon = lon
         self.__lat = lat
         self.__crs = crs
