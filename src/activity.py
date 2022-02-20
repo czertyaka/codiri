@@ -22,6 +22,12 @@ class ExceedingStepError(ActivityMapError):
     pass
 
 
+class ExceedingMeasurmentProximity(ActivityMapError):
+    """Measurement is too far from corresponding shoreline"""
+
+    pass
+
+
 class Measurment(object):
     """Holds info on activity measurement"""
 

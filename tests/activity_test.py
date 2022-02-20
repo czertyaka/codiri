@@ -2,6 +2,7 @@ from bottom_deposits_radiocontamination.src.activity import (
     ActivityMap,
     ExceedingStepError,
     Measurment,
+    ExceedingMeasurmentProximity,
 )
 from bottom_deposits_radiocontamination.src.geo import Coordinate
 from bottom_deposits_radiocontamination.src.shorelines import ShorelineContour
@@ -62,12 +63,15 @@ def test_map_exceeding_step():
         ActivityMap(ul, lr, 100)
 
 
-def check_adding_shoreline(shorelines, ref_data, resolution):
+def check_adding_shoreline(
+    shorelines, ref_data, resolution, measurment_proximity=0
+):
     actmap = ActivityMap(
         ul=Coordinate(lon=0, lat=resolution),
         lr=Coordinate(lon=resolution, lat=0),
         step=1,
     )
+    actmap.measurment_proximity = measurment_proximity
     for shoreline in shorelines:
         actmap.add_shoreline(shoreline["cnt"], shoreline["measurments"])
     data = actmap.img.read(1)
@@ -348,4 +352,53 @@ def test_add_not_closed_shoreline_with_few_measurments():
             [[0, 0, 0, 0], [0, 0, 1, 0], [0, 2, 3, 4], [0, 0, 0, 0]]
         ).astype("uint8"),
         resolution=res,
+    )
+
+
+# - - - 1
+# * - - -
+# * - - -
+# * * * -
+def test_add_shoreline_with_too_far_measurment():
+    res = 4
+    with pytest.raises(ExceedingMeasurmentProximity):
+        check_adding_shoreline(
+            shorelines=[
+                {
+                    "cnt": ShorelineContour(
+                        points=[[0, 2], [0, 0], [2, 0]], closed=False
+                    ),
+                    "measurments": [
+                        Measurment(activity=1, coo=Coordinate(3, 3)),
+                    ],
+                }
+            ],
+            ref_data=np.array(
+                [[0, 0, 0, 0], [0, 0, 1, 0], [0, 2, 3, 4], [0, 0, 0, 0]]
+            ).astype("uint8"),
+            resolution=res,
+            measurment_proximity=3,
+        )
+
+
+# * - - 1
+# - * - -
+# - - * -
+# - - - *
+def test_add_shoreline_with_close_enough_measurment():
+    res = 4
+    check_adding_shoreline(
+        shorelines=[
+            {
+                "cnt": ShorelineContour(points=[[0, 3], [3, 0]], closed=False),
+                "measurments": [
+                    Measurment(activity=1, coo=Coordinate(3, 3)),
+                ],
+            }
+        ],
+        ref_data=np.array(
+            [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+        ).astype("uint8"),
+        resolution=res,
+        measurment_proximity=3,
     )
