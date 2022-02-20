@@ -45,6 +45,9 @@ class ActivityMap(object):
 
     def __init__(self, ul, lr, step):
         self.__init_img(ul, lr, step)
+        # setting the proximity of the measurement to the shore to default
+        # value (meters)
+        self.__measurment_proximity = 10
 
     def add_shoreline(self, shoreline, measurments):
         pass
@@ -83,3 +86,11 @@ class ActivityMap(object):
     @property
     def img(self):
         return self.__img
+
+    @property
+    def measurment_proximity(self):
+        return self.__measurment_proximity
+
+    @measurment_proximity.setter
+    def measurment_proximity(self, value):
+        self.__measurment_proximity = value
