@@ -80,62 +80,6 @@ def check_adding_shoreline(
     assert (data == ref_data).all()
 
 
-# - - - -
-# - - - -
-# - - - -
-# - - - -
-def test_add_no_shoreline_with_no_measurments():
-    res = 4
-    check_adding_shoreline(
-        shorelines=[{"cnt": ShorelineContour(), "measurments": []}],
-        ref_data=np.zeros((res, res)).astype("uint8"),
-        resolution=res,
-    )
-
-
-# - - - -
-# - - - -
-# - - - -
-# 0 1 - -
-def test_add_no_shoreline_with_measurments():
-    res = 4
-    check_adding_shoreline(
-        shorelines=[
-            {
-                "cnt": ShorelineContour(),
-                "measurments": [
-                    Measurment(activity=0, coo=Coordinate(0, 0)),
-                    Measurment(activity=1, coo=Coordinate(1, 0)),
-                ],
-            }
-        ],
-        ref_data=np.zeros((res, res)).astype("uint8"),
-        resolution=res,
-    )
-
-
-# - - - -
-# - - - -
-# - - - -
-# - - - -
-def test_add_no_shorelines_multiple_times():
-    res = 4
-    check_adding_shoreline(
-        shorelines=[
-            {
-                "cnt": ShorelineContour(),
-                "measurments": [],
-            },
-            {
-                "cnt": ShorelineContour(),
-                "measurments": [],
-            },
-        ],
-        ref_data=np.zeros((res, res)).astype("uint8"),
-        resolution=res,
-    )
-
-
 #           *
 #         * *
 # - - - -

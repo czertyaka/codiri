@@ -6,6 +6,7 @@ from matplotlib.patches import Polygon
 from matplotlib.ticker import AutoMinorLocator
 from .geo import Coordinate
 import shapely.geometry as geom
+import numpy as np
 
 
 def _log(msg):
@@ -15,9 +16,16 @@ def _log(msg):
 class ShorelineContour(object):
     """Holds data on single shoreline contour"""
 
-    def __init__(self, points=None, closed=True):
-        self.__points = points if points is not None else []
-        self.__closed = closed
+    def __init__(self, points, closed=True):
+        points = points if points is not None else []
+        [
+            points[i]
+            for i in sorted(np.unique(points, return_index=True, axis=0)[1])
+        ]
+        self.__closed = True if closed and len(points) > 2 else False
+        self.__figure = (
+            geom.LinearRing(points) if self.closed else geom.LineString(points)
+        )
 
     def __eq__(self, other):
         return self.closed == other.closed and sorted(self.points) == sorted(
@@ -29,7 +37,7 @@ class ShorelineContour(object):
 
     @property
     def points(self):
-        return self.__points
+        return self.__figure.coords
 
     @property
     def closed(self):
@@ -80,10 +88,11 @@ class ShorelinesFinder(object):
         coo.transform(self.map.img.crs)
         point = geom.Point(coo.lon, coo.lat)
         for cnt in self.__cnts:
-            polygon = geom.polygon.Polygon(cnt.points)
+            polygon = geom.Polygon(cnt.points)
+            print(f"{polygon}, {point}")
             if polygon.contains(point):
                 return cnt
-        return ShorelineContour()
+        return None
 
     def plot(self):
         fig, ax = plt.subplots()
