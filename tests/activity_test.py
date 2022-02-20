@@ -62,13 +62,14 @@ def test_map_exceeding_step():
         ActivityMap(ul, lr, 100)
 
 
-def check_adding_shoreline(resolution, contour, measurments, ref_data):
+def check_adding_shoreline(resolution, shorelines, ref_data):
     actmap = ActivityMap(
         ul=Coordinate(lon=0, lat=resolution),
         lr=Coordinate(lon=resolution, lat=0),
         step=1,
     )
-    actmap.add_shoreline(ShorelineContour(), [])
+    for shoreline in shorelines:
+        actmap.add_shoreline(shoreline["cnt"], shoreline["measurments"])
     data = actmap.img.read(1)
     assert (data == ref_data).all()
 
@@ -77,8 +78,7 @@ def test_add_no_shoreline_with_no_measurments():
     res = 4
     check_adding_shoreline(
         resolution=res,
-        contour=ShorelineContour(),
-        measurments=[],
+        shorelines=[{"cnt": ShorelineContour(), "measurments": []}],
         ref_data=np.zeros((res, res)).astype("uint8"),
     )
 
@@ -87,10 +87,32 @@ def test_add_no_shoreline_with_measurments():
     res = 4
     check_adding_shoreline(
         resolution=res,
-        contour=ShorelineContour(),
-        measurments=[
-            Measurment(activity=0, coo=Coordinate(res / 2, res / 2)),
-            Measurment(activity=1, coo=Coordinate(res / 2, res / 2)),
+        shorelines=[
+            {
+                "cnt": ShorelineContour(),
+                "measurments": [
+                    Measurment(activity=0, coo=Coordinate(res / 2, res / 2)),
+                    Measurment(activity=1, coo=Coordinate(res / 2, res / 2)),
+                ],
+            }
+        ],
+        ref_data=np.zeros((res, res)).astype("uint8"),
+    )
+
+
+def test_add_no_shorelines_multiple_times():
+    res = 4
+    check_adding_shoreline(
+        resolution=res,
+        shorelines=[
+            {
+                "cnt": ShorelineContour(),
+                "measurments": [],
+            },
+            {
+                "cnt": ShorelineContour(),
+                "measurments": [],
+            },
         ],
         ref_data=np.zeros((res, res)).astype("uint8"),
     )
