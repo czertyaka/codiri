@@ -116,3 +116,24 @@ def test_add_no_shorelines_multiple_times():
         ],
         ref_data=np.zeros((res, res)).astype("uint8"),
     )
+
+
+def test_add_outer_shoreline():
+    res = 4
+    check_adding_shoreline(
+        resolution=res,
+        shorelines=[
+            {"cnt": ShorelineContour([[6, 6], [7, 7]]), "measurments": []}
+        ],
+        ref_data=np.zeros((res, res)).astype("uint8"),
+    )
+    check_adding_shoreline(
+        resolution=res,
+        shorelines=[
+            {
+                "cnt": ShorelineContour([[-1, -1], [5, -1], [5, 5], [-1, 5]]),
+                "measurments": [],
+            }
+        ],
+        ref_data=np.zeros((res, res)).astype("uint8"),
+    )
