@@ -360,24 +360,17 @@ def test_add_not_closed_shoreline_with_few_measurments():
 # * - - -
 # * * * -
 def test_add_shoreline_with_too_far_measurment():
-    res = 4
     with pytest.raises(ExceedingMeasurmentProximity):
-        check_adding_shoreline(
-            shorelines=[
-                {
-                    "cnt": ShorelineContour(
-                        points=[[0, 2], [0, 0], [2, 0]], closed=False
-                    ),
-                    "measurments": [
-                        Measurment(activity=1, coo=Coordinate(3, 3)),
-                    ],
-                }
-            ],
-            ref_data=np.array(
-                [[0, 0, 0, 0], [0, 0, 1, 0], [0, 2, 3, 4], [0, 0, 0, 0]]
-            ).astype("uint8"),
-            resolution=res,
-            measurment_proximity=3,
+        res = 4
+        actmap = ActivityMap(
+            ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1
+        )
+        actmap.measurment_proximity = 3
+        actmap.add_shoreline(
+            shoreline=ShorelineContour(
+                points=[[0, 2], [0, 0], [2, 0]], closed=False
+            ),
+            measurments=[Measurment(activity=1, coo=Coordinate(3, 3))],
         )
 
 
