@@ -55,7 +55,7 @@ class ActivityMap(object):
         # value (meters)
         self.__measurment_proximity = 10
 
-    def add_shoreline(self, shoreline, measurments):
+    def add_shoreline(self, contour, measurments):
         pass
 
     def __init_img(self, ul, lr, step):

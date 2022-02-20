@@ -73,7 +73,9 @@ def check_adding_shoreline(
     )
     actmap.measurment_proximity = measurment_proximity
     for shoreline in shorelines:
-        actmap.add_shoreline(shoreline["cnt"], shoreline["measurments"])
+        actmap.add_shoreline(
+            contour=shoreline["cnt"], measurments=shoreline["measurments"]
+        )
     data = actmap.img.read(1)
     assert (data == ref_data).all()
 
@@ -367,7 +369,7 @@ def test_add_shoreline_with_too_far_measurment():
         )
         actmap.measurment_proximity = 3
         actmap.add_shoreline(
-            shoreline=ShorelineContour(
+            contour=ShorelineContour(
                 points=[[0, 2], [0, 0], [2, 0]], closed=False
             ),
             measurments=[Measurment(activity=1, coo=Coordinate(3, 3))],
