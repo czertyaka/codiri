@@ -6,7 +6,6 @@ from matplotlib.patches import Polygon
 from matplotlib.ticker import AutoMinorLocator
 from .geo import Coordinate
 import shapely.geometry as geom
-import numpy as np
 
 
 def _log(msg):
@@ -18,10 +17,6 @@ class ShorelineContour(object):
 
     def __init__(self, points, closed=True):
         points = points if points is not None else []
-        [
-            points[i]
-            for i in sorted(np.unique(points, return_index=True, axis=0)[1])
-        ]
         self.__closed = True if closed and len(points) > 2 else False
         self.__figure = (
             geom.LinearRing(points) if self.closed else geom.LineString(points)

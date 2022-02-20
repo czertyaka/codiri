@@ -4,6 +4,25 @@ from bottom_deposits_radiocontamination.src.shorelines import (
 )
 from bottom_deposits_radiocontamination.src.geo import Coordinate
 from bottom_deposits_radiocontamination.tests.mock import MockMap
+import pytest
+
+
+def check_invalid_shoreline_contour(points):
+    with pytest.raises(ValueError):
+        ShorelineContour(points=points)
+
+
+def test_shoreline_contour_empty():
+    check_invalid_shoreline_contour([[]])
+
+
+def test_shoreline_contour_point():
+    check_invalid_shoreline_contour([[0, 0]])
+
+
+def test_shoreline_contour_line_segment():
+    cnt = ShorelineContour([[0, 0], [1, 1]], closed=True)
+    assert cnt.closed is False
 
 
 # test input is small map 4x4 pix with georeferencinging as on plot below
