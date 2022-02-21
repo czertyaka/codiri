@@ -5,7 +5,7 @@ from bottom_deposits_radiocontamination.src.activity import (
     ExceedingMeasurmentProximity,
 )
 from bottom_deposits_radiocontamination.src.geo import Coordinate
-from bottom_deposits_radiocontamination.src.shorelines import ShorelineContour
+from bottom_deposits_radiocontamination.src.basins import Basin
 import numpy as np
 import pytest
 
@@ -63,8 +63,8 @@ def test_map_exceeding_step():
         ActivityMap(ul, lr, 100)
 
 
-def check_adding_shoreline(
-    shorelines, ref_data, resolution, measurment_proximity=0
+def check_adding_basin(
+    basins_with_measurments, ref_data, resolution, measurment_proximity=0
 ):
     actmap = ActivityMap(
         ul=Coordinate(lon=0, lat=resolution),
@@ -72,27 +72,26 @@ def check_adding_shoreline(
         step=1,
     )
     actmap.measurment_proximity = measurment_proximity
-    for shoreline in shorelines:
-        actmap.add_shoreline(
-            contour=shoreline["cnt"], measurments=shoreline["measurments"]
-        )
+    for dictionary in basins_with_measurments:
+        basin = Basin(contour=dictionary["basin_cnt"])
+        actmap.add_basin(basin=basin, measurments=dictionary["measurments"])
     data = actmap.img.read(1)
     assert (data == ref_data).all()
 
 
-#           *
 #         * *
+#         1 *
 # - - - -
 # - - - -
 # - - - -
 # - - - -
-def test_add_outer_shoreline():
+def test_add_outer_basin():
     res = 4
-    check_adding_shoreline(
-        shorelines=[
+    check_adding_basin(
+        basins_with_measurments=[
             {
-                "cnt": ShorelineContour([[4, 4], [5, 5], [5, 4]]),
-                "measurments": [],
+                "basin_cnt": [[4, 4], [4, 5], [5, 5], [5, 4]],
+                "measurments": [Measurment(activity=1, coo=Coordinate(4, 4))],
             }
         ],
         ref_data=np.zeros((res, res)).astype("uint8"),
@@ -104,12 +103,12 @@ def test_add_outer_shoreline():
 # - * * -
 # - * * -
 # - - - -
-def test_add_shoreline_with_no_measurments():
+def test_add_basin_with_no_measurments():
     res = 4
-    check_adding_shoreline(
-        shorelines=[
+    check_adding_basin(
+        basins_with_measurments=[
             {
-                "cnt": ShorelineContour([[1, 1], [2, 1], [2, 2], [1, 2]]),
+                "basin_cnt": [[1, 1], [2, 1], [2, 2], [1, 2]],
                 "measurments": [],
             }
         ],
@@ -122,12 +121,12 @@ def test_add_shoreline_with_no_measurments():
 # - * * -
 # - 0 * -
 # - - - -
-def test_add_shoreline_with_zero_measurments():
+def test_add_basin_with_zero_measurments():
     res = 4
-    check_adding_shoreline(
-        shorelines=[
+    check_adding_basin(
+        basins_with_measurments=[
             {
-                "cnt": ShorelineContour([[1, 1], [2, 1], [2, 2], [1, 2]]),
+                "basin_cnt": [[1, 1], [2, 1], [2, 2], [1, 2]],
                 "measurments": [Measurment(activity=0, coo=Coordinate(1, 1))],
             }
         ],
@@ -140,12 +139,12 @@ def test_add_shoreline_with_zero_measurments():
 # - * * -
 # - 1 * -
 # - - - -
-def test_add_shoreline():
+def test_add_basin():
     res = 4
-    check_adding_shoreline(
-        shorelines=[
+    check_adding_basin(
+        basins_with_measurments=[
             {
-                "cnt": ShorelineContour([[1, 1], [2, 1], [2, 2], [1, 2]]),
+                "basin_cnt": [[1, 1], [2, 1], [2, 2], [1, 2]],
                 "measurments": [Measurment(activity=1, coo=Coordinate(1, 1))],
             }
         ],
@@ -161,12 +160,12 @@ def test_add_shoreline():
 # - - 1 * *
 # - - - -
 # - - - -
-def test_add_partly_inner_shoreline():
+def test_add_partly_inner_basin():
     res = 4
-    check_adding_shoreline(
-        shorelines=[
+    check_adding_basin(
+        basins_with_measurments=[
             {
-                "cnt": ShorelineContour([[2, 2], [4, 2], [4, 4], [2, 4]]),
+                "basin_cnt": [[2, 2], [4, 2], [4, 4], [2, 4]],
                 "measurments": [Measurment(activity=1, coo=Coordinate(2, 2))],
             }
         ],
@@ -183,12 +182,12 @@ def test_add_partly_inner_shoreline():
 #   - * - - *
 #   1 - - - *
 # * * * * * *
-def test_add_partly_inner_shoreline_with_no_inner_points():
+def test_add_partly_inner_basin_with_no_inner_points():
     res = 4
-    check_adding_shoreline(
-        shorelines=[
+    check_adding_basin(
+        basins_with_measurments=[
             {
-                "cnt": ShorelineContour([[-1, -1], [4, -1], [4, 4]]),
+                "basin_cnt": [[-1, -1], [4, -1], [4, 4]],
                 "measurments": [Measurment(activity=1, coo=Coordinate(0, 0))],
             }
         ],
@@ -204,16 +203,16 @@ def test_add_partly_inner_shoreline_with_no_inner_points():
 # * - 2 * *
 # * * - -
 # 1 * * -
-def test_add_few_shorelines():
+def test_add_few_basins():
     res = 4
-    check_adding_shoreline(
-        shorelines=[
+    check_adding_basin(
+        basins_with_measurments=[
             {
-                "cnt": ShorelineContour([[0, 0], [2, 0], [0, 2]]),
+                "basin_cnt": [[0, 0], [2, 0], [0, 2]],
                 "measurments": [Measurment(activity=1, coo=Coordinate(0, 0))],
             },
             {
-                "cnt": ShorelineContour([[2, 2], [4, 2], [4, 4], [2, 4]]),
+                "basin_cnt": [[2, 2], [4, 2], [4, 4], [2, 4]],
                 "measurments": [Measurment(activity=2, coo=Coordinate(2, 2))],
             },
         ],
@@ -224,45 +223,16 @@ def test_add_few_shorelines():
     )
 
 
-#     *
-# - - * -
-# * - 2 * *
-# * - - -
-# 1 * * -
-def test_add_few_not_closed_shorelines():
-    res = 4
-    check_adding_shoreline(
-        shorelines=[
-            {
-                "cnt": ShorelineContour(
-                    points=[[2, 0], [0, 0], [0, 2]], closed=False
-                ),
-                "measurments": [Measurment(activity=1, coo=Coordinate(0, 0))],
-            },
-            {
-                "cnt": ShorelineContour(
-                    points=[[2, 4], [2, 2], [4, 2]], closed=False
-                ),
-                "measurments": [Measurment(activity=2, coo=Coordinate(2, 2))],
-            },
-        ],
-        ref_data=np.array(
-            [[0, 0, 2, 0], [1, 0, 2, 2], [1, 1, 0, 0], [1, 0, 1, 0]]
-        ).astype("uint8"),
-        resolution=res,
-    )
-
-
 # - - - -
 # - * 3 -
 # - 1 * -
 # - - - -
-def test_add_shoreline_with_few_measurments():
+def test_add_basin_with_few_measurments():
     res = 4
-    check_adding_shoreline(
-        shorelines=[
+    check_adding_basin(
+        basins_with_measurments=[
             {
-                "cnt": ShorelineContour([[1, 1], [1, 2], [2, 2], [2, 1]]),
+                "basin_cnt": [[1, 1], [1, 2], [2, 2], [2, 1]],
                 "measurments": [
                     Measurment(activity=1, coo=Coordinate(1, 1)),
                     Measurment(activity=3, coo=Coordinate(2, 2)),
@@ -276,63 +246,34 @@ def test_add_shoreline_with_few_measurments():
     )
 
 
-# - * - -
-# - 1 - -
-# - * 3 *
-# - - - -
-def test_add_not_closed_shoreline_with_few_measurments():
-    res = 4
-    check_adding_shoreline(
-        shorelines=[
-            {
-                "cnt": ShorelineContour(
-                    points=[[1, 3], [1, 1], [3, 1]], closed=False
-                ),
-                "measurments": [
-                    Measurment(activity=1, coo=Coordinate(1, 2)),
-                    Measurment(activity=3, coo=Coordinate(2, 1)),
-                ],
-            }
-        ],
-        ref_data=np.array(
-            [[0, 0, 0, 0], [0, 0, 1, 0], [0, 2, 3, 4], [0, 0, 0, 0]]
-        ).astype("uint8"),
-        resolution=res,
-    )
-
-
 # - - - 1
 # * - - -
-# * - - -
+# * * - -
 # * * * -
-def test_add_shoreline_with_too_far_measurment():
+def test_add_basin_with_too_far_measurment():
     with pytest.raises(ExceedingMeasurmentProximity):
         res = 4
         actmap = ActivityMap(
             ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1
         )
-        actmap.measurment_proximity = 3
-        actmap.add_shoreline(
-            contour=ShorelineContour(
-                points=[[0, 2], [0, 0], [2, 0]], closed=False
-            ),
+        actmap.measurment_proximity = 1
+        actmap.add_basin(
+            basin=Basin(contour=[[0, 2], [0, 0], [2, 0]]),
             measurments=[Measurment(activity=1, coo=Coordinate(3, 3))],
         )
 
 
-# * - - 1
-# - * - -
-# - - * -
-# - - - *
-def test_add_shoreline_with_close_enough_measurment():
+# - - - 1
+# * - - -
+# * * - -
+# * * * -
+def test_add_basin_with_close_enough_measurment():
     res = 4
-    check_adding_shoreline(
-        shorelines=[
+    check_adding_basin(
+        basins_with_measurments=[
             {
-                "cnt": ShorelineContour(points=[[0, 3], [3, 0]], closed=False),
-                "measurments": [
-                    Measurment(activity=1, coo=Coordinate(3, 3)),
-                ],
+                "basin_cnt": [[0, 0], [0, 3], [3, 0]],
+                "measurments": [Measurment(activity=1, coo=Coordinate(3, 3))],
             }
         ],
         ref_data=np.array(

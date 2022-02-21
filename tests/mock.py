@@ -31,3 +31,11 @@ class MockMap(object):
     @property
     def data(self):
         return self.__data
+
+    @property
+    def contour(self):
+        left, top = self.img.xy(0, 0, offset="ul")
+        right, bottom = self.img.xy(
+            self.img.width - 1, self.img.height - 1, offset="ul"
+        )
+        return [[left, top], [left, bottom], [right, bottom], [right, top]]
