@@ -2,10 +2,10 @@
 
 import cv2 as cv
 from matplotlib import pyplot as plt
-from matplotlib.patches import Polygon
 from matplotlib.ticker import AutoMinorLocator
 from .geo import Coordinate
-from shapely import geometry, ops
+from shapely import geometry
+import numpy as np
 
 
 def _log(msg):
@@ -21,51 +21,63 @@ class Basin(object):
     """
 
     def __init__(self, contour, map_contour=None):
-        contour = geometry.LinearRing(contour)
+        self.__body = geometry.Polygon(contour)
 
+        body_contour = geometry.LinearRing(contour)
         if map_contour is None:
-            self.__shoreline_contour = contour
+            self.__shoreline = body_contour
             return
 
         map_contour = geometry.LinearRing(map_contour)
-        self.__contour = contour
-        if map_contour.intersects(contour) is not True:
-            self.__shoreline_contour = contour
+        if geometry.Polygon(map_contour.coords[:-1]).contains(
+            self.body
+        ) is not True or body_contour.equals(map_contour):
+            raise ValueError("map doesn't contain basin")
+
+        # body is within map or touching it in one or more points
+        if body_contour.disjoint(map_contour) or body_contour.intersection(
+            map_contour
+        ).geom_type in ("Point", "MultiPoint"):
+            self.__shoreline = body_contour
             return
 
-        diff = self.contour.difference(map_contour)
-        if diff.geom_type == "LineString":
-            if diff.is_empty is True:
-                raise ValueError("basin's shoreline is out of map")
-            elif diff.coords[0] == diff.coords[-1]:
-                self.__shoreline_contour = contour
-            else:
-                self.__shoreline_contour = diff
-        elif diff.geom_type == "MultiLineString":
-            merged_linestring = ops.linemerge(diff)
-            if merged_linestring.geom_type == "MultiLineString":
-                raise ValueError("merging failed")
-            self.__shoreline_contour = geometry.LinearRing(
-                merged_linestring.coords[:-1]
-            )
+        # map does not cover all the body
+        self.__shoreline = body_contour.difference(map_contour)
+
+    @property
+    def body(self):
+        return self.__body
+
+    @property
+    def shoreline(self):
+        if self.shoreline_segments_count > 1:
+            return self.__shoreline.geoms
         else:
-            raise ValueError("unexpected difference geometry type")
+            return [self.__shoreline]
 
     @property
-    def contour(self):
-        return self.__contour
+    def is_closed(self):
+        return self.shoreline[0].geom_type == "LinearRing"
 
     @property
-    def shoreline_contour(self):
-        return self.__shoreline_contour
+    def shoreline_segments_count(self):
+        return (
+            1
+            if self.__shoreline.geom_type != "MultiLineString"
+            else len(self.__shoreline.geoms)
+        )
 
     def __eq__(self, other):
-        return self.contour.equals(
-            other.contour
-        ) and self.shoreline_contour.equals(other.shoreline_contour)
+        ret = (
+            self.body.equals(other.body)
+            and self.shoreline_segments_count == other.shoreline_segments_count
+        )
+        for i in range(self.shoreline_segments_count):
+            ret &= self.shoreline[i].equals(other.shoreline[i])
+        return ret
 
     def __repr__(self):
-        return f"contour: {self.contour}; shoreline: {self.shoreline_contour}"
+        return f"<body: {self.body}; shoreline: {self.shoreline}>"
 
 
 class BasinsFinder(object):
@@ -93,6 +105,8 @@ class BasinsFinder(object):
         map_contour = self.__get_map_contour()
         for pix_cnt in pix_cnts:
             pix_cnt = cv.approxPolyDP(pix_cnt, self.__approx_error, True)
+            if len(pix_cnt) < 3:
+                continue
             coord_cnt = []
             for pix_vertice in pix_cnt:
                 pix_vertice = pix_vertice[0]
@@ -110,8 +124,8 @@ class BasinsFinder(object):
                         map_contour=map_contour,
                     )
                 )
-            except ValueError:
-                pass
+            except ValueError as e:
+                _log(f"{e}")
         _log(f"added {len(self.basins)} basins")
 
     def __get_map_contour(self):
@@ -125,16 +139,16 @@ class BasinsFinder(object):
         coo.transform(self.map.img.crs)
         point = geometry.Point(coo.lon, coo.lat)
         for basin in self.basins:
-            polygon = geometry.Polygon(basin.contour.coords[:-1])
-            if polygon.contains(point):
+            if basin.body.contains(point):
                 return basin
         return None
 
     def plot(self):
         fig, ax = plt.subplots()
         for basin in self.basins:
-            polygon = Polygon(basin.contour.coords[:-1], fill=False, ec="blue")
-            ax.add_patch(polygon)
+            for shoreline_segment in basin.shoreline:
+                coords = np.array(shoreline_segment.coords)
+                plt.plot(coords[:, 0], coords[:, 1], c="blue")
 
         ax.set_xlim([self.map.img.bounds.left, self.map.img.bounds.right])
         ax.set_ylim([self.map.img.bounds.bottom, self.map.img.bounds.top])

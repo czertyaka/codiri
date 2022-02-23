@@ -5,5 +5,5 @@ from src.basins import BasinsFinder as Finder
 
 if __name__ == "__main__":
     mymap = Mymap(r"data/water.tif")
-    mymap.plot()
-    Finder(map=mymap, approx_error=1).plot()
+    # mymap.plot()
+    Finder(map=mymap, approx_error=3).plot()
