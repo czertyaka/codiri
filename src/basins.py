@@ -146,9 +146,12 @@ class BasinsFinder(object):
     def plot(self):
         fig, ax = plt.subplots()
         for basin in self.basins:
+            ax.fill(*basin.body.boundary.xy, color="aqua")
             for shoreline_segment in basin.shoreline:
-                coords = np.array(shoreline_segment.coords)
-                plt.plot(coords[:, 0], coords[:, 1], c="blue")
+                shoreline_coords = np.array(shoreline_segment.coords)
+                plt.plot(
+                    shoreline_coords[:, 0], shoreline_coords[:, 1], c="blue"
+                )
 
         ax.set_xlim([self.map.img.bounds.left, self.map.img.bounds.right])
         ax.set_ylim([self.map.img.bounds.bottom, self.map.img.bounds.top])
