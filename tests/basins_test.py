@@ -1,9 +1,9 @@
-from bottom_deposits_radiocontamination.src.basins import (
+from codri.src.basins import (
     BasinsFinder,
     Basin,
 )
-from bottom_deposits_radiocontamination.src.geo import Coordinate
-from bottom_deposits_radiocontamination.tests.mock import MockMap
+from codri.src.geo import Coordinate
+from codri.tests.mock import MockMap
 import pytest
 from shapely import geometry
 

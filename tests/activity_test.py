@@ -1,11 +1,11 @@
-from bottom_deposits_radiocontamination.src.activity import (
+from codri.src.activity import (
     ActivityMap,
     ExceedingStepError,
     Measurment,
     ExceedingMeasurmentProximity,
 )
-from bottom_deposits_radiocontamination.src.geo import Coordinate
-from bottom_deposits_radiocontamination.src.basins import Basin
+from codri.src.geo import Coordinate
+from codri.src.basins import Basin
 import numpy as np
 import pytest
 

@@ -1,4 +1,4 @@
-from bottom_deposits_radiocontamination.src.geo import (
+from codri.src.geo import (
     distance,
     Coordinate,
     Map,
