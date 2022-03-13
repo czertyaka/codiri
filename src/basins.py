@@ -20,8 +20,10 @@ class Basin(object):
     map_contour is list of (x, y) couples
     """
 
-    def __init__(self, contour, map_contour=None):
+    def __init__(self, contour, shoreline_width=2, map_contour=None):
+        """[shoreline_width] = m"""
         self.__body = geometry.Polygon(contour)
+        self.__shoreline_width = shoreline_width
 
         body_contour = geometry.LinearRing(contour)
         if map_contour is None:
@@ -54,6 +56,11 @@ class Basin(object):
             return self.__shoreline.geoms
         else:
             return [self.__shoreline]
+
+    @property
+    def shoreline_width(self):
+        """shoreline width in m"""
+        return self.__shoreline_width
 
     @property
     def is_closed(self):

@@ -8,6 +8,11 @@ import pytest
 from shapely import geometry
 
 
+def test_shoreline_width():
+    assert Basin(contour=[]).shoreline_width == 2
+    assert Basin(contour=[], shoreline_width=3).shoreline_width == 3
+
+
 # test input is small map 4x4 pix map
 #
 #     0 2 4 6
