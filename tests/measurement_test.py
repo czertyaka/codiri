@@ -1,5 +1,13 @@
-from codri.src.measurement import Measurement
+from codri.src.measurement import Measurement, SoilActivity
 from codri.src.geo import Coordinate
+import pytest
+
+
+def test_soil_activity():
+    specific_activity = 10
+    activity = SoilActivity(specific_activity)
+    assert activity.specific == specific_activity
+    assert activity.surface_1cm == pytest.approx(140)
 
 
 def test_measurement():
