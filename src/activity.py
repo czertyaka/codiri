@@ -22,28 +22,10 @@ class ExceedingStepError(ActivityMapError):
     pass
 
 
-class ExceedingMeasurmentProximity(ActivityMapError):
+class ExceedingMeasurementProximity(ActivityMapError):
     """Measurement is too far from corresponding shoreline"""
 
     pass
-
-
-class Measurment(object):
-    """Holds info on activity measurement"""
-
-    def __init__(self, activity, coo):
-        """[specific activity] = Bq/kg"""
-        self.__activity = activity
-        coo.transform("EPSG:3857")
-        self.__coo = coo
-
-    @property
-    def activity(self):
-        return self.__activity
-
-    @property
-    def coo(self):
-        return self.__coo
 
 
 class ActivityMap(object):
@@ -53,9 +35,9 @@ class ActivityMap(object):
         self.__init_img(ul, lr, step)
         # setting the proximity of the measurement to the shore to default
         # value (meters)
-        self.__measurment_proximity = 10
+        self.measurement_proximity = 10
 
-    def add_basin(self, basin, measurments):
+    def add_basin(self, basin, measurements):
         pass
 
     def __init_img(self, ul, lr, step):
@@ -94,9 +76,9 @@ class ActivityMap(object):
         return self.__img
 
     @property
-    def measurment_proximity(self):
-        return self.__measurment_proximity
+    def measurement_proximity(self):
+        return self.__measurement_proximity
 
-    @measurment_proximity.setter
-    def measurment_proximity(self, value):
-        self.__measurment_proximity = value
+    @measurement_proximity.setter
+    def measurement_proximity(self, value):
+        self.__measurement_proximity = value

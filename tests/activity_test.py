@@ -1,20 +1,13 @@
 from codri.src.activity import (
     ActivityMap,
     ExceedingStepError,
-    Measurment,
-    ExceedingMeasurmentProximity,
+    ExceedingMeasurementProximity,
 )
+from codri.src.measurement import Measurement
 from codri.src.geo import Coordinate
 from codri.src.basins import Basin
 import numpy as np
 import pytest
-
-
-def test_measurment():
-    measurment = Measurment(
-        activity=0, coo=Coordinate(lon=10, lat=10, crs="EPSG:4326")
-    )
-    assert measurment.coo.crs == "EPSG:3857"
 
 
 def check_empty_map(ul, lr, new_lr, step, ref_width, ref_height):
@@ -64,17 +57,17 @@ def test_map_exceeding_step():
 
 
 def check_adding_basin(
-    basins_with_measurments, ref_data, resolution, measurment_proximity=0
+    basins_with_measurements, ref_data, resolution, measurement_proximity=0
 ):
     actmap = ActivityMap(
         ul=Coordinate(lon=0, lat=resolution),
         lr=Coordinate(lon=resolution, lat=0),
         step=1,
     )
-    actmap.measurment_proximity = measurment_proximity
-    for dictionary in basins_with_measurments:
+    actmap.measurement_proximity = measurement_proximity
+    for dictionary in basins_with_measurements:
         basin = Basin(contour=dictionary["basin_cnt"])
-        actmap.add_basin(basin=basin, measurments=dictionary["measurments"])
+        actmap.add_basin(basin=basin, measurements=dictionary["measurements"])
     data = actmap.img.read(1)
     assert (data == ref_data).all()
 
@@ -88,10 +81,12 @@ def check_adding_basin(
 def test_add_outer_basin():
     res = 4
     check_adding_basin(
-        basins_with_measurments=[
+        basins_with_measurements=[
             {
                 "basin_cnt": [[4, 4], [4, 5], [5, 5], [5, 4]],
-                "measurments": [Measurment(activity=1, coo=Coordinate(4, 4))],
+                "measurements": [
+                    Measurement(activity=1, coo=Coordinate(4, 4))
+                ],
             }
         ],
         ref_data=np.zeros((res, res)).astype("uint8"),
@@ -103,13 +98,13 @@ def test_add_outer_basin():
 # - * * -
 # - * * -
 # - - - -
-def test_add_basin_with_no_measurments():
+def test_add_basin_with_no_measurements():
     res = 4
     check_adding_basin(
-        basins_with_measurments=[
+        basins_with_measurements=[
             {
                 "basin_cnt": [[1, 1], [2, 1], [2, 2], [1, 2]],
-                "measurments": [],
+                "measurements": [],
             }
         ],
         ref_data=np.zeros((res, res)).astype("uint8"),
@@ -121,13 +116,15 @@ def test_add_basin_with_no_measurments():
 # - * * -
 # - 0 * -
 # - - - -
-def test_add_basin_with_zero_measurments():
+def test_add_basin_with_zero_measurements():
     res = 4
     check_adding_basin(
-        basins_with_measurments=[
+        basins_with_measurements=[
             {
                 "basin_cnt": [[1, 1], [2, 1], [2, 2], [1, 2]],
-                "measurments": [Measurment(activity=0, coo=Coordinate(1, 1))],
+                "measurements": [
+                    Measurement(activity=0, coo=Coordinate(1, 1))
+                ],
             }
         ],
         ref_data=np.zeros((res, res)).astype("uint8"),
@@ -142,10 +139,12 @@ def test_add_basin_with_zero_measurments():
 def test_add_basin():
     res = 4
     check_adding_basin(
-        basins_with_measurments=[
+        basins_with_measurements=[
             {
                 "basin_cnt": [[1, 1], [2, 1], [2, 2], [1, 2]],
-                "measurments": [Measurment(activity=1, coo=Coordinate(1, 1))],
+                "measurements": [
+                    Measurement(activity=1, coo=Coordinate(1, 1))
+                ],
             }
         ],
         ref_data=np.array(
@@ -163,10 +162,12 @@ def test_add_basin():
 def test_add_partly_inner_basin():
     res = 4
     check_adding_basin(
-        basins_with_measurments=[
+        basins_with_measurements=[
             {
                 "basin_cnt": [[2, 2], [4, 2], [4, 4], [2, 4]],
-                "measurments": [Measurment(activity=1, coo=Coordinate(2, 2))],
+                "measurements": [
+                    Measurement(activity=1, coo=Coordinate(2, 2))
+                ],
             }
         ],
         ref_data=np.array(
@@ -185,10 +186,12 @@ def test_add_partly_inner_basin():
 def test_add_partly_inner_basin_with_no_inner_points():
     res = 4
     check_adding_basin(
-        basins_with_measurments=[
+        basins_with_measurements=[
             {
                 "basin_cnt": [[-1, -1], [4, -1], [4, 4]],
-                "measurments": [Measurment(activity=1, coo=Coordinate(0, 0))],
+                "measurements": [
+                    Measurement(activity=1, coo=Coordinate(0, 0))
+                ],
             }
         ],
         ref_data=np.array(
@@ -206,14 +209,18 @@ def test_add_partly_inner_basin_with_no_inner_points():
 def test_add_few_basins():
     res = 4
     check_adding_basin(
-        basins_with_measurments=[
+        basins_with_measurements=[
             {
                 "basin_cnt": [[0, 0], [2, 0], [0, 2]],
-                "measurments": [Measurment(activity=1, coo=Coordinate(0, 0))],
+                "measurements": [
+                    Measurement(activity=1, coo=Coordinate(0, 0))
+                ],
             },
             {
                 "basin_cnt": [[2, 2], [4, 2], [4, 4], [2, 4]],
-                "measurments": [Measurment(activity=2, coo=Coordinate(2, 2))],
+                "measurements": [
+                    Measurement(activity=2, coo=Coordinate(2, 2))
+                ],
             },
         ],
         ref_data=np.array(
@@ -227,15 +234,15 @@ def test_add_few_basins():
 # - * 3 -
 # - 1 * -
 # - - - -
-def test_add_basin_with_few_measurments():
+def test_add_basin_with_few_measurements():
     res = 4
     check_adding_basin(
-        basins_with_measurments=[
+        basins_with_measurements=[
             {
                 "basin_cnt": [[1, 1], [1, 2], [2, 2], [2, 1]],
-                "measurments": [
-                    Measurment(activity=1, coo=Coordinate(1, 1)),
-                    Measurment(activity=3, coo=Coordinate(2, 2)),
+                "measurements": [
+                    Measurement(activity=1, coo=Coordinate(1, 1)),
+                    Measurement(activity=3, coo=Coordinate(2, 2)),
                 ],
             }
         ],
@@ -250,16 +257,16 @@ def test_add_basin_with_few_measurments():
 # * - - -
 # * * - -
 # * * * -
-def test_add_basin_with_too_far_measurment():
-    with pytest.raises(ExceedingMeasurmentProximity):
+def test_add_basin_with_too_far_measurement():
+    with pytest.raises(ExceedingMeasurementProximity):
         res = 4
         actmap = ActivityMap(
             ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1
         )
-        actmap.measurment_proximity = 1
+        actmap.measurement_proximity = 1
         actmap.add_basin(
             basin=Basin(contour=[[0, 2], [0, 0], [2, 0]]),
-            measurments=[Measurment(activity=1, coo=Coordinate(3, 3))],
+            measurements=[Measurement(activity=1, coo=Coordinate(3, 3))],
         )
 
 
@@ -267,18 +274,20 @@ def test_add_basin_with_too_far_measurment():
 # * - - -
 # * * - -
 # * * * -
-def test_add_basin_with_close_enough_measurment():
+def test_add_basin_with_close_enough_measurement():
     res = 4
     check_adding_basin(
-        basins_with_measurments=[
+        basins_with_measurements=[
             {
                 "basin_cnt": [[0, 0], [0, 3], [3, 0]],
-                "measurments": [Measurment(activity=1, coo=Coordinate(3, 3))],
+                "measurements": [
+                    Measurement(activity=1, coo=Coordinate(3, 3))
+                ],
             }
         ],
         ref_data=np.array(
             [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         ).astype("uint8"),
         resolution=res,
-        measurment_proximity=3,
+        measurement_proximity=3,
     )
