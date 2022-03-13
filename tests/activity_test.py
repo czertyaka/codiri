@@ -3,7 +3,7 @@ from codri.src.activity import (
     ExceedingStepError,
     ExceedingMeasurementProximity,
 )
-from codri.src.measurement import Measurement
+from codri.src.measurement import Measurement, SoilActivity
 from codri.src.geo import Coordinate
 from codri.src.basins import Basin
 import numpy as np
@@ -85,7 +85,7 @@ def test_add_outer_basin():
             {
                 "basin_cnt": [[4, 4], [4, 5], [5, 5], [5, 4]],
                 "measurements": [
-                    Measurement(activity=1, coo=Coordinate(4, 4))
+                    Measurement(activity=SoilActivity(1), coo=Coordinate(4, 4))
                 ],
             }
         ],
@@ -123,7 +123,7 @@ def test_add_basin_with_zero_measurements():
             {
                 "basin_cnt": [[1, 1], [2, 1], [2, 2], [1, 2]],
                 "measurements": [
-                    Measurement(activity=0, coo=Coordinate(1, 1))
+                    Measurement(activity=SoilActivity(0), coo=Coordinate(1, 1))
                 ],
             }
         ],
@@ -143,7 +143,7 @@ def test_add_basin():
             {
                 "basin_cnt": [[1, 1], [2, 1], [2, 2], [1, 2]],
                 "measurements": [
-                    Measurement(activity=1, coo=Coordinate(1, 1))
+                    Measurement(activity=SoilActivity(1), coo=Coordinate(1, 1))
                 ],
             }
         ],
@@ -166,7 +166,7 @@ def test_add_partly_inner_basin():
             {
                 "basin_cnt": [[2, 2], [4, 2], [4, 4], [2, 4]],
                 "measurements": [
-                    Measurement(activity=1, coo=Coordinate(2, 2))
+                    Measurement(activity=SoilActivity(1), coo=Coordinate(2, 2))
                 ],
             }
         ],
@@ -190,7 +190,7 @@ def test_add_partly_inner_basin_with_no_inner_points():
             {
                 "basin_cnt": [[-1, -1], [4, -1], [4, 4]],
                 "measurements": [
-                    Measurement(activity=1, coo=Coordinate(0, 0))
+                    Measurement(activity=SoilActivity(1), coo=Coordinate(0, 0))
                 ],
             }
         ],
@@ -213,13 +213,13 @@ def test_add_few_basins():
             {
                 "basin_cnt": [[0, 0], [2, 0], [0, 2]],
                 "measurements": [
-                    Measurement(activity=1, coo=Coordinate(0, 0))
+                    Measurement(activity=SoilActivity(1), coo=Coordinate(0, 0))
                 ],
             },
             {
                 "basin_cnt": [[2, 2], [4, 2], [4, 4], [2, 4]],
                 "measurements": [
-                    Measurement(activity=2, coo=Coordinate(2, 2))
+                    Measurement(activity=SoilActivity(2), coo=Coordinate(2, 2))
                 ],
             },
         ],
@@ -241,8 +241,12 @@ def test_add_basin_with_few_measurements():
             {
                 "basin_cnt": [[1, 1], [1, 2], [2, 2], [2, 1]],
                 "measurements": [
-                    Measurement(activity=1, coo=Coordinate(1, 1)),
-                    Measurement(activity=3, coo=Coordinate(2, 2)),
+                    Measurement(
+                        activity=SoilActivity(1), coo=Coordinate(1, 1)
+                    ),
+                    Measurement(
+                        activity=SoilActivity(3), coo=Coordinate(2, 2)
+                    ),
                 ],
             }
         ],
@@ -266,7 +270,9 @@ def test_add_basin_with_too_far_measurement():
         actmap.measurement_proximity = 1
         actmap.add_basin(
             basin=Basin(contour=[[0, 2], [0, 0], [2, 0]]),
-            measurements=[Measurement(activity=1, coo=Coordinate(3, 3))],
+            measurements=[
+                Measurement(activity=SoilActivity(1), coo=Coordinate(3, 3))
+            ],
         )
 
 
@@ -281,7 +287,7 @@ def test_add_basin_with_close_enough_measurement():
             {
                 "basin_cnt": [[0, 0], [0, 3], [3, 0]],
                 "measurements": [
-                    Measurement(activity=1, coo=Coordinate(3, 3))
+                    Measurement(activity=SoilActivity(1), coo=Coordinate(3, 3))
                 ],
             }
         ],
