@@ -57,7 +57,11 @@ def test_map_exceeding_step():
 
 
 def check_adding_basin(
-    basins_with_measurements, ref_data, resolution, measurement_proximity=0
+    basins_with_measurements,
+    ref_data,
+    resolution,
+    measurement_proximity=0,
+    shoreline_width=1,
 ):
     actmap = ActivityMap(
         ul=Coordinate(lon=0, lat=resolution),
@@ -66,7 +70,9 @@ def check_adding_basin(
     )
     actmap.measurement_proximity = measurement_proximity
     for dictionary in basins_with_measurements:
-        basin = Basin(contour=dictionary["basin_cnt"])
+        basin = Basin(
+            contour=dictionary["basin_cnt"], shoreline_width=shoreline_width
+        )
         actmap.add_basin(basin=basin, measurements=dictionary["measurements"])
     data = actmap.img.read(1)
     assert (data == ref_data).all()
