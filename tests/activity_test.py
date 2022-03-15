@@ -424,3 +424,32 @@ def test_add_basin_measurmentes_far_from_segment():
         measurement_proximity=1,
         crop_basin=True,
     )
+
+
+def test_contamination_depth():
+    res = 4
+    step = 1
+    actmap = ActivityMap(
+        ul=Coordinate(0, res - 1), lr=Coordinate(res - 1, 0), step=step
+    )
+    activity = SoilActivity(1)
+    pix_area = step * step
+    depth = 1
+    pix_value = activity.surface_1cm * depth * pix_area
+    actmap.contamination_depth = depth
+    actmap.add_basin(
+        Basin([[0, 0], [1, 0], [0, 1]]),
+        Measurement(activity=activity, coo=Coordinate(1, 1)),
+    )
+    data = actmap.img.read(1)
+    assert data[0, 0] == pix_value
+
+    depth = 5
+    pix_value = activity.surface_1cm * depth * pix_area
+    actmap.contamination_depth = depth
+    actmap.add_basin(
+        Basin([[2, 3], [3, 3], [3, 2]]),
+        Measurement(activity=activity, coo=Coordinate(1, 1)),
+    )
+    data = actmap.img.read(1)
+    assert data[3, 3] == pix_value
