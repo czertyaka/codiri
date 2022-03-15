@@ -63,16 +63,27 @@ def check_adding_basin(
     resolution,
     measurement_proximity=0,
     shoreline_width=1,
+    crop_basin=False,
 ):
+    last_idx = resolution - 1
     actmap = ActivityMap(
-        ul=Coordinate(lon=0, lat=resolution - 1),
-        lr=Coordinate(lon=resolution - 1, lat=0),
+        ul=Coordinate(lon=0, lat=last_idx),
+        lr=Coordinate(lon=last_idx, lat=0),
         step=1,
     )
     actmap.measurement_proximity = measurement_proximity
     for dictionary in basins_with_measurements:
         basin = Basin(
-            contour=dictionary["basin_cnt"], shoreline_width=shoreline_width
+            contour=dictionary["basin_cnt"],
+            shoreline_width=shoreline_width,
+            map_contour=[
+                [0, 0],
+                [0, last_idx],
+                [last_idx, last_idx],
+                [last_idx, 0],
+            ]
+            if crop_basin is True
+            else None,
         )
         actmap.add_basin(basin=basin, measurements=dictionary["measurements"])
     data = actmap.img.read(1)
@@ -326,16 +337,85 @@ def test_add_basin_invalid_measurement_location():
         )
 
 
-# TODO: segmented shoreline tests
-# Requirement:
-# Only use measurement for basin segment if it is located inland
-# between this segment and map contour. If no measurement for specific segment
-# were provided do not raise an error. Instead, warn user and leave this
-# segment blank.
-#
-# Example:
-# Use measurement for segment [[2, 0], [2, 2], [4, 2]] only
+# - 1 - -
+# - * * *
+# - * * *
+# - * * 1
+def test_add_basin_measurmentes_for_all_segments():
+    res = 4
+    check_adding_basin(
+        basins_with_measurements=[
+            {
+                "basin_cnt": [[1, 0], [1, 2], [3, 2], [3, 1], [2, 1], [2, 0]],
+                "measurements": [
+                    Measurement(
+                        activity=SoilActivity(1), coo=Coordinate(3, 0)
+                    ),
+                    Measurement(
+                        activity=SoilActivity(1), coo=Coordinate(1, 3)
+                    ),
+                ],
+            }
+        ],
+        ref_data=np.array(
+            [[0, 0, 0, 0], [0, 1, 1, 1], [0, 1, 1, 1], [0, 1, 1, 0]]
+        ).astype("uint8"),
+        resolution=res,
+        measurement_proximity=1,
+        crop_basin=True,
+    )
+
+
 # - - - -
 # - * * *
-# - * - -
-# - * - 1
+# - * * *
+# - * * 1
+def test_add_basin_measurmentes_for_some_segments():
+    res = 4
+    check_adding_basin(
+        basins_with_measurements=[
+            {
+                "basin_cnt": [[1, 0], [1, 2], [3, 2], [3, 1], [2, 1], [2, 0]],
+                "measurements": [
+                    Measurement(
+                        activity=SoilActivity(1), coo=Coordinate(3, 0)
+                    ),
+                ],
+            }
+        ],
+        ref_data=np.array(
+            [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0]]
+        ).astype("uint8"),
+        resolution=res,
+        measurement_proximity=1,
+        crop_basin=True,
+    )
+
+
+# 1 - - -
+# - * * *
+# - * * *
+# - * * 1
+def test_add_basin_measurmentes_far_from_segment():
+    res = 4
+    check_adding_basin(
+        basins_with_measurements=[
+            {
+                "basin_cnt": [[1, 0], [1, 2], [3, 2], [3, 1], [2, 1], [2, 0]],
+                "measurements": [
+                    Measurement(
+                        activity=SoilActivity(1), coo=Coordinate(3, 0)
+                    ),
+                    Measurement(
+                        activity=SoilActivity(1), coo=Coordinate(0, 3)
+                    ),
+                ],
+            }
+        ],
+        ref_data=np.array(
+            [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0]]
+        ).astype("uint8"),
+        resolution=res,
+        measurement_proximity=1,
+        crop_basin=True,
+    )
