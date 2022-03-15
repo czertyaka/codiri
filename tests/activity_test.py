@@ -59,7 +59,7 @@ def test_map_exceeding_step():
 
 def check_adding_basin(
     basins_with_measurements,
-    ref_data,
+    ref_data_normalized,
     resolution,
     measurement_proximity=0,
     shoreline_width=1,
@@ -87,8 +87,8 @@ def check_adding_basin(
         )
         actmap.add_basin(basin=basin, measurements=dictionary["measurements"])
     data = actmap.img.read(1)
-    assert data.shape == ref_data.shape
-    assert (data == ref_data).all()
+    assert data.shape == ref_data_normalized.shape
+    assert (data == ref_data_normalized).all()
 
 
 #         * *
@@ -108,7 +108,7 @@ def test_add_outer_basin():
                 ],
             }
         ],
-        ref_data=np.zeros((res, res)).astype("uint8"),
+        ref_data_normalized=np.zeros((res, res)).astype("uint8"),
         resolution=res,
     )
 
@@ -126,7 +126,7 @@ def test_add_basin_with_no_measurements():
                 "measurements": [],
             }
         ],
-        ref_data=np.zeros((res, res)).astype("uint8"),
+        ref_data_normalized=np.zeros((res, res)).astype("uint8"),
         resolution=res,
     )
 
@@ -146,7 +146,7 @@ def test_add_basin_with_zero_measurements():
                 ],
             }
         ],
-        ref_data=np.zeros((res, res)).astype("uint8"),
+        ref_data_normalized=np.zeros((res, res)).astype("uint8"),
         resolution=res,
     )
 
@@ -166,7 +166,7 @@ def test_add_basin():
                 ],
             }
         ],
-        ref_data=np.array(
+        ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]
         ).astype("uint8"),
         resolution=res,
@@ -189,7 +189,7 @@ def test_add_partly_inner_basin():
                 ],
             }
         ],
-        ref_data=np.array(
+        ref_data_normalized=np.array(
             [[0, 0, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]]
         ).astype("uint8"),
         resolution=res,
@@ -213,7 +213,7 @@ def test_add_partly_inner_basin_with_no_inner_points():
                 ],
             }
         ],
-        ref_data=np.array(
+        ref_data_normalized=np.array(
             [[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0]]
         ).astype("uint8"),
         resolution=res,
@@ -242,8 +242,13 @@ def test_add_few_basins():
                 ],
             },
         ],
-        ref_data=np.array(
-            [[0, 0, 2, 0], [1, 0, 2, 2], [1, 1, 0, 0], [1, 1, 1, 0]]
+        ref_data_normalized=np.array(
+            [
+                [0, 0, 1, 0],
+                [0.5, 0, 1, 1],
+                [0.5, 0.5, 0, 0],
+                [0.5, 0.5, 0.5, 0],
+            ]
         ).astype("uint8"),
         resolution=res,
     )
@@ -269,8 +274,8 @@ def test_add_basin_with_few_measurements():
                 ],
             }
         ],
-        ref_data=np.array(
-            [[0, 0, 0, 0], [0, 2, 3, 0], [0, 1, 2, 0], [0, 0, 0, 0]]
+        ref_data_normalized=np.array(
+            [[0, 0, 0, 0], [0, 0.67, 1, 0], [0, 0.33, 0.67, 0], [0, 0, 0, 0]]
         ).astype("uint8"),
         resolution=res,
     )
@@ -310,7 +315,7 @@ def test_add_basin_with_close_enough_measurement():
                 ],
             }
         ],
-        ref_data=np.array(
+        ref_data_normalized=np.array(
             [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
         ).astype("uint8"),
         resolution=res,
@@ -352,13 +357,13 @@ def test_add_basin_measurmentes_for_all_segments():
                         activity=SoilActivity(1), coo=Coordinate(3, 0)
                     ),
                     Measurement(
-                        activity=SoilActivity(1), coo=Coordinate(1, 3)
+                        activity=SoilActivity(2), coo=Coordinate(1, 3)
                     ),
                 ],
             }
         ],
-        ref_data=np.array(
-            [[0, 0, 0, 0], [0, 1, 1, 1], [0, 1, 1, 1], [0, 1, 1, 0]]
+        ref_data_normalized=np.array(
+            [[0, 0, 0, 0], [0, 1, 1, 1], [0, 1, 0.5, 0.5], [0, 1, 0.5, 0]]
         ).astype("uint8"),
         resolution=res,
         measurement_proximity=1,
@@ -383,7 +388,7 @@ def test_add_basin_measurmentes_for_some_segments():
                 ],
             }
         ],
-        ref_data=np.array(
+        ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0]]
         ).astype("uint8"),
         resolution=res,
@@ -412,7 +417,7 @@ def test_add_basin_measurmentes_far_from_segment():
                 ],
             }
         ],
-        ref_data=np.array(
+        ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0]]
         ).astype("uint8"),
         resolution=res,
