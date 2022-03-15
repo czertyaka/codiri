@@ -51,8 +51,8 @@ class ActivityMap(object):
         lr.transform("EPSG:3857")
         # since map can't be larger than 100 km flat Earth model is good enough
         # here
-        x_res = abs(math.floor((lr.lon - ul.lon) / step))
-        y_res = abs(math.floor((ul.lat - lr.lat) / step))
+        x_res = abs(math.floor((lr.lon + 1 - ul.lon) / step))
+        y_res = abs(math.floor((ul.lat + 1 - lr.lat) / step))
         if x_res == 0 or y_res == 0:
             raise ExceedingStepError
 
@@ -61,7 +61,9 @@ class ActivityMap(object):
         # lower bottom corner doesn't necessary consist with initial lower
         # bottom
         lr = Coordinate(
-            lon=ul.lon + x_res * step, lat=ul.lat - y_res * step, crs=lr.crs
+            lon=ul.lon + x_res * step - 1,
+            lat=ul.lat - y_res * step + 1,
+            crs=lr.crs,
         )
 
         memfile = MemoryFile()

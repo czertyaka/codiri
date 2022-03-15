@@ -15,10 +15,10 @@ def check_empty_map(ul, lr, new_lr, step, ref_width, ref_height):
     actmap = ActivityMap(ul=ul, lr=lr, step=step).img
     assert actmap.width == ref_width
     assert actmap.height == ref_height
-    assert actmap.xy(0, 0, offset="ul") == (ul.lon, ul.lat)
-    assert actmap.xy(actmap.width, actmap.height, offset="ul") == (
-        new_lr.lon,
-        new_lr.lat,
+    assert actmap.index(ul.lon, ul.lat) == (0, 0)
+    assert actmap.index(new_lr.lon, new_lr.lat) == (
+        actmap.width - 1,
+        actmap.height - 1,
     )
 
     data = actmap.read(1)
@@ -34,8 +34,8 @@ def test_map():
         lr=lr,
         new_lr=lr,
         step=1,
-        ref_width=10,
-        ref_height=10,
+        ref_width=11,
+        ref_height=11,
     )
 
 
@@ -44,7 +44,7 @@ def test_map_large_step():
         ul=Coordinate(lon=10, lat=20),
         lr=Coordinate(lon=25, lat=5),
         new_lr=Coordinate(lon=20, lat=10),
-        step=10,
+        step=11,
         ref_width=1,
         ref_height=1,
     )
@@ -65,8 +65,8 @@ def check_adding_basin(
     shoreline_width=1,
 ):
     actmap = ActivityMap(
-        ul=Coordinate(lon=0, lat=resolution),
-        lr=Coordinate(lon=resolution, lat=0),
+        ul=Coordinate(lon=0, lat=resolution - 1),
+        lr=Coordinate(lon=resolution - 1, lat=0),
         step=1,
     )
     actmap.measurement_proximity = measurement_proximity
@@ -76,6 +76,7 @@ def check_adding_basin(
         )
         actmap.add_basin(basin=basin, measurements=dictionary["measurements"])
     data = actmap.img.read(1)
+    assert data.shape == ref_data.shape
     assert (data == ref_data).all()
 
 
