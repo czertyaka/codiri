@@ -2,6 +2,7 @@ from codri.src.activity import (
     ActivityMap,
     ExceedingStepError,
     ExceedingMeasurementProximity,
+    InvalidMeasurementLocation,
 )
 from codri.src.measurement import Measurement, SoilActivity
 from codri.src.geo import Coordinate
@@ -303,3 +304,22 @@ def test_add_basin_with_close_enough_measurement():
         resolution=res,
         measurement_proximity=3,
     )
+
+
+# - - - -
+# * * * -
+# * 1 * -
+# * * * -
+def test_add_basin_invalid_measurement_location():
+    with pytest.raises(InvalidMeasurementLocation):
+        res = 4
+        actmap = ActivityMap(
+            ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1
+        )
+        actmap.measurement_proximity = 1
+        actmap.add_basin(
+            basin=Basin(contour=[[0, 0], [2, 0], [2, 2], [0, 2]]),
+            measurements=[
+                Measurement(activity=SoilActivity(1), coo=Coordinate(1, 1))
+            ],
+        )

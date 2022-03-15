@@ -28,6 +28,12 @@ class ExceedingMeasurementProximity(ActivityMapError):
     pass
 
 
+class InvalidMeasurementLocation(ActivityMapError):
+    """Measurement location is not valid"""
+
+    pass
+
+
 class ActivityMap(object):
     """Holds discretizated activity distribution"""
 
