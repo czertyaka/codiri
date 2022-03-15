@@ -427,10 +427,12 @@ def test_add_basin_measurmentes_far_from_segment():
 
 
 def test_contamination_depth():
-    res = 4
+    map_size = 4
     step = 1
     actmap = ActivityMap(
-        ul=Coordinate(0, res - 1), lr=Coordinate(res - 1, 0), step=step
+        ul=Coordinate(0, map_size - 1),
+        lr=Coordinate(map_size - 1, 0),
+        step=step,
     )
     activity = SoilActivity(1)
     pix_area = step * step
@@ -438,7 +440,7 @@ def test_contamination_depth():
     pix_value = activity.surface_1cm * depth * pix_area
     actmap.contamination_depth = depth
     actmap.add_basin(
-        Basin([[0, 0], [1, 0], [0, 1]]),
+        Basin(contour=[[0, 0], [1, 0], [0, 1]], shoreline_width=1),
         Measurement(activity=activity, coo=Coordinate(1, 1)),
     )
     data = actmap.img.read(1)
@@ -453,3 +455,46 @@ def test_contamination_depth():
     )
     data = actmap.img.read(1)
     assert data[3, 3] == pix_value
+
+
+def test_shoreline_width():
+    map_size = 12
+    step = 1
+    actmap = ActivityMap(
+        ul=Coordinate(0, map_size - 1),
+        lr=Coordinate(map_size - 1, 0),
+        step=step,
+    )
+    activity = SoilActivity(1)
+    pix_area = step * step
+    pix_value = activity.surface_1cm * actmap.contamination_depth * pix_area
+    actmap.add_basin(
+        Basin(contour=[[1, 1], [1, 4], [4, 4], [4, 1]], shoreline_width=1),
+        Measurement(activity=activity, coo=Coordinate(1, 1)),
+    )
+    actmap.add_basin(
+        Basin(contour=[[7, 7], [7, 10], [10, 10], [10, 7]], shoreline_width=1),
+        Measurement(activity=activity, coo=Coordinate(1, 1)),
+    )
+    ref_data = (
+        np.array(
+            [
+                [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ]
+        ).astype("uint8")
+        * pix_value
+    )
+    data = actmap.img.read(1)
+    assert data.shape == ref_data.shape
+    assert (data == ref_data).all()
