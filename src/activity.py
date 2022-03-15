@@ -38,10 +38,12 @@ class ActivityMap(object):
     """Holds discretizated activity distribution"""
 
     def __init__(self, ul, lr, step):
-        self.__init_img(ul, lr, step)
         # setting the proximity of the measurement to the shore to default
         # value (meters)
         self.measurement_proximity = 10
+        # default contamination depth is 10 cm
+        self.contamination_depth = 10
+        self.__init_img(ul, lr, step)
 
     def add_basin(self, basin, measurements):
         pass
@@ -85,8 +87,20 @@ class ActivityMap(object):
 
     @property
     def measurement_proximity(self):
+        """[proximity] = m"""
         return self.__measurement_proximity
 
     @measurement_proximity.setter
     def measurement_proximity(self, value):
+        """[value] = m"""
         self.__measurement_proximity = value
+
+    @property
+    def contamination_depth(self):
+        """[depth] = cm"""
+        return self.__contamination_depth
+
+    @contamination_depth.setter
+    def contamination_depth(self, value):
+        """[value] = cm"""
+        self.__contamination_depth = value
