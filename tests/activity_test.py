@@ -323,3 +323,18 @@ def test_add_basin_invalid_measurement_location():
                 Measurement(activity=SoilActivity(1), coo=Coordinate(1, 1))
             ],
         )
+
+
+# TODO: segmented shoreline tests
+# Requirement:
+# Only use measurement for basin segment if it is located inland
+# between this segment and map contour. If no measurement for specific segment
+# were provided do not raise an error. Instead, warn user and leave this
+# segment blank.
+#
+# Example:
+# Use measurement for segment [[2, 0], [2, 2], [4, 2]] only
+# - - - -
+# - * * *
+# - * - -
+# - * - 1
