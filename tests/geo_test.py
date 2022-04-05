@@ -1,4 +1,4 @@
-from codri.src.geo import (
+from codiri.src.geo import (
     distance,
     Coordinate,
     Map,

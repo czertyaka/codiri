@@ -1,9 +1,9 @@
-from codri.src.basins import (
+from codiri.src.basins import (
     BasinsFinder,
     Basin,
 )
-from codri.src.geo import Coordinate
-from codri.tests.mock import MockMap
+from codiri.src.geo import Coordinate
+from codiri.tests.mock import MockMap
 import pytest
 from shapely import geometry
 

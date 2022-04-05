@@ -37,12 +37,13 @@ class InvalidMeasurementLocation(ActivityMapError):
 class ActivityMap(object):
     """Holds discretizated activity distribution"""
 
-    def __init__(self, ul, lr, step):
+    def __init__(self, ul, lr, step, nuclide):
         # setting the proximity of the measurement to the shore to default
         # value (meters)
         self.measurement_proximity = 10
         # default contamination depth is 10 cm
         self.contamination_depth = 10
+        self.__nuclide = nuclide
         self.__init_img(ul, lr, step)
 
     def add_basin(self, basin, measurements):
@@ -104,3 +105,7 @@ class ActivityMap(object):
     def contamination_depth(self, value):
         """[value] = cm"""
         self.__contamination_depth = value
+
+    @property
+    def nuclide(self):
+        return self.__nuclide

@@ -1,5 +1,5 @@
-from codri.src.measurement import Measurement, SoilActivity
-from codri.src.geo import Coordinate
+from codiri.src.measurement import Measurement, SoilActivity
+from codiri.src.geo import Coordinate
 import pytest
 
 

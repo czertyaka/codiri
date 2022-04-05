@@ -1,18 +1,23 @@
-from codri.src.activity import (
+from codiri.src.activity import (
     ActivityMap,
     ExceedingStepError,
     ExceedingMeasurementProximity,
     InvalidMeasurementLocation,
 )
-from codri.src.measurement import Measurement, SoilActivity
-from codri.src.geo import Coordinate
-from codri.src.basins import Basin
+from codiri.src.measurement import Measurement, SoilActivity
+from codiri.src.geo import Coordinate
+from codiri.src.basins import Basin
 import numpy as np
 import pytest
 
 
+class TestMap(ActivityMap):
+    def __init__(self, ul, lr, step):
+        super().__init__(ul, lr, step, None)
+
+
 def check_empty_map(ul, lr, new_lr, step, ref_width, ref_height):
-    actmap = ActivityMap(ul=ul, lr=lr, step=step).img
+    actmap = TestMap(ul=ul, lr=lr, step=step).img
     assert actmap.width == ref_width
     assert actmap.height == ref_height
     assert actmap.index(ul.lon, ul.lat) == (0, 0)
@@ -54,7 +59,7 @@ def test_map_exceeding_step():
     ul = Coordinate(lon=10, lat=20)
     lr = Coordinate(lon=25, lat=5)
     with pytest.raises(ExceedingStepError):
-        ActivityMap(ul, lr, 100)
+        TestMap(ul, lr, 100)
 
 
 def check_adding_basin(
@@ -66,7 +71,7 @@ def check_adding_basin(
     crop_basin=False,
 ):
     last_idx = resolution - 1
-    actmap = ActivityMap(
+    actmap = TestMap(
         ul=Coordinate(lon=0, lat=last_idx),
         lr=Coordinate(lon=last_idx, lat=0),
         step=1,
@@ -288,9 +293,7 @@ def test_add_basin_with_few_measurements():
 def test_add_basin_with_too_far_measurement():
     with pytest.raises(ExceedingMeasurementProximity):
         res = 4
-        actmap = ActivityMap(
-            ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1
-        )
+        actmap = TestMap(ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1)
         actmap.measurement_proximity = 1
         actmap.add_basin(
             basin=Basin(contour=[[0, 2], [0, 0], [2, 0]]),
@@ -330,9 +333,7 @@ def test_add_basin_with_close_enough_measurement():
 def test_add_basin_invalid_measurement_location():
     with pytest.raises(InvalidMeasurementLocation):
         res = 4
-        actmap = ActivityMap(
-            ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1
-        )
+        actmap = TestMap(ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1)
         actmap.measurement_proximity = 1
         actmap.add_basin(
             basin=Basin(contour=[[0, 0], [2, 0], [2, 2], [0, 2]]),
@@ -429,7 +430,7 @@ def test_add_basin_measurmentes_far_from_segment():
 def test_contamination_depth():
     map_size = 4
     step = 1
-    actmap = ActivityMap(
+    actmap = TestMap(
         ul=Coordinate(0, map_size - 1),
         lr=Coordinate(map_size - 1, 0),
         step=step,
@@ -460,7 +461,7 @@ def test_contamination_depth():
 def test_shoreline_width():
     map_size = 12
     step = 1
-    actmap = ActivityMap(
+    actmap = TestMap(
         ul=Coordinate(0, map_size - 1),
         lr=Coordinate(map_size - 1, 0),
         step=step,
