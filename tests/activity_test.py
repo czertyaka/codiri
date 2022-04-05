@@ -281,7 +281,7 @@ def test_add_basin_with_few_measurements():
             }
         ],
         ref_data_normalized=np.array(
-            [[0, 0, 0, 0], [0, 0.67, 1, 0], [0, 0.33, 0.67, 0], [0, 0, 0, 0]]
+            [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]
         ).astype("uint8"),
         resolution=res,
     )
@@ -472,11 +472,11 @@ def test_shoreline_width():
     pix_value = activity.surface_1cm * actmap.contamination_depth * pix_area
     actmap.add_basin(
         Basin(contour=[[1, 1], [1, 4], [4, 4], [4, 1]], shoreline_width=1),
-        Measurement(activity=activity, coo=Coordinate(1, 1)),
+        [Measurement(activity=activity, coo=Coordinate(1, 1))],
     )
     actmap.add_basin(
         Basin(contour=[[7, 7], [7, 10], [10, 10], [10, 7]], shoreline_width=1),
-        Measurement(activity=activity, coo=Coordinate(1, 1)),
+        [Measurement(activity=activity, coo=Coordinate(1, 1))],
     )
     ref_data = (
         np.array(
@@ -500,3 +500,32 @@ def test_shoreline_width():
     data = actmap.img.read(1)
     assert data.shape == ref_data.shape
     assert (data == ref_data).all()
+
+
+def test_measurments_averaging():
+    map_size = 4
+    step = 1
+    actmap1 = TestMap(
+        ul=Coordinate(0, map_size - 1),
+        lr=Coordinate(map_size - 1, 0),
+        step=step,
+    )
+    actmap2 = actmap1
+
+    basin = Basin(contour=[[1, 1], [1, 2], [2, 2], [2, 1]], shoreline_width=1)
+    actmap1.add_basin(
+        basin,
+        [
+            Measurement(activity=SoilActivity(1), coo=Coordinate(1, 1)),
+            Measurement(activity=SoilActivity(3), coo=Coordinate(2, 2)),
+        ],
+    )
+    actmap2.add_basin(
+        basin, [Measurement(activity=SoilActivity(2), coo=Coordinate(1, 1))]
+    )
+
+    data1 = actmap1.img.read(1)
+    data2 = actmap2.img.read(1)
+
+    assert data1.shape == data2.shape
+    assert (data1 == data2).all()
