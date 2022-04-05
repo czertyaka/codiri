@@ -93,7 +93,8 @@ def check_adding_basin(
         actmap.add_basin(basin=basin, measurements=dictionary["measurements"])
     data = actmap.img.read(1)
     assert data.shape == ref_data_normalized.shape
-    assert (data == ref_data_normalized).all()
+    ref_data = ref_data_normalized * (data.max() if data.max() != 0 else 1)
+    assert (data == ref_data).all()
 
 
 #         * *
