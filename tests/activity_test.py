@@ -9,6 +9,7 @@ from codiri.src.geo import Coordinate
 from codiri.src.basins import Basin
 import numpy as np
 import pytest
+from math import isclose
 
 
 def act_map(ul, lr, step):
@@ -361,31 +362,35 @@ def test_contamination_depth():
     map_size = 4
     step = 1
     actmap = act_map(
-        ul=Coordinate(0, map_size - 1),
-        lr=Coordinate(map_size - 1, 0),
+        ul=Coordinate(0 - step / 2, map_size - 1 + step / 2),
+        lr=Coordinate(map_size - 1 + step / 2, 0 - step / 2),
         step=step,
     )
     activity = SoilActivity(1)
     pix_area = step * step
     depth = 1
-    pix_value = activity.surface_1cm * depth * pix_area
+    pix_activity = activity.surface_1cm * depth * pix_area
     actmap.contamination_depth = depth
     actmap.add_basin(
-        Basin(contour=[[0, 0], [1, 0], [0, 1]], shoreline_width=1),
-        [Measurement(activity=activity, coo=Coordinate(1, 1))],
+        Basin(contour=[[0, 3], [1, 3], [1, 2], [0, 2]], shoreline_width=1),
+        [Measurement(activity=activity, coo=Coordinate(0, 3))],
     )
     data = actmap.img.read(1)
-    assert data[0, 0] == pix_value
+    assert isclose(
+        data[0, 0] / actmap.raster_factor, pix_activity, rel_tol=1e-4
+    )
 
     depth = 5
-    pix_value = activity.surface_1cm * depth * pix_area
+    pix_activity = activity.surface_1cm * depth * pix_area
     actmap.contamination_depth = depth
     actmap.add_basin(
-        Basin([[2, 3], [3, 3], [3, 2]]),
-        [Measurement(activity=activity, coo=Coordinate(1, 1))],
+        Basin(contour=[[2, 0], [2, 1], [3, 1], [3, 0]], shoreline_width=1),
+        [Measurement(activity=activity, coo=Coordinate(2, 0))],
     )
     data = actmap.img.read(1)
-    assert data[3, 3] == pix_value
+    assert isclose(
+        data[3, 3] / actmap.raster_factor, pix_activity, rel_tol=1e-4
+    )
 
 
 def test_shoreline_width():

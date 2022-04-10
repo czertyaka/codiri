@@ -217,3 +217,7 @@ class ActivityMap(object):
     @property
     def nuclide(self):
         return self.__nuclide
+
+    @property
+    def raster_factor(self):
+        return self.__raster_factor
