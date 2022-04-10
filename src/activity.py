@@ -55,7 +55,7 @@ class ActivityMap(object):
         if not measurements:
             return
 
-        self.__check_measurments_proximity(basin, measurements)
+        self.__check_measurments(basin, measurements)
 
         surface_activity = self.__calculate_average_surface_activity(
             measurements
@@ -164,23 +164,31 @@ class ActivityMap(object):
         max_raster_code = np.iinfo(self.__type).max
         return max_raster_code / (2 * activity)
 
-    def __check_measurments_proximity(self, basin, measurements):
+    def __check_measurments(self, basin, measurements):
         for measurement in measurements:
-            proximate_enough = False
-            for shoreline_segment in basin.shoreline:
-                measurement_point = geometry.Point(
-                    measurement.coo.lon, measurement.coo.lat
-                )
-                (coo1, coo2) = ops.nearest_points(
-                    measurement_point, shoreline_segment
-                )
-                distance = coo1.distance(coo2)
-                proximate_enough = (
-                    proximate_enough
-                    or distance <= self.__measurement_proximity
-                )
-            if proximate_enough is False:
-                raise ExceedingMeasurementProximity
+            self.__check_measurment_location(measurement, basin)
+            self.__check_measurment_proximity(measurement, basin)
+
+    def __check_measurment_location(self, measurement, basin):
+        coo = measurement.coo
+        if basin.body.contains(geometry.Point(coo.lon, coo.lat)):
+            raise InvalidMeasurementLocation
+
+    def __check_measurment_proximity(self, measurement, basin):
+        proximate_enough = False
+        for shoreline_segment in basin.shoreline:
+            measurement_point = geometry.Point(
+                measurement.coo.lon, measurement.coo.lat
+            )
+            (coo1, coo2) = ops.nearest_points(
+                measurement_point, shoreline_segment
+            )
+            distance = coo1.distance(coo2)
+            proximate_enough = (
+                proximate_enough or distance <= self.__measurement_proximity
+            )
+        if proximate_enough is False:
+            raise ExceedingMeasurementProximity
 
     @property
     def img(self):
