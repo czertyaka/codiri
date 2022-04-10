@@ -96,7 +96,10 @@ def check_adding_basin(
         actmap.add_basin(basin=basin, measurements=dictionary["measurements"])
     data = actmap.img.read(1)
     assert data.shape == ref_data_normalized.shape
-    ref_data = ref_data_normalized * (data.max() if data.max() != 0 else 1)
+    ref_data = (
+        ref_data_normalized
+        * (data.max() if data.max() != 0 else np.iinfo(np.uint16).max)
+    ).astype(np.uint16)
     assert (data == ref_data).all()
 
 
@@ -117,7 +120,7 @@ def test_add_outer_basin():
                 ],
             }
         ],
-        ref_data_normalized=np.zeros((res, res)).astype(np.uint16),
+        ref_data_normalized=np.zeros((res, res)),
         resolution=res,
     )
 
@@ -135,7 +138,7 @@ def test_add_basin_with_no_measurements():
                 "measurements": [],
             }
         ],
-        ref_data_normalized=np.zeros((res, res)).astype(np.uint16),
+        ref_data_normalized=np.zeros((res, res)),
         resolution=res,
     )
 
@@ -155,7 +158,7 @@ def test_add_basin_with_zero_measurements():
                 ],
             }
         ],
-        ref_data_normalized=np.zeros((res, res)).astype(np.uint16),
+        ref_data_normalized=np.zeros((res, res)),
         resolution=res,
     )
 
@@ -177,7 +180,7 @@ def test_add_basin_simple():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]
-        ).astype(np.uint16),
+        ),
         resolution=res,
     )
 
@@ -200,7 +203,7 @@ def test_add_partly_inner_basin():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]]
-        ).astype(np.uint16),
+        ),
         resolution=res,
     )
 
@@ -213,6 +216,7 @@ def test_add_partly_inner_basin():
 # * * * * * *
 def test_add_partly_inner_basin_with_no_inner_points():
     res = 4
+    magic_number = 0.273459
     check_adding_basin(
         basins_with_measurements=[
             {
@@ -223,8 +227,13 @@ def test_add_partly_inner_basin_with_no_inner_points():
             }
         ],
         ref_data_normalized=np.array(
-            [[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0]]
-        ).astype(np.uint16),
+            [
+                [0, 0, magic_number, 1],
+                [0, magic_number, 1, magic_number],
+                [magic_number, 1, magic_number, 0],
+                [1, magic_number, 0, 0],
+            ]
+        ),
         resolution=res,
     )
 
@@ -258,7 +267,7 @@ def test_add_few_basins():
                 [0.5, 0.5, 0, 0],
                 [0.5, 0.5, 0.5, 0],
             ]
-        ).astype(np.uint16),
+        ),
         resolution=res,
     )
 
@@ -285,7 +294,7 @@ def test_add_basin_with_few_measurements():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]
-        ).astype(np.uint16),
+        ),
         resolution=res,
     )
 
@@ -324,7 +333,7 @@ def test_add_basin_with_close_enough_measurement():
         ],
         ref_data_normalized=np.array(
             [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-        ).astype(np.uint16),
+        ),
         resolution=res,
         measurement_proximity=3,
     )
@@ -369,7 +378,7 @@ def test_add_basin_measurmentes_for_all_segments():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 1, 1, 1], [0, 1, 0.5, 0.5], [0, 1, 0.5, 0]]
-        ).astype(np.uint16),
+        ),
         resolution=res,
         measurement_proximity=1,
         crop_basin=True,
@@ -395,7 +404,7 @@ def test_add_basin_measurmentes_for_some_segments():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0]]
-        ).astype(np.uint16),
+        ),
         resolution=res,
         measurement_proximity=1,
         crop_basin=True,
@@ -424,7 +433,7 @@ def test_add_basin_measurmentes_far_from_segment():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0]]
-        ).astype(np.uint16),
+        ),
         resolution=res,
         measurement_proximity=1,
         crop_basin=True,

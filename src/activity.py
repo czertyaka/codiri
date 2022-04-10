@@ -46,8 +46,8 @@ class ActivityMap(object):
         self.contamination_depth = 10
         self.__nuclide = nuclide
         self.__step = step
-        # activity * factor = value in image
-        self.__factor = None
+        # activity * raster_factor = raster code of activity
+        self.__raster_factor = None
         self.__type = np.uint16
         self.__init_img(ul, lr)
 
@@ -79,17 +79,17 @@ class ActivityMap(object):
                         continue
 
                     activity = surface_activity * intersection
-                    max_value = np.iinfo(self.__type).max
-                    if self.__factor is None:
-                        self.__factor = (max_value / 2) / activity
+                    raster_factor = self.__update_raster_factor(activity)
+                    if self.__raster_factor is None:
+                        self.__raster_factor = raster_factor
+                    elif raster_factor != self.__raster_factor:
+                        data = (
+                            data / self.__raster_factor * raster_factor
+                        ).astype(self.__type)
+                        self.__raster_factor = raster_factor
 
-                    value = self.__factor * activity
-                    if value > max_value:
-                        self.__update_factor(value, data)
+                    data[i, j] = raster_factor * activity
 
-                    data[i, j] = value
-
-        _log(f"data = {data}")
         self.img.write(data, 1)
 
     def __init_img(self, ul, lr):
@@ -147,6 +147,20 @@ class ActivityMap(object):
             ]
         )
         return cell
+
+    def __update_raster_factor(self, activity):
+        max_raster_code = np.iinfo(self.__type).max
+        if (
+            self.__raster_factor is None
+            or self.__raster_factor * activity > max_raster_code
+        ):
+            return self.__make_raster_factor(activity)
+        else:
+            return self.__raster_factor
+
+    def __make_raster_factor(self, activity):
+        max_raster_code = np.iinfo(self.__type).max
+        return max_raster_code / (2 * activity)
 
     @property
     def img(self):
