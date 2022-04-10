@@ -65,11 +65,11 @@ class ActivityMap(object):
             shoreline_poly = shoreline_segment.buffer(
                 basin.shoreline_width / 2,
                 cap_style=geometry.CAP_STYLE.square,
-                join_style=geometry.JOIN_STYLE.bevel,
+                join_style=geometry.JOIN_STYLE.mitre,
             )
             for i in range(self.img.width):
                 for j in range(self.img.height):
-                    x, y = self.img.xy(j, i)
+                    x, y = self.img.xy(i, j)
                     cell_poly = self.__get_cell_poly(x, y)
                     intersection = shoreline_poly.intersection(cell_poly).area
                     if intersection == 0:
