@@ -238,17 +238,18 @@ def test_add_partly_inner_basin_with_no_inner_points():
     )
 
 
-#     * * *
-# - - * - *
-# * - 2 * *
-# * * - -
-# 1 * * -
+#       * * *
+#   - - * - *
+#   - - 2 * *
+# * * 1 - -
+# * - * - -
+# * * *
 def test_add_few_basins():
     res = 4
     check_adding_basin(
         basins_with_measurements=[
             {
-                "basin_cnt": [[0, 0], [2, 0], [0, 2]],
+                "basin_cnt": [[-1, -1], [-1, 1], [1, 1], [1, -1]],
                 "measurements": [
                     Measurement(activity=SoilActivity(1), coo=Coordinate(0, 0))
                 ],
@@ -263,9 +264,9 @@ def test_add_few_basins():
         ref_data_normalized=np.array(
             [
                 [0, 0, 1, 0],
-                [0.5, 0, 1, 1],
+                [0, 0, 1, 1],
                 [0.5, 0.5, 0, 0],
-                [0.5, 0.5, 0.5, 0],
+                [0, 0.5, 0, 0],
             ]
         ),
         resolution=res,
