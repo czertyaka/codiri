@@ -11,19 +11,23 @@ import numpy as np
 import pytest
 
 
-class TestMap(ActivityMap):
-    def __init__(self, ul, lr, step):
-        super().__init__(ul, lr, step, None)
+def act_map(ul, lr, step):
+    return ActivityMap(ul, lr, step, None)
 
 
 def check_empty_map(ul, lr, new_lr, step, ref_width, ref_height):
-    actmap = TestMap(ul=ul, lr=lr, step=step).img
+    actmap = act_map(ul=ul, lr=lr, step=step).img
     assert actmap.width == ref_width
     assert actmap.height == ref_height
-    assert actmap.index(ul.lon, ul.lat) == (0, 0)
-    assert actmap.index(new_lr.lon, new_lr.lat) == (
+    assert actmap.index(ul.lon + step / 2, ul.lat - step / 2) == (0, 0)
+    assert actmap.index(new_lr.lon - step / 2, new_lr.lat + step / 2) == (
         actmap.width - 1,
         actmap.height - 1,
+    )
+    assert actmap.xy(0, 0) == (ul.lon + step / 2, ul.lat - step / 2)
+    assert actmap.xy(actmap.width - 1, actmap.height - 1) == (
+        new_lr.lon - step / 2,
+        new_lr.lat + step / 2,
     )
 
     data = actmap.read(1)
@@ -39,8 +43,8 @@ def test_map():
         lr=lr,
         new_lr=lr,
         step=1,
-        ref_width=11,
-        ref_height=11,
+        ref_width=10,
+        ref_height=10,
     )
 
 
@@ -49,7 +53,7 @@ def test_map_large_step():
         ul=Coordinate(lon=10, lat=20),
         lr=Coordinate(lon=25, lat=5),
         new_lr=Coordinate(lon=20, lat=10),
-        step=11,
+        step=10,
         ref_width=1,
         ref_height=1,
     )
@@ -59,7 +63,7 @@ def test_map_exceeding_step():
     ul = Coordinate(lon=10, lat=20)
     lr = Coordinate(lon=25, lat=5)
     with pytest.raises(ExceedingStepError):
-        TestMap(ul, lr, 100)
+        act_map(ul, lr, 100)
 
 
 def check_adding_basin(
@@ -71,11 +75,10 @@ def check_adding_basin(
     crop_basin=False,
 ):
     last_idx = resolution - 1
-    actmap = TestMap(
-        ul=Coordinate(lon=0, lat=last_idx),
-        lr=Coordinate(lon=last_idx, lat=0),
-        step=1,
-    )
+    step = 1
+    ul = Coordinate(lon=0 - step / 2, lat=last_idx + step / 2)
+    lr = Coordinate(lon=last_idx + step / 2, lat=0 - step / 2)
+    actmap = act_map(ul=ul, lr=lr, step=step)
     actmap.measurement_proximity = measurement_proximity
     for dictionary in basins_with_measurements:
         basin = Basin(
@@ -114,7 +117,7 @@ def test_add_outer_basin():
                 ],
             }
         ],
-        ref_data_normalized=np.zeros((res, res)).astype("uint8"),
+        ref_data_normalized=np.zeros((res, res)).astype(np.uint16),
         resolution=res,
     )
 
@@ -132,7 +135,7 @@ def test_add_basin_with_no_measurements():
                 "measurements": [],
             }
         ],
-        ref_data_normalized=np.zeros((res, res)).astype("uint8"),
+        ref_data_normalized=np.zeros((res, res)).astype(np.uint16),
         resolution=res,
     )
 
@@ -152,7 +155,7 @@ def test_add_basin_with_zero_measurements():
                 ],
             }
         ],
-        ref_data_normalized=np.zeros((res, res)).astype("uint8"),
+        ref_data_normalized=np.zeros((res, res)).astype(np.uint16),
         resolution=res,
     )
 
@@ -161,7 +164,7 @@ def test_add_basin_with_zero_measurements():
 # - * * -
 # - 1 * -
 # - - - -
-def test_add_basin():
+def test_add_basin_simple():
     res = 4
     check_adding_basin(
         basins_with_measurements=[
@@ -174,7 +177,7 @@ def test_add_basin():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]
-        ).astype("uint8"),
+        ).astype(np.uint16),
         resolution=res,
     )
 
@@ -197,7 +200,7 @@ def test_add_partly_inner_basin():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]]
-        ).astype("uint8"),
+        ).astype(np.uint16),
         resolution=res,
     )
 
@@ -221,7 +224,7 @@ def test_add_partly_inner_basin_with_no_inner_points():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0]]
-        ).astype("uint8"),
+        ).astype(np.uint16),
         resolution=res,
     )
 
@@ -255,7 +258,7 @@ def test_add_few_basins():
                 [0.5, 0.5, 0, 0],
                 [0.5, 0.5, 0.5, 0],
             ]
-        ).astype("uint8"),
+        ).astype(np.uint16),
         resolution=res,
     )
 
@@ -282,7 +285,7 @@ def test_add_basin_with_few_measurements():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]
-        ).astype("uint8"),
+        ).astype(np.uint16),
         resolution=res,
     )
 
@@ -294,7 +297,7 @@ def test_add_basin_with_few_measurements():
 def test_add_basin_with_too_far_measurement():
     with pytest.raises(ExceedingMeasurementProximity):
         res = 4
-        actmap = TestMap(ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1)
+        actmap = act_map(ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1)
         actmap.measurement_proximity = 1
         actmap.add_basin(
             basin=Basin(contour=[[0, 2], [0, 0], [2, 0]]),
@@ -321,7 +324,7 @@ def test_add_basin_with_close_enough_measurement():
         ],
         ref_data_normalized=np.array(
             [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-        ).astype("uint8"),
+        ).astype(np.uint16),
         resolution=res,
         measurement_proximity=3,
     )
@@ -334,7 +337,7 @@ def test_add_basin_with_close_enough_measurement():
 def test_add_basin_invalid_measurement_location():
     with pytest.raises(InvalidMeasurementLocation):
         res = 4
-        actmap = TestMap(ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1)
+        actmap = act_map(ul=Coordinate(0, res), lr=Coordinate(res, 0), step=1)
         actmap.measurement_proximity = 1
         actmap.add_basin(
             basin=Basin(contour=[[0, 0], [2, 0], [2, 2], [0, 2]]),
@@ -366,7 +369,7 @@ def test_add_basin_measurmentes_for_all_segments():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 1, 1, 1], [0, 1, 0.5, 0.5], [0, 1, 0.5, 0]]
-        ).astype("uint8"),
+        ).astype(np.uint16),
         resolution=res,
         measurement_proximity=1,
         crop_basin=True,
@@ -392,7 +395,7 @@ def test_add_basin_measurmentes_for_some_segments():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0]]
-        ).astype("uint8"),
+        ).astype(np.uint16),
         resolution=res,
         measurement_proximity=1,
         crop_basin=True,
@@ -421,7 +424,7 @@ def test_add_basin_measurmentes_far_from_segment():
         ],
         ref_data_normalized=np.array(
             [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1, 1], [0, 0, 1, 0]]
-        ).astype("uint8"),
+        ).astype(np.uint16),
         resolution=res,
         measurement_proximity=1,
         crop_basin=True,
@@ -431,7 +434,7 @@ def test_add_basin_measurmentes_far_from_segment():
 def test_contamination_depth():
     map_size = 4
     step = 1
-    actmap = TestMap(
+    actmap = act_map(
         ul=Coordinate(0, map_size - 1),
         lr=Coordinate(map_size - 1, 0),
         step=step,
@@ -443,7 +446,7 @@ def test_contamination_depth():
     actmap.contamination_depth = depth
     actmap.add_basin(
         Basin(contour=[[0, 0], [1, 0], [0, 1]], shoreline_width=1),
-        Measurement(activity=activity, coo=Coordinate(1, 1)),
+        [Measurement(activity=activity, coo=Coordinate(1, 1))],
     )
     data = actmap.img.read(1)
     assert data[0, 0] == pix_value
@@ -453,7 +456,7 @@ def test_contamination_depth():
     actmap.contamination_depth = depth
     actmap.add_basin(
         Basin([[2, 3], [3, 3], [3, 2]]),
-        Measurement(activity=activity, coo=Coordinate(1, 1)),
+        [Measurement(activity=activity, coo=Coordinate(1, 1))],
     )
     data = actmap.img.read(1)
     assert data[3, 3] == pix_value
@@ -462,7 +465,7 @@ def test_contamination_depth():
 def test_shoreline_width():
     map_size = 12
     step = 1
-    actmap = TestMap(
+    actmap = act_map(
         ul=Coordinate(0, map_size - 1),
         lr=Coordinate(map_size - 1, 0),
         step=step,
@@ -494,7 +497,7 @@ def test_shoreline_width():
                 [0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             ]
-        ).astype("uint8")
+        ).astype(np.uint16)
         * pix_value
     )
     data = actmap.img.read(1)
@@ -505,7 +508,7 @@ def test_shoreline_width():
 def test_measurments_averaging():
     map_size = 4
     step = 1
-    actmap1 = TestMap(
+    actmap1 = act_map(
         ul=Coordinate(0, map_size - 1),
         lr=Coordinate(map_size - 1, 0),
         step=step,
