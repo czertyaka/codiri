@@ -59,6 +59,9 @@ class ActivityMap(object):
             measurements
         )
 
+        if surface_activity == 0:
+            return
+
         data = self.img.read(1)
 
         for shoreline_segment in basin.shoreline:
