@@ -397,8 +397,8 @@ def test_shoreline_width():
     map_size = 12
     step = 1
     actmap = act_map(
-        ul=Coordinate(0, map_size - 1),
-        lr=Coordinate(map_size - 1, 0),
+        ul=Coordinate(0 - step / 2, map_size - 1 + step / 2),
+        lr=Coordinate(map_size - 1 + step / 2, 0 - step / 2),
         step=step,
     )
     activity = SoilActivity(1)
@@ -409,7 +409,7 @@ def test_shoreline_width():
         [Measurement(activity=activity, coo=Coordinate(1, 1))],
     )
     actmap.add_basin(
-        Basin(contour=[[7, 7], [7, 10], [10, 10], [10, 7]], shoreline_width=1),
+        Basin(contour=[[7, 7], [7, 10], [10, 10], [10, 7]], shoreline_width=3),
         [Measurement(activity=activity, coo=Coordinate(1, 1))],
     )
     ref_data = (
@@ -433,7 +433,11 @@ def test_shoreline_width():
     )
     data = actmap.img.read(1)
     assert data.shape == ref_data.shape
-    assert (data == ref_data).all()
+    for i in range(map_size):
+        for j in range(map_size):
+            assert isclose(
+                data[i, j] / actmap.raster_factor, ref_data[i, j], rel_tol=1e-4
+            )
 
 
 def test_measurments_averaging():
