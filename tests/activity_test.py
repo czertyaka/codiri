@@ -251,7 +251,7 @@ def test_add_few_basins():
             {
                 "basin_cnt": [[-1, -1], [-1, 1], [1, 1], [1, -1]],
                 "measurements": [
-                    Measurement(activity=SoilActivity(1), coo=Coordinate(0, 0))
+                    Measurement(activity=SoilActivity(1), coo=Coordinate(1, 1))
                 ],
             },
             {

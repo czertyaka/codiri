@@ -4,7 +4,7 @@ from .geo import Coordinate
 import math
 import numpy as np
 from rasterio import Affine, MemoryFile
-from shapely import geometry
+from shapely import geometry, ops
 
 
 def _log(msg):
@@ -54,6 +54,8 @@ class ActivityMap(object):
     def add_basin(self, basin, measurements):
         if not measurements:
             return
+
+        self.__check_measurments_proximity(basin, measurements)
 
         surface_activity = self.__calculate_average_surface_activity(
             measurements
@@ -161,6 +163,24 @@ class ActivityMap(object):
     def __make_raster_factor(self, activity):
         max_raster_code = np.iinfo(self.__type).max
         return max_raster_code / (2 * activity)
+
+    def __check_measurments_proximity(self, basin, measurements):
+        for measurement in measurements:
+            proximate_enough = False
+            for shoreline_segment in basin.shoreline:
+                measurement_point = geometry.Point(
+                    measurement.coo.lon, measurement.coo.lat
+                )
+                (coo1, coo2) = ops.nearest_points(
+                    measurement_point, shoreline_segment
+                )
+                distance = coo1.distance(coo2)
+                proximate_enough = (
+                    proximate_enough
+                    or distance <= self.__measurement_proximity
+                )
+            if proximate_enough is False:
+                raise ExceedingMeasurementProximity
 
     @property
     def img(self):
