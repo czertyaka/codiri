@@ -318,22 +318,22 @@ def test_add_basin_with_too_far_measurement():
 
 
 # - - - 1
-# * - - -
+# - - - -
 # * * - -
-# * * * -
+# * * - -
 def test_add_basin_with_close_enough_measurement():
     res = 4
     check_adding_basin(
         basins_with_measurements=[
             {
-                "basin_cnt": [[0, 0], [0, 3], [3, 0]],
+                "basin_cnt": [[0, 0], [0, 1], [1, 1], [1, 0]],
                 "measurements": [
                     Measurement(activity=SoilActivity(1), coo=Coordinate(3, 3))
                 ],
             }
         ],
         ref_data_normalized=np.array(
-            [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
+            [[0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 0, 0], [1, 1, 0, 0]]
         ),
         resolution=res,
         measurement_proximity=3,
