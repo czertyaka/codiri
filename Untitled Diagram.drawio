@@ -1,1 +1,307 @@
-<mxfile host="app.diagrams.net" modified="2022-04-24T14:05:40.671Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36" etag="I7rPcIIc6L7asCrr0KAx" version="17.4.6" type="github"><diagram name="Page-1" id="42789a77-a242-8287-6e28-9cd8cfd52e62">7Ztdk5owFIZ/jZftQAIil9Xubi/a3thpr7OQhXRD4oT41V/fIIlCUxE7s2OcZryQnHxBzpvnHEAncFHtngRalV94jukEBPluAj9OAAijYKa+Gsu+tSSRNhSC5LrRybAkv7A2Btq6Jjmuew0l51SSVd+YccZwJns2JATf9pu9cNqfdYUKbBmWGaK29QfJZamtYRCcKj5hUpR66lmsK55R9loIvmZ6PsYZbmsqZIbRTesS5XzbMcGHCVwIzmV7VO0WmDbLalas7fd4pvZ4ygIzOaoDRjBMkjTIQYbSGXwXAn1icm/WAedqWXTxcClwfrg43IwRqlIpK6oPKXrGdH68/gWnXJy61RIJ+aFxzR+2R0KbEQJT1mKIVRmz3PTIKKprkn0rCWsrdLewLXU6/cRS7nUZrSVXJi5kyQvOEP3M+Ur3qqXgr9ic5QTA+eFzrDF+b9q+cCYfUUVoI+fvWOSIIW3WM5m16y6/9kjN1yLD59ZcixuJAsszbfTQjS86A2unPmFeYSn2qoHAFEmy6UsY6Z1QHNudJKEOtCrGKgS2g24QXetp2kk589JxUTqpO9KJvHTuSjrQHelYylk2LiOsmIApqtTSztlz3XypMlXXM8/JRh0WzSFTuYkxq5k7NbbsKFX5RSORbUkkXq7QYQG3KsXpa+4kxoN+TBxvqjJekUxXXJLmP/kbzhElBWvEqVyOxfFC/qKBDRYS7wa9p2sjk7/ofG2mi9tT8pNqU9lJe6bBG7gb2P72pLgVKcAIUiTOkAIAL527ks7UHelYyjFRo14hZmLG10M0CUAnonSrfUjphpTkfdwLKmFqR5UktqNK/BZRJYw9GpxBAxyBhsgZNNg3vQNogB4NF9GQBP1s87ZgmHowOAOGaAQYYmfAYD/SGABD4sFwNRgguCUYEg8GZ8AQjwDDzBkw2LnmABhSD4arwRAlNwQD8G9B3AHD9K7AYOeaA2CYejBcBEMcO5QxAP+Oyx0wJHcFBjvXHABD7MFwEQxw6hAYZpZ3H1iuDO3LSe+088+M4/CWd4Cp57kzPE9H8NyIxQGg29LR8A5t6fy/G/74g08XngSbCOG3uwPb3QhjeL+Hzuz30BbPQAYX+Qzuajbc9mGwncJ5NtyMDWN+v+jOvZ053XFomHk0XI2GN3wcrIqnv2Qc6jp/eYEPvwE=</diagram></mxfile>
+<mxfile host="app.diagrams.net" modified="2022-04-24T14:53:50.027Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36" etag="jNbBVB5WhrBDn3vcOvpM" version="17.4.6" type="github">
+  <diagram name="Page-1" id="42789a77-a242-8287-6e28-9cd8cfd52e62">
+    <mxGraphModel dx="1175" dy="661" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="1ea317790d2ca983-12" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Verdana;fontSize=12" parent="1" target="1ea317790d2ca983-2" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="495" y="140" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;E&lt;sub&gt;total10&lt;/sub&gt;&lt;/font&gt;" tooltip="обусловленная радионуклидом суммарная эффективная доза облучения человека за счет внешнего облучения и внутреннего облучения от ингаляции на начальном периоде аварии (10 суток)" id="1ea317790d2ca983-2">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" parent="1" vertex="1">
+            <mxGeometry x="457.5" y="180" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;E&lt;sub&gt;max10&lt;/sub&gt;&lt;/font&gt;" tooltip="максимальная суммарная (по радионуклидам) эффективная доза облучения человека за счет внешнего облучения и внутреннего облучения от ингаляции на начальном периоде аварии (10 суток)" id="MDNrY1f4z-c_4jOw3_9k-1">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" vertex="1" parent="1">
+            <mxGeometry x="457.5" y="90" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;E&lt;sub&gt;обл&lt;/sub&gt;&lt;/font&gt;" tooltip="эффективная доза внешнего облучения от радиоактивного облака, обусловленная радионуклидом" id="MDNrY1f4z-c_4jOw3_9k-2">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" vertex="1" parent="1">
+            <mxGeometry x="310" y="180" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;E&lt;sub&gt;инг&lt;/sub&gt;&lt;/font&gt;" tooltip="эффективная доза от внутреннего облучения, обусловленная&#xa;вдыханием радионуклида" id="MDNrY1f4z-c_4jOw3_9k-3">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" vertex="1" parent="1">
+            <mxGeometry x="457.5" y="360" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;E&lt;sub&gt;пов&lt;/sub&gt;&lt;/font&gt;" tooltip="эффективная доза от внешнего облучения от поверхности почвы, обусловленная радионуклидом" id="MDNrY1f4z-c_4jOw3_9k-4">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" vertex="1" parent="1">
+            <mxGeometry x="650" y="270" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-7" value="&lt;font face=&quot;Helvetica&quot;&gt;if not IRG&lt;/font&gt;" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#d6b656;strokeWidth=1;fontFamily=Verdana;fontSize=12;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fillColor=#fff2cc;" edge="1" parent="1" source="1ea317790d2ca983-2" target="MDNrY1f4z-c_4jOw3_9k-3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="505" y="150" as="sourcePoint" />
+            <mxPoint x="505" y="189.9999999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-8" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="1ea317790d2ca983-2" target="MDNrY1f4z-c_4jOw3_9k-2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="515" y="160" as="sourcePoint" />
+            <mxPoint x="515" y="199.9999999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-9" value="&lt;font face=&quot;Helvetica&quot;&gt;if not IRG&lt;/font&gt;" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#d6b656;strokeWidth=1;fontFamily=Verdana;fontSize=12;exitX=1;exitY=1;exitDx=0;exitDy=0;fillColor=#fff2cc;" edge="1" parent="1" source="1ea317790d2ca983-2" target="MDNrY1f4z-c_4jOw3_9k-4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="525" y="170" as="sourcePoint" />
+            <mxPoint x="525" y="209.9999999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;R&lt;sub&gt;обл&lt;/sub&gt;&lt;/font&gt;" tooltip="коэффициент дозового преобразования при внешнем облучении населения от радиоактивного облака для радионуклида " id="MDNrY1f4z-c_4jOw3_9k-10">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="200" y="180" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-11" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Verdana;fontSize=12;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-2" target="MDNrY1f4z-c_4jOw3_9k-10">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="467.50000000000205" y="214.9999999999999" as="sourcePoint" />
+            <mxPoint x="395.0000000000016" y="214.9999999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-12" value="Variable color codes" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="30" width="180" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-48" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Helvetica;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-12">
+          <mxGeometry y="30" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-49" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;top=0;left=0;bottom=0;right=0;overflow=hidden;pointerEvents=1;fontFamily=Helvetica;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-48">
+          <mxGeometry width="40" height="30" as="geometry">
+            <mxRectangle width="40" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-50" value="Calculated variable" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;fontFamily=Helvetica;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-48">
+          <mxGeometry x="40" width="140" height="30" as="geometry">
+            <mxRectangle width="140" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-13" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Helvetica;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-12">
+          <mxGeometry y="60" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-14" value="" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=#dae8fc;top=0;left=0;bottom=0;right=0;overflow=hidden;pointerEvents=1;fontFamily=Helvetica;strokeColor=#6c8ebf;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-13">
+          <mxGeometry width="40" height="30" as="geometry">
+            <mxRectangle width="40" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-15" value="Reference variable" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;fontFamily=Helvetica;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-13">
+          <mxGeometry x="40" width="140" height="30" as="geometry">
+            <mxRectangle width="140" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-36" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Helvetica;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-12">
+          <mxGeometry y="90" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-37" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=#d5e8d4;top=0;left=0;bottom=0;right=0;overflow=hidden;pointerEvents=1;fontFamily=Helvetica;strokeColor=#82b366;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-36">
+          <mxGeometry width="40" height="30" as="geometry">
+            <mxRectangle width="40" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-38" value="Constant" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;fontFamily=Helvetica;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-36">
+          <mxGeometry x="40" width="140" height="30" as="geometry">
+            <mxRectangle width="140" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-52" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;top=0;left=0;bottom=0;right=0;collapsible=0;dropTarget=0;fillColor=none;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontFamily=Helvetica;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-12">
+          <mxGeometry y="120" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-53" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=#fff2cc;top=0;left=0;bottom=0;right=0;overflow=hidden;pointerEvents=1;fontFamily=Helvetica;strokeColor=#d6b656;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-52">
+          <mxGeometry width="40" height="30" as="geometry">
+            <mxRectangle width="40" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-54" value="Input variable" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=6;overflow=hidden;fontFamily=Helvetica;" vertex="1" parent="MDNrY1f4z-c_4jOw3_9k-52">
+          <mxGeometry x="40" width="140" height="30" as="geometry">
+            <mxRectangle width="140" height="30" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;С&lt;/font&gt;" tooltip="временной интеграл концентрации радионуклида приземном слое атмосферы" id="MDNrY1f4z-c_4jOw3_9k-25">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" vertex="1" parent="1">
+            <mxGeometry x="310" y="450" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-27" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-2" target="MDNrY1f4z-c_4jOw3_9k-25">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="309.9999999999984" y="294.71" as="sourcePoint" />
+            <mxPoint x="237.5000000000016" y="294.71" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;Сl&lt;/font&gt;" tooltip="значение суммарного выпадения радионуклида r на поверхность земли за счет сухого влажного осаждения" id="MDNrY1f4z-c_4jOw3_9k-28">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" vertex="1" parent="1">
+            <mxGeometry x="650" y="375" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-29" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-4" target="MDNrY1f4z-c_4jOw3_9k-28">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="357.5" y="240" as="sourcePoint" />
+            <mxPoint x="357.5" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;R&lt;sub&gt;пов&lt;/sub&gt;&lt;/font&gt;" tooltip="коэффициент дозового преобразования при внешнем облучении от поверхности земли для радионуклида" id="MDNrY1f4z-c_4jOw3_9k-30">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="650" y="190" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-31" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-4" target="MDNrY1f4z-c_4jOw3_9k-30">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="697.5" y="330" as="sourcePoint" />
+            <mxPoint x="697.5" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;K&lt;/font&gt;" tooltip="коэффициент, учитывающий время нахождения (проживания) на загрязненной результате выброса радиоактивных веществ территории, с" id="MDNrY1f4z-c_4jOw3_9k-32">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" vertex="1" parent="1">
+            <mxGeometry x="760" y="270" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-33" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-4" target="MDNrY1f4z-c_4jOw3_9k-32">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="697.5" y="330" as="sourcePoint" />
+            <mxPoint x="697.5" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;arial, sans-serif&quot;&gt;&lt;span style=&quot;font-size: 14px&quot;&gt;λ&lt;sub&gt;l&lt;/sub&gt;&lt;/span&gt;&lt;/font&gt;" tooltip="постоянная спада мощности дозы со временем от загрязненного слоя почвы за счет всех процессов, кроме радиоактивного распада,&#xa;приводящих выведению активности из этого слоя, с-1" id="MDNrY1f4z-c_4jOw3_9k-34">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+            <mxGeometry x="860" y="230" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-35" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-32" target="MDNrY1f4z-c_4jOw3_9k-34">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="735.0000000000016" y="305" as="sourcePoint" />
+            <mxPoint x="769.9999999999984" y="305" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;arial, sans-serif&quot;&gt;&lt;span style=&quot;font-size: 14px&quot;&gt;t&lt;sub&gt;l&lt;/sub&gt;&lt;/span&gt;&lt;/font&gt;" tooltip="время нахождения населения на загрязненной территории" id="MDNrY1f4z-c_4jOw3_9k-39">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+            <mxGeometry x="860" y="310" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-40" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-32" target="MDNrY1f4z-c_4jOw3_9k-39">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="834.1186862136442" y="287.3907152740509" as="sourcePoint" />
+            <mxPoint x="880.8813137863558" y="282.60928472594946" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;arial, sans-serif&quot;&gt;&lt;span style=&quot;font-size: 14px&quot;&gt;λ&lt;sub&gt;r&lt;/sub&gt;&lt;/span&gt;&lt;/font&gt;" tooltip="постоянная радиоактивного распада радионуклида, с-1" id="MDNrY1f4z-c_4jOw3_9k-41">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+            <mxGeometry x="960" y="270" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-42" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-32" target="MDNrY1f4z-c_4jOw3_9k-41">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="834.0165042944955" y="322.6776695296637" as="sourcePoint" />
+            <mxPoint x="880.9834957055045" y="327.3223304703364" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-43" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-3" target="MDNrY1f4z-c_4jOw3_9k-25">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="357.5" y="239.9999999999999" as="sourcePoint" />
+            <mxPoint x="357.5" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;R&lt;sub&gt;инг&lt;/sub&gt;&lt;/font&gt;" tooltip="коэффициент дозового преобразования при поступлении радионуклида r воздухом" id="MDNrY1f4z-c_4jOw3_9k-44">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="370" y="310" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-45" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=0;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-3" target="MDNrY1f4z-c_4jOw3_9k-44">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="478.48349570550454" y="412.6776695296635" as="sourcePoint" />
+            <mxPoint x="384.01650429449546" y="467.3223304703363" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;U&lt;sub&gt;инг&lt;/sub&gt;&lt;/font&gt;" tooltip="интенсивность дыхания для лиц возрастной группы, которая&#xa;является критической по поступлению радионуклида r за счет ингаляции&#xa;соответствии таблицей 8.1 СанПиН 2.6.1.2523-09 «Нормы радиационной&#xa;безопасности. Санитарные правила нормативы», утвержденных&#xa;постановлением Главного государственного санитарного врача Российской Федерации от 7 июля 2009 г. Н2 47" id="MDNrY1f4z-c_4jOw3_9k-46">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="550" y="310" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-47" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-3" target="MDNrY1f4z-c_4jOw3_9k-46">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="478.48349570550454" y="377.3223304703365" as="sourcePoint" />
+            <mxPoint x="444.01650429449546" y="362.6776695296637" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;Q&lt;/font&gt;" tooltip="активность радионуклида r аварийном выбросе" id="MDNrY1f4z-c_4jOw3_9k-51">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+            <mxGeometry x="410" y="530" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-55" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-25" target="MDNrY1f4z-c_4jOw3_9k-51">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="478.48349570550454" y="412.6776695296635" as="sourcePoint" />
+            <mxPoint x="384.01650429449546" y="467.3223304703363" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;G&lt;/font&gt;" tooltip="фактор разбавления радионуклида r приземном слое атмосферы на расстоянии от источника аварийного выброса" id="MDNrY1f4z-c_4jOw3_9k-56">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" vertex="1" parent="1">
+            <mxGeometry x="307.5" y="610" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-57" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-25" target="MDNrY1f4z-c_4jOw3_9k-56">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="357.5" y="239.9999999999999" as="sourcePoint" />
+            <mxPoint x="357.5" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;С&lt;sub&gt;z&lt;/sub&gt;&lt;/font&gt;" tooltip="временной интеграл от распределенной по высоте концентрации радионуклида по вертикальному направлению распространения аварийного выброса" id="MDNrY1f4z-c_4jOw3_9k-58">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" vertex="1" parent="1">
+            <mxGeometry x="513" y="450" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-59" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-28" target="MDNrY1f4z-c_4jOw3_9k-58">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="697.5" y="330.0000000000001" as="sourcePoint" />
+            <mxPoint x="697.5" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-60" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-58" target="MDNrY1f4z-c_4jOw3_9k-51">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="660" y="485" as="sourcePoint" />
+            <mxPoint x="598" y="485" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;G&lt;sub&gt;z&lt;/sub&gt;&lt;/font&gt;" tooltip="фактор осаждения радионуклида r по вертикальному направлению распространения аварийного выброса" id="MDNrY1f4z-c_4jOw3_9k-61">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" vertex="1" parent="1">
+            <mxGeometry x="513" y="610" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-62" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-58" target="MDNrY1f4z-c_4jOw3_9k-61">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="533.9834957055045" y="502.6776695296637" as="sourcePoint" />
+            <mxPoint x="484.01650429449546" y="547.3223304703363" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-63" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-28" target="MDNrY1f4z-c_4jOw3_9k-25">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="670.9834957055045" y="427.6776695296635" as="sourcePoint" />
+            <mxPoint x="587.0165042944955" y="467.3223304703365" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;V&lt;sub&gt;g&lt;/sub&gt;&lt;/font&gt;" tooltip="значение скорости осаждения радионуклида r на поверхность земли" id="MDNrY1f4z-c_4jOw3_9k-64">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+            <mxGeometry x="760" y="375" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-65" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-28" target="MDNrY1f4z-c_4jOw3_9k-64">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="670.9834957055045" y="427.6776695296635" as="sourcePoint" />
+            <mxPoint x="587.0165042944955" y="467.3223304703365" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;Λ&lt;/font&gt;" tooltip="величина постоянной вымывания радионуклида атмосферными осадками" id="MDNrY1f4z-c_4jOw3_9k-66">
+          <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;" vertex="1" parent="1">
+            <mxGeometry x="760" y="450" width="75" height="50" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="MDNrY1f4z-c_4jOw3_9k-67" style="edgeStyle=none;rounded=1;html=1;labelBackgroundColor=none;startArrow=none;startFill=0;startSize=5;endArrow=classicThin;endFill=1;endSize=5;jettySize=auto;orthogonalLoop=1;strokeColor=#B3B3B3;strokeWidth=1;fontFamily=Helvetica;fontSize=12;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="MDNrY1f4z-c_4jOw3_9k-28" target="MDNrY1f4z-c_4jOw3_9k-66">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="670.9834957055045" y="427.6776695296635" as="sourcePoint" />
+            <mxPoint x="587.0165042944955" y="467.3223304703365" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
