@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-04-24T15:53:51.417Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36" etag="ZMunVQ8IM5zR6BWMn3ES" version="17.4.6" type="github">
+<mxfile host="app.diagrams.net" modified="2022-04-24T16:00:38.951Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36" etag="Bv6ozIxz6RSRt-KXjYfK" version="17.4.6" type="github">
   <diagram name="Page-1" id="42789a77-a242-8287-6e28-9cd8cfd52e62">
     <mxGraphModel dx="1410" dy="793" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
       <root>
@@ -356,7 +356,7 @@
             <mxPoint x="347.5" y="729.9999999999998" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;u&lt;/font&gt;" tooltip="активность радионуклида r аварийном выбросе" id="AazKejOo3o8su-soS1Ww-11">
+        <UserObject label="&lt;font face=&quot;Helvetica&quot;&gt;u&lt;/font&gt;" tooltip="скорость ветра на высоте шероховатости для категории&#xa;устойчивости атмосферы j ДЛЯ экстремальных ветровых нагрузок&#xa;(сценарий 2), которые рекомендуется принимать в соответствие с экстрмеальными ветровыми нагрузками, характерными для района размещения ОЯТЦ, м/с" id="AazKejOo3o8su-soS1Ww-11">
           <mxCell style="ellipse;whiteSpace=wrap;html=1;rounded=0;shadow=1;comic=0;labelBackgroundColor=none;strokeWidth=1;fontFamily=Verdana;fontSize=12;align=center;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
             <mxGeometry x="298.5" y="690" width="75" height="50" as="geometry" />
           </mxCell>
