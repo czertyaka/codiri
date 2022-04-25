@@ -90,7 +90,7 @@ class ActivityMap(object):
                         ).astype(self.__type)
                         self.__raster_factor = raster_factor
 
-                    data[i, j] = raster_factor * activity
+                    data[i, j] += raster_factor * activity
 
         self.img.write(data, 1)
 
