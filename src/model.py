@@ -119,5 +119,11 @@ class Model:
         self.__data.results.drop_all()
         self.__input = _Input()
 
+    def calculate(self):
+        if self.__is_ready() is False:
+            _log("model instance is not ready for calculation")
+            return
+        pass
+
     def __is_ready(self):
         return self.__input.initialized() and self.__input.consistent()
