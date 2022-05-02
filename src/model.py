@@ -1,22 +1,47 @@
+from .database import Database, InMemoryDatabase
+
+
 def _log(msg):
     print("RB-134-17: " + msg)
 
 
-class Model:
-    """Doses & dilution factor calculator based on 2 scenario in Руководство
-    по безопасности при использовании атомной энергии «Рекомендуемые методы
-    оценки и прогнозирования радиационных последствий аварий на объектах
-    ядерного топливного цикла (РБ-134-17)"""
+class _Data:
+    """Holds datasets required by model"""
+
+    def __init__(self, dbname):
+        self.__reference = Database(dbname)
+        self.__results = InMemoryDatabase()
+
+    @property
+    def reference(self):
+        return self.__reference
+
+    @property
+    def results(self):
+        return self.__results
+
+
+class _Input:
+    """Holds input data for model"""
 
     def __init__(self):
-        self.distance = None
-        self.square_side = None
-        self.activities = None
-        self.precipation_rate = None
-        self.extreme_windspeeds = None
+        self.__distance = None
+        self.__square_side = None
+        self.__activities = list()
+        self.__precipation_rate = None
+        self.__extreme_windspeeds = None
 
-    def reset(self):
-        self.__init__()
+    def initialized(self):
+        return (
+            self.distance is not None
+            and self.square_side is not None
+            and self.activities.count() > 0
+            and self.precipation_rate is not None
+            and self.extreme_windspeeds is not None
+        )
+
+    def consistent(self):
+        return self.distance > (self.square_side / 2)
 
     @property
     def distance(self):
@@ -29,7 +54,7 @@ class Model:
         if value > 50000:
             _log(f"given distance ({value/1000} km) exceeds maximum (50 km)")
             return
-        self.distance = value
+        self.__distance = value
 
     @property
     def square_side(self):
@@ -38,7 +63,7 @@ class Model:
     @square_side.setter
     def square_side(self, value):
         """Square-shaped surface source side length, m"""
-        self.square_side = value
+        self.__square_side = value
 
     @property
     def activities(self):
@@ -46,12 +71,7 @@ class Model:
 
     def add_activity(self, nuclide, activity):
         """Add accidental release activity for specific nuclide, Bq"""
-        # if not db.find_nuclide(nuclide):
-        #     _log(f"unknown nuclide {nuclide}")
-        #     return
-        if self.activities is None:
-            self.activities = list()
-        self.activities.append(dict(nuclide=nuclide, activity=activity))
+        self.__activities.append(dict(nuclide=nuclide, activity=activity))
 
     @property
     def precipation_rate(self):
@@ -60,7 +80,7 @@ class Model:
     @precipation_rate.setter
     def precipation_rate(self, value):
         """Precipation rate, mm/hr"""
-        self.precipation_rate = value
+        self.__precipation_rate = value
 
     @property
     def extreme_windspeeds(self):
@@ -69,26 +89,35 @@ class Model:
     @extreme_windspeeds.setter
     def extreme_windspeeds(self, values):
         """Extreme wind speed for each Pasquill-Gifford atmospheric stability
-        classes, m/s"""
+        classes as a list of count 6, m/s"""
         pasquill_gifford_classes = ["A", "B", "C", "D", "E", "F"]
-        if sorted(values) != pasquill_gifford_classes:
+        if values.count() != 6:
             _log(
-                f"given wind speeds dictionary ({values}) doesn't provide "
+                f"given wind speeds list ({values}) doesn't provide "
                 f"necessary atmospheric stability classes "
                 f"({pasquill_gifford_classes})"
             )
             return
-        self.extreme_windspeeds = values
+        self.__extreme_windspeeds = values
+
+
+class Model:
+    """Doses & dilution factor calculator based on 2 scenario in Руководство
+    по безопасности при использовании атомной энергии «Рекомендуемые методы
+    оценки и прогнозирования радиационных последствий аварий на объектах
+    ядерного топливного цикла (РБ-134-17)"""
+
+    def __init__(self, reference_data_db_name):
+        self.__data = _Data(reference_data_db_name)
+        self.__input = _Input()
+
+    @property
+    def input(self):
+        return self.__input
+
+    def reset(self):
+        self.__data.results.drop_all()
+        self.__input = _Input()
 
     def __is_ready(self):
-        return (
-            self.distance is not None
-            and self.square_side is not None
-            and self.activities is not None
-            and self.precipation_rate is not None
-            and self.extreme_windspeeds is not None
-            and self.__check_parameters_consistency()
-        )
-
-    def __check_parameters_consistency(self):
-        return self.distance > (self.square_side / 2)
+        return self.__input.initialized() and self.__input.consistent()
