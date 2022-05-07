@@ -33,7 +33,17 @@ class Model:
         return self.results
 
     def __is_ready(self):
-        return self.input.initialized() and self.input.consistent()
+        return (
+            self.input.initialized()
+            and self.input.consistent()
+            and self.__is_input_valid()
+        )
+
+    def __is_input_valid(self):
+        for activity in self.__input.activities:
+            if self.__reference.find_nuclide(activity["nuclide"]) is None:
+                return False
+        return True
 
     def __calculate_e_max_10(self):
         """РБ-134-17, p. 3, (1)"""
