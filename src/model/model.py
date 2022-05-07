@@ -28,6 +28,13 @@ class Model:
             log("model instance is not ready for calculation")
             return
 
+        for activity in self.__input.activities:
+            nuclide = activity["nuclide"]
+            for atmospheric_class in pasquill_gifford_classes:
+                self.__calculate_e_total_10(nuclide, atmospheric_class)
+
+        self.__calculate_e_max_10()
+
     @property
     def results(self):
         return self.__results
