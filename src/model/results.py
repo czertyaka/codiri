@@ -9,8 +9,11 @@ class ResultsDatabase(InMemoryDatabase):
         super(ResultsDatabase, self).__init__()
 
     def create_e_total_10_table(self):
+        self.__create_nuclide_vs_atmospheric_class_empty_table("e_total_10")
+
+    def __create_nuclide_vs_atmospheric_class_empty_table(self, name):
         table = self.create_table(
-            "e_total_10",
+            name,
             primary_id="nuclide",
             primary_type=self.types.string(7),
         )
