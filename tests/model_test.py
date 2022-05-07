@@ -1,5 +1,4 @@
-from codiri.src.model import Model, _pasquill_gifford_classes
-from codiri.src.database import ResultsDatabase
+from codiri.src.model import Model, _ResultsDatabase
 
 
 class ModelTest(Model):
@@ -7,7 +6,7 @@ class ModelTest(Model):
         super(ModelTest, self).__init__(
             reference_data_db_name="../data/reference_data.db"
         )
-        self.__results = ResultsDatabase()
+        self.__results = _ResultsDatabase()
 
     @property
     def results(self):
@@ -16,7 +15,7 @@ class ModelTest(Model):
 
 def test_calculate_e_max_10():
     model = ModelTest()
-    model.results.create_e_total_10_table(_pasquill_gifford_classes)
+    model.results.create_e_total_10_table()
     e_total_10_table = model.results["e_total_10"]
     e_total_10_table.insert(dict(nuclide="A-0", A=0, B=6, C=2, D=8, E=4, F=10))
     e_total_10_table.insert(dict(nuclide="B-1", A=1, B=7, C=3, D=9, E=5, F=11))

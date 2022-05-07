@@ -1,4 +1,4 @@
-from .database import Database, ResultsDatabase
+from .database import Database, InMemoryDatabase
 
 
 _pasquill_gifford_classes = ["A", "B", "C", "D", "E", "F"]
@@ -8,12 +8,28 @@ def _log(msg):
     print("RB-134-17: " + msg)
 
 
+class _ResultsDatabase(InMemoryDatabase):
+    """ORM class for model calculation results"""
+
+    def __init__(self):
+        super(_ResultsDatabase, self).__init__()
+
+    def create_e_total_10_table(self):
+        table = self.create_table(
+            "e_total_10",
+            primary_id="nuclide",
+            primary_type=self.types.string(7),
+        )
+        for a_class in _pasquill_gifford_classes:
+            table.create_column(a_class, self.types.float)
+
+
 class _Data:
     """Holds datasets required by model"""
 
     def __init__(self, dbname):
         self.__reference = Database(dbname)
-        self.__results = ResultsDatabase()
+        self.__results = _ResultsDatabase()
 
     @property
     def reference(self):
