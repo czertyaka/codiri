@@ -1,5 +1,5 @@
 from codiri.src.model.model import Model
-from codiri.src.model.results import ResultsDatabase
+from codiri.src.model.results import Results
 
 
 class ModelTest(Model):
@@ -7,7 +7,7 @@ class ModelTest(Model):
         super(ModelTest, self).__init__(
             reference_data_db_name="../data/reference_data.db"
         )
-        self.__results = ResultsDatabase()
+        self.__results = Results()
 
     @property
     def results(self):

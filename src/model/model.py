@@ -1,6 +1,7 @@
 from .common import log, pasquill_gifford_classes
-from .data import Data
 from .input import Input
+from .results import Results
+from .reference import Reference
 
 
 class Model:
@@ -10,7 +11,8 @@ class Model:
     ядерного топливного цикла (РБ-134-17)"""
 
     def __init__(self, reference_data_db_name):
-        self.__data = Data(reference_data_db_name)
+        self.__results = Results()
+        self.__reference = Reference(reference_data_db_name)
         self.__input = Input()
 
     @property
@@ -28,7 +30,7 @@ class Model:
 
     @property
     def results(self):
-        return self.__data.results
+        return self.results
 
     def __is_ready(self):
         return self.input.initialized() and self.input.consistent()
@@ -47,3 +49,8 @@ class Model:
 
         e_max_10 = max(e_total_10_sums)
         self.results["e_max_10"].insert(dict(e_max_10=e_max_10))
+
+    def __calculate_e_total_10(self, nuclide, atmospheric_class):
+        """РБ-134-17, p. 5, (3)"""
+
+        pass
