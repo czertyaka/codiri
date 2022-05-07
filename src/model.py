@@ -1,6 +1,9 @@
 from .database import Database, InMemoryDatabase
 
 
+_pasquill_gifford_classes = ["A", "B", "C", "D", "E", "F"]
+
+
 def _log(msg):
     print("RB-134-17: " + msg)
 
@@ -90,12 +93,12 @@ class _Input:
     def extreme_windspeeds(self, values):
         """Extreme wind speed for each Pasquill-Gifford atmospheric stability
         classes as a list of count 6, m/s"""
-        pasquill_gifford_classes = ["A", "B", "C", "D", "E", "F"]
+        _pasquill_gifford_classes = ["A", "B", "C", "D", "E", "F"]
         if values.count() != 6:
             _log(
                 f"given wind speeds list ({values}) doesn't provide "
                 f"necessary atmospheric stability classes "
-                f"({pasquill_gifford_classes})"
+                f"({_pasquill_gifford_classes})"
             )
             return
         self.__extreme_windspeeds = values
@@ -123,7 +126,22 @@ class Model:
         if self.__is_ready() is False:
             _log("model instance is not ready for calculation")
             return
-        pass
+        self.__calculate_e_max_10()
 
     def __is_ready(self):
         return self.__input.initialized() and self.__input.consistent()
+
+    def __calculate_e_max_10(self):
+        """РБ-134-17, p. 3, (1)"""
+
+        e_total_10_sums = list()
+        e_total_10_table = self.__data.results.load_table("e_total_10")
+
+        for atmospheric_class in _pasquill_gifford_classes:
+            e_total_10_sum = 0
+            for nuclide in e_total_10_table:
+                e_total_10_sum += nuclide[atmospheric_class]
+            e_total_10_sums.append(e_total_10_sum)
+
+        e_max_10 = e_total_10_sums.max()
+        self.__data.results["e_max_10"].insert(dict(e_max_10=e_max_10))
