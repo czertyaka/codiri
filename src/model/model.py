@@ -30,7 +30,11 @@ class Model:
 
     @property
     def results(self):
-        return self.results
+        return self.__results
+
+    @property
+    def reference(self):
+        return self.__reference
 
     def __is_ready(self):
         return (
@@ -41,7 +45,7 @@ class Model:
 
     def __is_input_valid(self):
         for activity in self.__input.activities:
-            if self.__reference.find_nuclide(activity["nuclide"]) is None:
+            if self.reference.find_nuclide(activity["nuclide"]) is None:
                 return False
         return True
 
@@ -63,4 +67,23 @@ class Model:
     def __calculate_e_total_10(self, nuclide, atmospheric_class):
         """РБ-134-17, p. 5, (3)"""
 
-        pass
+        e_total_10 = 0
+        if "e_total_10" not in self.results.tables:
+            self.results.create_e_total_10_table()
+
+        e_cloud = self.results.load_table("e_cloud").find_one(nuclide=nuclide)[
+            atmospheric_class
+        ]
+        e_total_10 += e_cloud
+        if self.reference.find_nuclide(nuclide)["group"] != "IRG":
+            e_inh = self.results.load_table("e_inh").find_one(nuclide=nuclide)[
+                atmospheric_class
+            ]
+            e_surface = self.results.load_table("e_surface").find_one(
+                nuclide=nuclide
+            )[atmospheric_class]
+            e_total_10 += e_inh + e_surface
+
+        self.results["e_total_10"].upsert(
+            {"nuclide": nuclide, atmospheric_class: e_total_10}, ["nuclide"]
+        )
