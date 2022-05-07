@@ -1,4 +1,4 @@
-from .database import Database, InMemoryDatabase
+from .database import Database, ResultsDatabase
 
 
 _pasquill_gifford_classes = ["A", "B", "C", "D", "E", "F"]
@@ -13,7 +13,7 @@ class _Data:
 
     def __init__(self, dbname):
         self.__reference = Database(dbname)
-        self.__results = InMemoryDatabase()
+        self.__results = ResultsDatabase()
 
     @property
     def reference(self):
@@ -119,14 +119,17 @@ class Model:
         return self.__input
 
     def reset(self):
-        self.__data.results.drop_all()
+        self.results().drop_all()
         self.__input = _Input()
 
     def calculate(self):
         if self.__is_ready() is False:
             _log("model instance is not ready for calculation")
             return
-        self.__calculate_e_max_10()
+
+    @property
+    def results(self):
+        return self.__data.results
 
     def __is_ready(self):
         return self.__input.initialized() and self.__input.consistent()
@@ -135,7 +138,7 @@ class Model:
         """РБ-134-17, p. 3, (1)"""
 
         e_total_10_sums = list()
-        e_total_10_table = self.__data.results.load_table("e_total_10")
+        e_total_10_table = self.results.load_table("e_total_10")
 
         for atmospheric_class in _pasquill_gifford_classes:
             e_total_10_sum = 0
@@ -143,5 +146,5 @@ class Model:
                 e_total_10_sum += nuclide[atmospheric_class]
             e_total_10_sums.append(e_total_10_sum)
 
-        e_max_10 = e_total_10_sums.max()
-        self.__data.results["e_max_10"].insert(dict(e_max_10=e_max_10))
+        e_max_10 = max(e_total_10_sums)
+        self.results["e_max_10"].insert(dict(e_max_10=e_max_10))
