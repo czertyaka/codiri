@@ -1,3 +1,6 @@
 __pycache__/
 *.tif
 *.png
+*-shm
+*-wal
+local-*
