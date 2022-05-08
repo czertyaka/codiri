@@ -26,6 +26,11 @@ class Results(InMemoryDatabase):
             "e_surface"
         )
 
+    def create_concentration_integrals_table(self):
+        return self.__create_nuclide_vs_atmospheric_class_empty_table(
+            "concentration_integrals"
+        )
+
     def __create_nuclide_vs_atmospheric_class_empty_table(self, name):
         table = self.create_table(
             name,

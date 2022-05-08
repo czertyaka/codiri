@@ -37,7 +37,8 @@ def test_calculate_e_max_10():
 
 def test_calculate_e_total_10():
     model = ModelTest()
-    e_total_10_table = model.results.create_e_total_10_table()
+    assert "e_total_10" not in model.results.tables
+
     e_cloud_table = model.results.create_e_cloud_table()
     e_inh_table = model.results.create_e_inh_table()
     e_surface_table = model.results.create_e_surface_table()
@@ -58,6 +59,9 @@ def test_calculate_e_total_10():
     model._Model__calculate_e_total_10("B-1", "B")
     model._Model__calculate_e_total_10("B-1", "D")
 
+    assert "e_total_10" in model.results.tables
+
+    e_total_10_table = model.results["e_total_10"]
     assert e_total_10_table.count() == 2
 
     assert e_total_10_table.find_one(nuclide="A-0")["A"] == 3
@@ -65,3 +69,36 @@ def test_calculate_e_total_10():
 
     assert e_total_10_table.find_one(nuclide="B-1")["B"] == 6
     assert e_total_10_table.find_one(nuclide="B-1")["D"] == 8
+
+
+def test_calculate_e_cloud():
+    model = ModelTest()
+    assert "e_cloud" not in model.results.tables
+
+    concentration_integrals_table = (
+        model.results.create_concentration_integrals_table()
+    )
+
+    model.reference["nuclides"].insert(dict(name="A-0", R_cloud=1.5))
+    concentration_integrals_table.insert(
+        dict(nuclide="A-0", A=0, B=6, C=2, D=8, E=4, F=10)
+    )
+
+    model._Model__calculate_e_cloud("A-0", "A")
+    model._Model__calculate_e_cloud("A-0", "B")
+    model._Model__calculate_e_cloud("A-0", "C")
+    model._Model__calculate_e_cloud("A-0", "D")
+    model._Model__calculate_e_cloud("A-0", "E")
+    model._Model__calculate_e_cloud("A-0", "F")
+
+    assert "e_cloud" in model.results.tables
+
+    e_cloud_table = model.results["e_cloud"]
+    assert e_cloud_table.count() == 1
+    row = e_cloud_table.find_one(nuclide="A-0")
+    assert row["A"] == 0
+    assert row["B"] == 9
+    assert row["C"] == 3
+    assert row["D"] == 12
+    assert row["E"] == 6
+    assert row["F"] == 15

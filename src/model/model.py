@@ -94,3 +94,24 @@ class Model:
         self.results["e_total_10"].upsert(
             {"nuclide": nuclide, atmospheric_class: e_total_10}, ["nuclide"]
         )
+
+    def __calculate_e_cloud(self, nuclide, atmospheric_class):
+        """РБ-134-17, p. 7, (5)"""
+
+        dose_coefficicent = self.reference.find_nuclide(nuclide)["R_cloud"]
+        concentration_integral = self.results[
+            "concentration_integrals"
+        ].find_one(nuclide=nuclide)[atmospheric_class]
+
+        if "e_cloud" not in self.results.tables:
+            self.results.create_e_cloud_table()
+
+        self.results["e_cloud"].upsert(
+            {
+                "nuclide": nuclide,
+                atmospheric_class: (
+                    dose_coefficicent * concentration_integral
+                ),
+            },
+            ["nuclide"],
+        )
