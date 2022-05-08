@@ -13,24 +13,32 @@ class Model:
     def __init__(self, reference_data_db_name):
         self.__results = Results()
         self.__reference = Reference(reference_data_db_name)
-        self.__input = Input()
+        self.input = Input()
 
     @property
     def input(self):
         return self.__input
 
+    @input.setter
+    def input(self, value):
+        self.__input = value
+
     def reset(self):
         self.results.drop_all()
-        self.__input = Input()
+        self.input = Input()
 
     def calculate(self):
         if self.__is_ready() is False:
             log("model instance is not ready for calculation")
             return
 
-        for activity in self.__input.activities:
+        for activity in self.input.activities:
             nuclide = activity["nuclide"]
             for atmospheric_class in pasquill_gifford_classes:
+                if self.reference.find_nuclide(nuclide)["group"] != "IRG":
+                    self.__calculate_e_inh(nuclide, atmospheric_class)
+                    self.__calculate_e_surface(nuclide, atmospheric_class)
+                self.__calculate_e_cloud(nuclide, atmospheric_class)
                 self.__calculate_e_total_10(nuclide, atmospheric_class)
 
         self.__calculate_e_max_10()
@@ -51,7 +59,7 @@ class Model:
         )
 
     def __is_input_valid(self):
-        for activity in self.__input.activities:
+        for activity in self.input.activities:
             if self.reference.find_nuclide(activity["nuclide"]) is None:
                 return False
         return True
@@ -99,19 +107,38 @@ class Model:
         """РБ-134-17, p. 7, (5)"""
 
         dose_coefficicent = self.reference.find_nuclide(nuclide)["R_cloud"]
-        concentration_integral = self.results[
-            "concentration_integrals"
-        ].find_one(nuclide=nuclide)[atmospheric_class]
+
+        concentration_integral = self.results.get_concentration_integral(
+            nuclide, atmospheric_class
+        )
 
         if "e_cloud" not in self.results.tables:
             self.results.create_e_cloud_table()
 
+        value = dose_coefficicent * concentration_integral
         self.results["e_cloud"].upsert(
-            {
-                "nuclide": nuclide,
-                atmospheric_class: (
-                    dose_coefficicent * concentration_integral
-                ),
-            },
+            {"nuclide": nuclide, atmospheric_class: value},
             ["nuclide"],
+        )
+
+    def __calculate_e_inh(self, nuclide, atmospheric_class):
+        """РБ-134-17, p. 9, (8)"""
+
+        age_group_id = self.reference.get_age_group_id(self.input.age)
+        respiration_rate = self.reference["age_groups"].find_one(
+            id=age_group_id
+        )["respiration_rate"]
+
+        concentration_integral = self.results.get_concentration_integral(
+            nuclide, atmospheric_class
+        )
+
+        dose_coefficicent = self.reference.find_nuclide(nuclide)["R_inh"]
+
+        if "e_inh" not in self.results.tables:
+            self.results.create_e_inh_table()
+
+        value = respiration_rate * dose_coefficicent * concentration_integral
+        self.results["e_inh"].upsert(
+            {"nuclide": nuclide, atmospheric_class: value}, ["nuclide"]
         )

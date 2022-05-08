@@ -2,6 +2,7 @@ from codiri.src.model.model import Model
 from codiri.src.model.results import Results
 from codiri.src.model.reference import _IReference
 from codiri.src.database import InMemoryDatabase
+from codiri.src.model.input import Input
 
 
 class ReferenceTest(_IReference):
@@ -102,3 +103,39 @@ def test_calculate_e_cloud():
     assert row["D"] == 12
     assert row["E"] == 6
     assert row["F"] == 15
+
+
+def test_calculate_e_inh():
+    model = ModelTest()
+    assert "e_inh" not in model.results.tables
+
+    model.results.create_concentration_integrals_table().insert(
+        dict(nuclide="A-0", A=4)
+    )
+
+    model.reference["nuclides"].insert(dict(name="A-0", R_inh=1.5))
+
+    model.reference["age_groups"].insert(
+        dict(id=0, lower_age=0, upper_age=10, respiration_rate=1)
+    )
+    model.reference["age_groups"].insert(
+        dict(id=1, lower_age=10, upper_age=20, respiration_rate=2)
+    )
+
+    input = Input()
+    input.age = 5
+    model.input = input
+    model._Model__calculate_e_inh("A-0", "A")
+
+    assert "e_inh" in model.results.tables
+
+    e_inh_table = model.results["e_inh"]
+    assert e_inh_table.count() == 1
+    assert e_inh_table.find_one(nuclide="A-0")["A"] == 6
+
+    input.age = 15
+    model.input = input
+    model._Model__calculate_e_inh("A-0", "A")
+
+    assert e_inh_table.count() == 1
+    assert e_inh_table.find_one(nuclide="A-0")["A"] == 12

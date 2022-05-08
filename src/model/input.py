@@ -10,6 +10,7 @@ class Input:
         self.__activities = list()
         self.__precipation_rate = None
         self.__extreme_windspeeds = None
+        self.__age = None
 
     def initialized(self):
         return (
@@ -18,10 +19,11 @@ class Input:
             and self.activities.count() > 0
             and self.precipation_rate is not None
             and self.extreme_windspeeds is not None
+            and self.age is not None
         )
 
     def consistent(self):
-        return self.distance > (self.square_side / 2)
+        return self.distance > (self.square_side / 2) and self.age >= 0
 
     @property
     def distance(self):
@@ -79,3 +81,11 @@ class Input:
             )
             return
         self.__extreme_windspeeds = values
+
+    @property
+    def age(self):
+        return self.__age
+
+    @age.setter
+    def age(self, value):
+        self.__age = value

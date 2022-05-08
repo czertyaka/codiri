@@ -22,6 +22,12 @@ class _IReference:
     def find_nuclide(self, nuclide_name):
         return self.load_table("nuclides").find_one(name=nuclide_name)
 
+    def get_age_group_id(self, age):
+        for age_group in self.db.load_table("age_groups"):
+            if age >= age_group["lower_age"] and age < age_group["upper_age"]:
+                return age_group["id"]
+        raise ValueError(f"invalid provided age {age}")
+
     def __getitem__(self, key):
         return self.db[key]
 

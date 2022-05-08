@@ -31,6 +31,10 @@ class Results(InMemoryDatabase):
             "concentration_integrals"
         )
 
+    def get_concentration_integral(self, nuclide, atmospheric_class):
+        table = self.load_table("concentration_integrals")
+        return table.find_one(nuclide=nuclide)[atmospheric_class]
+
     def __create_nuclide_vs_atmospheric_class_empty_table(self, name):
         table = self.create_table(
             name,
