@@ -114,6 +114,9 @@ class Results:
         self.__height_concentration_integrals = NuclideVsAtmosphericClassTable(
             db, "height_concentration_integral"
         )
+        self.__height_deposition_factors = NuclideVsAtmosphericClassTable(
+            db, "height_deposition_factors"
+        )
 
     @property
     def e_max_10(self) -> float:
@@ -176,3 +179,10 @@ class Results:
         radionuclide and each atmospheric stability class, Bq*seq/m^3
         """
         return self.__height_concentration_integrals
+
+    @property
+    def height_deposition_factors(self) -> NuclideVsAtmosphericClassTable:
+        """Height-phased deposition factor for each radionuclide and each
+        atmospheric stability class, sec/m^2
+        """
+        return self.__height_deposition_factors

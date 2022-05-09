@@ -7,12 +7,12 @@ class Input:
     def __init__(self):
         self.__distance = None
         self.__square_side = None
-        self.__activities = list()
+        self.__activities = dict()
         self.__precipation_rate = None
         self.__extreme_windspeeds = None
         self.__age = None
 
-    def initialized(self):
+    def initialized(self) -> bool:
         return (
             self.distance is not None
             and self.square_side is not None
@@ -22,15 +22,15 @@ class Input:
             and self.age is not None
         )
 
-    def consistent(self):
+    def consistent(self) -> bool:
         return self.distance > (self.square_side / 2) and self.age >= 0
 
     @property
-    def distance(self):
+    def distance(self) -> float:
         return self.__distance
 
     @distance.setter
-    def distance(self, value):
+    def distance(self, value: float) -> None:
         """Distance between source center and point where doses should be
         calculated, m"""
         if value > 50000:
@@ -39,37 +39,40 @@ class Input:
         self.__distance = value
 
     @property
-    def square_side(self):
+    def square_side(self) -> float:
         return self.__square_side
 
     @square_side.setter
-    def square_side(self, value):
+    def square_side(self, value: float) -> float:
         """Square-shaped surface source side length, m"""
         self.__square_side = value
 
     @property
-    def activities(self):
+    def activities(self) -> dict:
         return self.__activities
 
-    def add_activity(self, nuclide, activity):
+    def add_activity(self, nuclide: str, activity: float):
         """Add accidental release activity for specific nuclide, Bq"""
-        self.__activities.append(dict(nuclide=nuclide, activity=activity))
+        prev = self.__activities.get(nuclide)
+        self.__activities[nuclide] = (
+            (prev + activity) if prev is not None else activity
+        )
 
     @property
-    def precipation_rate(self):
+    def precipation_rate(self) -> float:
         return self.__precipation_rate
 
     @precipation_rate.setter
-    def precipation_rate(self, value):
+    def precipation_rate(self, value: float):
         """Precipation rate, mm/hr"""
         self.__precipation_rate = value
 
     @property
-    def extreme_windspeeds(self):
+    def extreme_windspeeds(self) -> list:
         return self.__extreme_windspeeds
 
     @extreme_windspeeds.setter
-    def extreme_windspeeds(self, values):
+    def extreme_windspeeds(self, values: list):
         """Extreme wind speed for each Pasquill-Gifford atmospheric stability
         classes as a list of count 6, m/s"""
         pasquill_gifford_classes = ["A", "B", "C", "D", "E", "F"]
@@ -83,9 +86,9 @@ class Input:
         self.__extreme_windspeeds = values
 
     @property
-    def age(self):
+    def age(self) -> int:
         return self.__age
 
     @age.setter
-    def age(self, value):
+    def age(self, value: int):
         self.__age = value

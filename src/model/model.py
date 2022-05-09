@@ -33,9 +33,10 @@ class Model:
             log("model instance is not ready for calculation")
             return
 
-        for activity in self.input.activities:
-            nuclide = activity["nuclide"]
+        for nuclide in self.input.activities:
             if self.reference.nuclide_group(nuclide) != "IRG":
+                self.__calculate_height_concentration_integrals(nuclide)
+                self.__calculate_depositions(nuclide)
                 self.__calculate_e_inh(nuclide)
                 self.__calculate_e_surface(nuclide)
             self.__calculate_e_cloud(nuclide)
@@ -173,4 +174,18 @@ class Model:
                 + sediment_detachment * height_concentration_integrals[a_class]
             )
 
-        self.results.depositions.insert(nuclide=nuclide, values=values)
+        self.results.depositions.insert(nuclide, values)
+
+    def __calculate_height_concentration_integrals(self, nuclide):
+        """РБ-134-17, p. 15, (2)"""
+
+        activity = self.input.activities[nuclide]
+        height_deposition_factor = self.results.height_deposition_factors[
+            nuclide
+        ]
+        values = dict()
+
+        for a_class in pasquill_gifford_classes:
+            values[a_class] = activity * height_deposition_factor[a_class]
+
+        self.results.height_concentration_integrals.insert(nuclide, values)
