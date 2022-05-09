@@ -139,3 +139,18 @@ def test_calculate_e_inh():
 
     assert e_inh_table.count() == 1
     assert e_inh_table.find_one(nuclide="A-0")["A"] == 12
+
+
+def test_calculate_e_surface():
+    model = ModelTest()
+    assert "e_surface" not in model.results.tables
+
+    model.results.create_deposition_table().insert(dict(nuclide="A-0", A=1))
+
+    model.reference["nuclides"].insert(
+        dict(name="A-0", R_surface=2, decay_coeff=3)
+    )
+
+    model._Model__calculate_e_surface("A-0", "A")
+
+    assert "e_surface" in model.results.tables

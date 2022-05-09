@@ -9,6 +9,20 @@ class _IReference:
     def db(self):
         raise NotImplementedError
 
+    def radio_decay_coeff(self, nuclide):
+        """Radioactivity decay coefficient, sec^-1"""
+        return self.find_nuclide(nuclide)["decay_coeff"]
+
+    def dose_rate_decay_coeff():
+        """Dose rate decay coefficient due to all processes except
+        radioactivity decay, sec^-1"""
+        return 1.27e-9
+
+    def residence_time():
+        """Population residence time in contaminated region for acute phase of
+        a radiation accident, sec"""
+        return 3.15e7
+
     @property
     def tables(self):
         return self.db.tables

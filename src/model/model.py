@@ -2,6 +2,7 @@ from .common import log, pasquill_gifford_classes
 from .input import Input
 from .results import Results
 from .reference import Reference
+import math
 
 
 class Model:
@@ -142,3 +143,32 @@ class Model:
         self.results["e_inh"].upsert(
             {"nuclide": nuclide, atmospheric_class: value}, ["nuclide"]
         )
+
+    def __calculate_e_surface(self, nuclide, atmospheric_class):
+        """РБ-134-17, p. 8, (6)"""
+
+        deposition = self.results.get_deposition(nuclide, atmospheric_class)
+
+        dose_coefficicent = self.reference.find_nuclide(nuclide)["R_surface"]
+
+        residence_time_coeff = self.__calculate_residence_time_coeff(nuclide)
+
+        if "e_surface" not in self.results.tables:
+            self.results.create_e_surface_table()
+
+        value = deposition * dose_coefficicent * residence_time_coeff
+        self.results["e_surface"].upsert(
+            {"nuclide": nuclide, atmospheric_class: value}, ["nuclide"]
+        )
+
+    def __calculate_residence_time_coeff(self, nuclide):
+        """РБ-134-17, p. 8, (7)"""
+
+        decay_coeff_sum = (
+            self.reference.radio_decay_coeff(nuclide)
+            + Reference.dose_rate_decay_coeff()
+        )
+
+        return (
+            1 - math.exp(-decay_coeff_sum * Reference.residence_time())
+        ) / decay_coeff_sum

@@ -32,8 +32,19 @@ class Results(InMemoryDatabase):
         )
 
     def get_concentration_integral(self, nuclide, atmospheric_class):
-        table = self.load_table("concentration_integrals")
-        return table.find_one(nuclide=nuclide)[atmospheric_class]
+        return self.__get_nuclide_vs_atmospheric_class_table_item(
+            "concentration_integrals", nuclide, atmospheric_class
+        )
+
+    def create_deposition_table(self):
+        return self.__create_nuclide_vs_atmospheric_class_empty_table(
+            "depositions"
+        )
+
+    def get_deposition(self, nuclide, atmospheric_class):
+        return self.__get_nuclide_vs_atmospheric_class_table_item(
+            "depositions", nuclide, atmospheric_class
+        )
 
     def __create_nuclide_vs_atmospheric_class_empty_table(self, name):
         table = self.create_table(
@@ -44,3 +55,9 @@ class Results(InMemoryDatabase):
         for a_class in pasquill_gifford_classes:
             table.create_column(a_class, type=self.types.float, default=0)
         return table
+
+    def __get_nuclide_vs_atmospheric_class_table_item(
+        self, table_name, nuclide, atmospheric_class
+    ):
+        table = self.load_table(table_name)
+        return table.find_one(nuclide=nuclide)[atmospheric_class]
