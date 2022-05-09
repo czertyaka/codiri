@@ -17,7 +17,3 @@ class Database(dataset.Database, IDatabase):
 class InMemoryDatabase(Database):
     def __init__(self):
         super(InMemoryDatabase, self).__init__(dbname=":memory:")
-
-    def drop_all(self):
-        for table in self.tables:
-            table.drop()
