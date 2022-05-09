@@ -1,11 +1,11 @@
 from codiri.src.model.model import Model
 from codiri.src.model.results import Results
-from codiri.src.model.reference import _IReference
+from codiri.src.model.reference import IReference
 from codiri.src.database import InMemoryDatabase
 from codiri.src.model.input import Input
 
 
-class ReferenceTest(_IReference):
+class ReferenceTest(IReference):
     def __init__(self):
         super(ReferenceTest, self).__init__()
         self.__db = InMemoryDatabase()

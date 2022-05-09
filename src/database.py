@@ -5,7 +5,11 @@ def _log(msg):
     print("db: " + msg)
 
 
-class Database(dataset.Database):
+class IDatabase:
+    pass
+
+
+class Database(dataset.Database, IDatabase):
     def __init__(self, dbname):
         super(Database, self).__init__(url=f"sqlite:///{dbname}")
 
