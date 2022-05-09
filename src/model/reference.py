@@ -70,6 +70,10 @@ class IReference:
         ]
         return float(rate)
 
+    def deposition_rate(self, nuclide: str) -> float:
+        """Deposition rate, m/s"""
+        return float(self.__find_nuclide(nuclide)["deposition_rate"])
+
     def __find_nuclide(self, nuclide_name):
         return self.db.load_table("nuclides").find_one(name=nuclide_name)
 

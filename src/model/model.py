@@ -155,3 +155,22 @@ class Model:
         return (
             1 - math.exp(-decay_coeff_sum * self.reference.residence_time)
         ) / decay_coeff_sum
+
+    def __calculate_depositions(self, nuclide):
+        """РБ-134-17, p. 17, (5)"""
+
+        depositon_rate = self.reference.deposition_rate(nuclide)
+        sediment_detachment = self.results.sediment_detachments[nuclide]
+        concentration_integrals = self.results.concentration_integrals[nuclide]
+        height_concentration_integrals = (
+            self.results.height_concentration_integrals[nuclide]
+        )
+        values = dict()
+
+        for a_class in pasquill_gifford_classes:
+            values[a_class] = (
+                depositon_rate * concentration_integrals[a_class]
+                + sediment_detachment * height_concentration_integrals[a_class]
+            )
+
+        self.results.depositions.insert(nuclide=nuclide, values=values)

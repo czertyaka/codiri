@@ -2,9 +2,8 @@ from ..database import InMemoryDatabase, IDatabase
 from .common import pasquill_gifford_classes
 
 
-class NuclideVsAtmosphericClassTable:
-    """Represents table containing certain value for each radionuclide and
-    atmospheric stability class"""
+class NuclideTable:
+    """Represents table containing certain value with a row per nuclide"""
 
     def __init__(self, database: IDatabase, table_name: str):
         """Create table instance"""
@@ -14,23 +13,43 @@ class NuclideVsAtmosphericClassTable:
             primary_id="nuclide",
             primary_type=database.types.string(7),
         )
+        self._create_columns(database)
 
-        for a_class in pasquill_gifford_classes:
-            self.__table.create_column(
-                a_class, type=database.types.float, default=0
-            )
+    @property
+    def name(self) -> str:
+        """Table name"""
+        return self.__name
+
+    @property
+    def table(self):
+        """Table instance"""
+        return self.__table
 
     def __iter__(self):
         """Same as :method:`self.__table.__iter__()`"""
         return self.__table.__iter__()
 
+    def _create_columns(self, database: IDatabase) -> None:
+        raise NotImplementedError
+
+
+class NuclideVsAtmosphericClassTable(NuclideTable):
+    """Represents table containing certain value for each radionuclide and
+    atmospheric stability class"""
+
+    def __init__(self, database: IDatabase, table_name: str):
+        """Create table instance"""
+        super(NuclideVsAtmosphericClassTable, self).__init__(
+            database, table_name
+        )
+
     def __getitem__(self, nuclide: str) -> dict:
         """Get table row for nuclide"""
-        row = dict(self.__table.find_one(nuclide=nuclide))
+        row = dict(self.table.find_one(nuclide=nuclide))
         row.pop("nuclide")
         return row
 
-    def insert(self, nuclide: str, values: dict):
+    def insert(self, nuclide: str, values: dict) -> None:
         """Inserts values for certain nuclide
         :param nuclide: A nuclide for which values are provided
         :type nuclide: str
@@ -43,12 +62,35 @@ class NuclideVsAtmosphericClassTable:
             raise ValueError
         row = values
         row["nuclide"] = nuclide
-        self.__table.upsert(row, ["nuclide"])
+        self.table.upsert(row, ["nuclide"])
 
-    @property
-    def name(self) -> str:
-        """Table name"""
-        return self.__name
+    def _create_columns(self, database: IDatabase) -> None:
+        for a_class in pasquill_gifford_classes:
+            self.table.create_column(
+                a_class, type=database.types.float, default=0
+            )
+
+
+class NuclideOneColumnTable(NuclideTable):
+    """Represents table containing single value for each radionuclide"""
+
+    def __init__(self, database: IDatabase, table_name: str, column_name: str):
+        self.__column_name = column_name
+        super(NuclideOneColumnTable, self).__init__(database, table_name)
+
+    def __getitem__(self, nuclide: str) -> float:
+        """Get value for nuclide"""
+        return self.table.find_one(nuclide=nuclide)[self.__column_name]
+
+    def insert(self, nuclide: str, value: float) -> None:
+        """Inserts value for certain nuclide"""
+        row = {"nuclide": nuclide, self.__column_name: value}
+        self.table.upsert(row, ["nuclide"])
+
+    def _create_columns(self, database: IDatabase) -> None:
+        self.table.create_column(
+            self.__column_name, type=database.types.float, default=0
+        )
 
 
 class Results:
@@ -66,6 +108,12 @@ class Results:
         )
         self.__depositions = NuclideVsAtmosphericClassTable(db, "depositions")
         self.__e_total_10 = NuclideVsAtmosphericClassTable(db, "e_total_10")
+        self.__sediment_detachments = NuclideOneColumnTable(
+            db, "sediment_detachments", "sediment_detachment"
+        )
+        self.__height_concentration_integrals = NuclideVsAtmosphericClassTable(
+            db, "height_concentration_integral"
+        )
 
     @property
     def e_max_10(self) -> float:
@@ -116,3 +164,15 @@ class Results:
         """Summarized deposition value on ground surface due to dry and wet
         deposition, Bq/m^2"""
         return self.__depositions
+
+    @property
+    def sediment_detachments(self) -> NuclideOneColumnTable:
+        """Radionuclide sediment detachment from soil values, sec^-1"""
+        return self.__sediment_detachments
+
+    @property
+    def height_concentration_integrals(self) -> NuclideVsAtmosphericClassTable:
+        """Height-phased concentration in surface air time integral for each
+        radionuclide and each atmospheric stability class, Bq*seq/m^3
+        """
+        return self.__height_concentration_integrals

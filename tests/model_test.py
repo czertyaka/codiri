@@ -139,3 +139,22 @@ def test_calculate_e_surface():
     assert model.results.e_surface["A-0"] == dict(
         A=0, B=12, C=4, D=16, E=8, F=20
     )
+
+
+def test_calculate_depositions():
+    model = ModelTest()
+
+    model.reference.db["nuclides"].insert(dict(name="A-0", deposition_rate=1))
+    model.results.sediment_detachments.insert("A-0", 2)
+    model.results.concentration_integrals.insert(
+        "A-0", dict(A=0, B=6, C=2, D=8, E=4, F=10)
+    )
+    model.results.height_concentration_integrals.insert(
+        "A-0", dict(A=1, B=7, C=3, D=9, E=5, F=11)
+    )
+
+    model._Model__calculate_depositions("A-0")
+
+    assert model.results.depositions["A-0"] == dict(
+        A=2, B=20, C=8, D=26, E=14, F=32
+    )
