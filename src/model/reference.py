@@ -25,7 +25,7 @@ class IReference:
             nuclides.append(row["name"])
         return nuclides
 
-    def radio_decay_coeff(self, nuclide) -> float:
+    def radio_decay_coeff(self, nuclide: str) -> float:
         """Radioactivity decay coefficient, sec^-1"""
         return float(self.__find_nuclide(nuclide)["decay_coeff"])
 
@@ -43,27 +43,27 @@ class IReference:
         """
         return 3.15e7
 
-    def nuclide_group(self, nuclide) -> str:
+    def nuclide_group(self, nuclide: str) -> str:
         """Nuclide group, e.g. aerosol, IRG etc."""
         return str(self.__find_nuclide(nuclide)["group"])
 
-    def cloud_dose_coeff(self, nuclide) -> float:
+    def cloud_dose_coeff(self, nuclide: str) -> float:
         """Dose conversion factor for external exposure from radioactive cloud,
         (Sv*m^3)/(Bq*s)
         """
         return float(self.__find_nuclide(nuclide)["R_cloud"])
 
-    def inhalation_dose_coeff(self, nuclide) -> float:
+    def inhalation_dose_coeff(self, nuclide: str) -> float:
         """Dose conversion factor for nuclide intake with air, Sv/Bq"""
         return float(self.__find_nuclide(nuclide)["R_inh"])
 
-    def surface_dose_coeff(self, nuclide) -> float:
+    def surface_dose_coeff(self, nuclide: str) -> float:
         """Dose conversion factor for external exposure from soil surface,
         (Sv*m^2)/(Bq*s)
         """
         return float(self.__find_nuclide(nuclide)["R_surface"])
 
-    def respiration_rate(self, age) -> float:
+    def respiration_rate(self, age: int) -> float:
         """Respiration rate, m^3/sec"""
         rate = self.db["age_groups"].find_one(id=self.__get_age_group_id(age))[
             "respiration_rate"

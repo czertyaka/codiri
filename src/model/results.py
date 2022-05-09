@@ -1,4 +1,4 @@
-from ..database import InMemoryDatabase
+from ..database import InMemoryDatabase, IDatabase
 from .common import pasquill_gifford_classes
 
 
@@ -6,13 +6,8 @@ class NuclideVsAtmosphericClassTable:
     """Represents table containing certain value for each radionuclide and
     atmospheric stability class"""
 
-    def __init__(self, database, table_name):
-        """Create table instance
-        :param database: database in which table will be created
-        :type database: :class:`..database.IDatabase`
-        :param table_name: table name
-        :type table_name: str
-        """
+    def __init__(self, database: IDatabase, table_name: str):
+        """Create table instance"""
         self.__name = table_name
         self.__table = database.create_table(
             table_name,
@@ -29,13 +24,13 @@ class NuclideVsAtmosphericClassTable:
         """Same as :method:`self.__table.__iter__()`"""
         return self.__table.__iter__()
 
-    def __getitem__(self, nuclide) -> dict:
+    def __getitem__(self, nuclide: str) -> dict:
         """Get table row for nuclide"""
         row = dict(self.__table.find_one(nuclide=nuclide))
         row.pop("nuclide")
         return row
 
-    def insert(self, nuclide, values):
+    def insert(self, nuclide: str, values: dict):
         """Inserts values for certain nuclide
         :param nuclide: A nuclide for which values are provided
         :type nuclide: str
@@ -73,7 +68,8 @@ class Results:
         self.__e_total_10 = NuclideVsAtmosphericClassTable(db, "e_total_10")
 
     @property
-    def e_max_10(self):
+    def e_max_10(self) -> float:
+        """Maximal effective dose at the acute accident period, Sv"""
         return self.__e_max_10
 
     @e_max_10.setter
@@ -81,25 +77,42 @@ class Results:
         self.__e_max_10 = value
 
     @property
-    def e_total_10(self):
+    def e_total_10(self) -> NuclideVsAtmosphericClassTable:
+        """Effective doses for each radionuclide and each atmospheric stability
+        class, Sv
+        """
         return self.__e_total_10
 
     @property
-    def e_cloud(self):
+    def e_cloud(self) -> NuclideVsAtmosphericClassTable:
+        """Effective doses due to external exposure from radioactive cloud for
+        each radionuclide and each atmospheric stability class, Sv
+        """
         return self.__e_cloud
 
     @property
-    def e_inhalation(self):
+    def e_inhalation(self) -> NuclideVsAtmosphericClassTable:
+        """Effective doses due to nuclide intake with air for each radionuclide
+        and each atmospheric stability class, Sv
+        """
         return self.__e_inhalation
 
     @property
-    def e_surface(self):
+    def e_surface(self) -> NuclideVsAtmosphericClassTable:
+        """Effective doses due to external exposure from soil surface for each
+        radionuclide and each atmospheric stability class, Sv
+        """
         return self.__e_surface
 
     @property
-    def concentration_integrals(self):
+    def concentration_integrals(self) -> NuclideVsAtmosphericClassTable:
+        """Concentration in surface air time integral for each radionuclide and
+        each atmospheric stability class, Bq*seq/m^3
+        """
         return self.__concentration_integrals
 
     @property
-    def depositions(self):
+    def depositions(self) -> NuclideVsAtmosphericClassTable:
+        """Summarized deposition value on ground surface due to dry and wet
+        deposition, Bq/m^2"""
         return self.__depositions
