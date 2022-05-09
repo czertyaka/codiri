@@ -9,19 +9,54 @@ class _IReference:
     def db(self):
         raise NotImplementedError
 
+    def all_nuclides(self):
+        """List of all radionuclides in refernce data"""
+        nuclides = list()
+        for row in self.db["nuclides"]:
+            nuclides.append(row["name"])
+        return nuclides
+
     def radio_decay_coeff(self, nuclide):
         """Radioactivity decay coefficient, sec^-1"""
-        return self.find_nuclide(nuclide)["decay_coeff"]
+        return self.__find_nuclide(nuclide)["decay_coeff"]
 
     def dose_rate_decay_coeff():
         """Dose rate decay coefficient due to all processes except
-        radioactivity decay, sec^-1"""
+        radioactivity decay, sec^-1
+        """
         return 1.27e-9
 
     def residence_time():
         """Population residence time in contaminated region for acute phase of
-        a radiation accident, sec"""
+        a radiation accident, sec
+        """
         return 3.15e7
+
+    def nuclide_group(self, nuclide):
+        """Nuclide group, e.g. aerosol, IRG etc."""
+        return self.__find_nuclide(nuclide)["group"]
+
+    def cloud_dose_coeff(self, nuclide):
+        """Dose conversion factor for external exposure from radioactive cloud,
+        (Sv*m^3)/(Bq*s)
+        """
+        return self.__find_nuclide(nuclide)["R_cloud"]
+
+    def inhalation_dose_coeff(self, nuclide):
+        """Dose conversion factor for nuclide intake with air, Sv/Bq"""
+        return self.__find_nuclide(nuclide)["R_inh"]
+
+    def surface_dose_coeff(self, nuclide):
+        """Dose conversion factor for external exposure from soil surface,
+        (Sv*m^2)/(Bq*s)
+        """
+        return self.__find_nuclide(nuclide)["R_surface"]
+
+    def respiration_rate(self, age):
+        """Respiration rate, m^3/sec"""
+        return self.db["age_groups"].find_one(id=self.__get_age_group_id(age))[
+            "respiration_rate"
+        ]
 
     @property
     def tables(self):
@@ -33,10 +68,10 @@ class _IReference:
     def load_table(self, table_name):
         return self.db.load_table(table_name)
 
-    def find_nuclide(self, nuclide_name):
+    def __find_nuclide(self, nuclide_name):
         return self.load_table("nuclides").find_one(name=nuclide_name)
 
-    def get_age_group_id(self, age):
+    def __get_age_group_id(self, age):
         for age_group in self.db.load_table("age_groups"):
             if age >= age_group["lower_age"] and age < age_group["upper_age"]:
                 return age_group["id"]

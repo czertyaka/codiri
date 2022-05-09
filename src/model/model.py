@@ -36,7 +36,7 @@ class Model:
         for activity in self.input.activities:
             nuclide = activity["nuclide"]
             for atmospheric_class in pasquill_gifford_classes:
-                if self.reference.find_nuclide(nuclide)["group"] != "IRG":
+                if self.reference.nuclide_group(nuclide) != "IRG":
                     self.__calculate_e_inh(nuclide, atmospheric_class)
                     self.__calculate_e_surface(nuclide, atmospheric_class)
                 self.__calculate_e_cloud(nuclide, atmospheric_class)
@@ -60,8 +60,9 @@ class Model:
         )
 
     def __is_input_valid(self):
+        nuclides = self.reference.all_nuclides()
         for activity in self.input.activities:
-            if self.reference.find_nuclide(activity["nuclide"]) is None:
+            if activity["nuclide"] not in nuclides:
                 return False
         return True
 
@@ -91,7 +92,7 @@ class Model:
             atmospheric_class
         ]
         e_total_10 += e_cloud
-        if self.reference.find_nuclide(nuclide)["group"] != "IRG":
+        if self.reference.nuclide_group(nuclide) != "IRG":
             e_inh = self.results.load_table("e_inh").find_one(nuclide=nuclide)[
                 atmospheric_class
             ]
@@ -107,7 +108,7 @@ class Model:
     def __calculate_e_cloud(self, nuclide, atmospheric_class):
         """РБ-134-17, p. 7, (5)"""
 
-        dose_coefficicent = self.reference.find_nuclide(nuclide)["R_cloud"]
+        dose_coefficicent = self.reference.cloud_dose_coeff(nuclide)
 
         concentration_integral = self.results.get_concentration_integral(
             nuclide, atmospheric_class
@@ -125,16 +126,13 @@ class Model:
     def __calculate_e_inh(self, nuclide, atmospheric_class):
         """РБ-134-17, p. 9, (8)"""
 
-        age_group_id = self.reference.get_age_group_id(self.input.age)
-        respiration_rate = self.reference["age_groups"].find_one(
-            id=age_group_id
-        )["respiration_rate"]
+        respiration_rate = self.reference.respiration_rate(self.input.age)
 
         concentration_integral = self.results.get_concentration_integral(
             nuclide, atmospheric_class
         )
 
-        dose_coefficicent = self.reference.find_nuclide(nuclide)["R_inh"]
+        dose_coefficicent = self.reference.inhalation_dose_coeff(nuclide)
 
         if "e_inh" not in self.results.tables:
             self.results.create_e_inh_table()
@@ -149,7 +147,7 @@ class Model:
 
         deposition = self.results.get_deposition(nuclide, atmospheric_class)
 
-        dose_coefficicent = self.reference.find_nuclide(nuclide)["R_surface"]
+        dose_coefficicent = self.reference.surface_dose_coeff(nuclide)
 
         residence_time_coeff = self.__calculate_residence_time_coeff(nuclide)
 
