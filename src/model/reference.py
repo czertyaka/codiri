@@ -29,13 +29,15 @@ class IReference:
         """Radioactivity decay coefficient, sec^-1"""
         return float(self.__find_nuclide(nuclide)["decay_coeff"])
 
-    def dose_rate_decay_coeff() -> float:
+    @property
+    def dose_rate_decay_coeff(self) -> float:
         """Dose rate decay coefficient due to all processes except
         radioactivity decay, sec^-1
         """
         return 1.27e-9
 
-    def residence_time() -> float:
+    @property
+    def residence_time(self) -> float:
         """Population residence time in contaminated region for acute phase of
         a radiation accident, sec
         """

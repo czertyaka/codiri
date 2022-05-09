@@ -2,6 +2,7 @@ from .common import log, pasquill_gifford_classes
 from .input import Input
 from .results import Results
 from .reference import Reference
+import math
 
 
 class Model:
@@ -127,3 +128,30 @@ class Model:
             )
 
         self.results.e_inhalation.insert(nuclide, values)
+
+    def __calculate_e_surface(self, nuclide):
+        """РБ-134-17, p. 8, (6)"""
+
+        depositions = self.results.depositions[nuclide]
+        dose_coefficicent = self.reference.surface_dose_coeff(nuclide)
+        residence_time_coeff = self.__calculate_residence_time_coeff(nuclide)
+        values = dict()
+
+        for a_class in pasquill_gifford_classes:
+            values[a_class] = (
+                depositions[a_class] * dose_coefficicent * residence_time_coeff
+            )
+
+        self.results.e_surface.insert(nuclide, values)
+
+    def __calculate_residence_time_coeff(self, nuclide):
+        """РБ-134-17, p. 8, (7)"""
+
+        decay_coeff_sum = (
+            self.reference.radio_decay_coeff(nuclide)
+            + self.reference.dose_rate_decay_coeff
+        )
+
+        return (
+            1 - math.exp(-decay_coeff_sum * self.reference.residence_time)
+        ) / decay_coeff_sum

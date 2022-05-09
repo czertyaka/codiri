@@ -3,6 +3,7 @@ from codiri.src.model.results import Results
 from codiri.src.model.reference import IReference
 from codiri.src.database import InMemoryDatabase
 from codiri.src.model.input import Input
+import math
 
 
 class ReferenceTest(IReference):
@@ -13,6 +14,14 @@ class ReferenceTest(IReference):
     @property
     def db(self):
         return self.__db
+
+    @property
+    def dose_rate_decay_coeff(self) -> float:
+        return 0.5
+
+    @property
+    def residence_time(self) -> float:
+        return -math.log(2)
 
 
 class ModelTest(Model):
@@ -105,3 +114,11 @@ def test_calculate_e_inh():
     assert model.results.e_inhalation["A-0"] == dict(
         A=0, B=18, C=6, D=24, E=12, F=30
     )
+
+
+def test_calculate_residence_time_coeff():
+    model = ModelTest()
+
+    model.reference.db["nuclides"].insert(dict(name="A-0", decay_coeff=0.5))
+
+    assert model._Model__calculate_residence_time_coeff("A-0") == -1
