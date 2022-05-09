@@ -4,6 +4,7 @@ from codiri.src.model.reference import IReference
 from codiri.src.database import InMemoryDatabase
 from codiri.src.model.input import Input
 import math
+from unittest.mock import MagicMock
 
 
 class ReferenceTest(IReference):
@@ -122,3 +123,19 @@ def test_calculate_residence_time_coeff():
     model.reference.db["nuclides"].insert(dict(name="A-0", decay_coeff=0.5))
 
     assert model._Model__calculate_residence_time_coeff("A-0") == -1
+
+
+def test_calculate_e_surface():
+    model = ModelTest()
+
+    model._Model__calculate_residence_time_coeff = MagicMock(return_value=1)
+    model.reference.db["nuclides"].insert(dict(name="A-0", R_surface=2))
+    model.results.depositions.insert(
+        "A-0", dict(A=0, B=6, C=2, D=8, E=4, F=10)
+    )
+
+    model._Model__calculate_e_surface("A-0")
+
+    assert model.results.e_surface["A-0"] == dict(
+        A=0, B=12, C=4, D=16, E=8, F=20
+    )
