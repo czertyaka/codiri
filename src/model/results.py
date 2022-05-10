@@ -58,7 +58,7 @@ class NuclideVsAtmosphericClassTable(NuclideTable):
         :type values: dict
         :raises ValueError: keys of `values` differs with expected
         """
-        if sorted(values.keys()) != pasquill_gifford_classes:
+        if sorted(values.keys()) != sorted(pasquill_gifford_classes):
             raise ValueError
         row = values
         row["nuclide"] = nuclide
@@ -119,6 +119,9 @@ class Results:
         )
         self.__dilution_factors = NuclideVsAtmosphericClassTable(
             db, "dilution_factors"
+        )
+        self.__full_depletions = NuclideVsAtmosphericClassTable(
+            db, "full_depletions"
         )
 
     @property
@@ -196,3 +199,8 @@ class Results:
         atmospheric stability class, sec/m^3
         """
         return self.__dilution_factors
+
+    @property
+    def full_depletions(self) -> NuclideVsAtmosphericClassTable:
+        """Full radioactive cloud depletion, unitless"""
+        return self.__full_depletions

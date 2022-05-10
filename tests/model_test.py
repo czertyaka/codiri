@@ -5,6 +5,7 @@ from codiri.src.database import InMemoryDatabase
 from codiri.src.model.input import Input
 import math
 from unittest.mock import MagicMock
+import pytest
 
 
 class ReferenceTest(IReference):
@@ -213,3 +214,79 @@ def test_calculate_sediment_detachments():
     model._Model__calculate_sediment_detachments("A-0")
 
     assert model.results.sediment_detachments["A-0"] == 6
+
+
+def test_calculate_dispersion_coefficients():
+    model = ModelTest()
+
+    coeffs = dict(p_y=1, q_y=2, p_z=3, q_z=4)
+
+    results = model._Model__calculate_dispersion_coefficients(coeffs, 2)
+
+    assert results["y"] == 4
+    assert results["z"] == 48
+
+    results = model._Model__calculate_dispersion_coefficients(coeffs, 10001)
+
+    assert results["z"] == 3 * math.pow(10001, 4)
+    assert results["y"] == 1 * math.pow(1000, 1.5) * math.sqrt(10001)
+
+
+def test_calculate_height_deposition_factors():
+    model = ModelTest()
+
+    input = Input()
+    input.square_side = 2
+    input.extreme_windspeeds = dict(A=1, B=1, C=1, D=1, E=1, F=1)
+    input.distance = 1
+    model.input = input
+
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="A", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="B", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="C", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="D", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="E", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="F", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+
+    model.results.full_depletions.insert(
+        "A-0", dict(A=1, B=1, C=1, D=1, E=1, F=1)
+    )
+
+    model._Model__calculate_height_deposition_factors("A-0")
+
+    assert model.results.height_concentration_integrals[
+        "A-0"
+    ] == pytest.approx(
+        dict(A=0.199, B=0.199, C=0.199, D=0.199, E=0.199, F=0.199), 0.01
+    )
+
+    input.distance = 10001
+    model.input = input
+
+    model._Model__calculate_height_deposition_factors("A-0")
+
+    assert model.results.height_concentration_integrals[
+        "A-0"
+    ] == pytest.approx(
+        dict(
+            A=7.117e-5,
+            B=7.117e-5,
+            C=7.117e-5,
+            D=7.117e-5,
+            E=7.117e-5,
+            F=7.117e-5,
+        ),
+        0.01,
+    )

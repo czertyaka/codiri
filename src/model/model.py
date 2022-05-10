@@ -3,6 +3,7 @@ from .input import Input
 from .results import Results
 from .reference import Reference
 import math
+from scipy import integrate
 
 
 class Model:
@@ -219,3 +220,55 @@ class Model:
         )
 
         self.results.sediment_detachments.insert(nuclide, value)
+
+    def __calculate_height_deposition_factors(self, nuclide):
+        """РБ-134-17, p. 28, (13)"""
+
+        windspeeds = self.input.extreme_windspeeds
+        side_half = self.input.square_side / 2
+        depletions = self.results.full_depletions[nuclide]
+        values = dict()
+
+        for a_class in pasquill_gifford_classes:
+            factor = depletions[a_class] / (
+                math.sqrt(math.pi)
+                * windspeeds[a_class]
+                * 4
+                * math.pow(side_half, 2)
+            )
+
+            diffusion_coefficients = self.reference.diffusion_coefficients(
+                a_class
+            )
+
+            def subintegral_func(x):
+                s_y = self.__calculate_dispersion_coefficients(
+                    diffusion_coefficients, self.input.distance - x
+                )["y"]
+                return math.erf(side_half / (math.sqrt(2) * s_y))
+
+            values[a_class] = (
+                factor
+                * integrate.quad(subintegral_func, -side_half, side_half)[0]
+            )
+
+        self.results.height_concentration_integrals.insert(nuclide, values)
+
+    def __calculate_dispersion_coefficients(
+        self, diffusion_coefficients: dict, x: float
+    ) -> dict:
+        """РБ-134-17, p. 29, (19) (20)"""
+
+        p_z = diffusion_coefficients["p_z"]
+        q_z = diffusion_coefficients["q_z"]
+        p_y = diffusion_coefficients["p_y"]
+        q_y = diffusion_coefficients["q_y"]
+
+        z = p_z * math.pow(x, q_z)
+        y = (
+            p_y * math.pow(x, q_y)
+            if x < 10000
+            else p_y * math.pow(1000, q_y - 0.5) * math.sqrt(x)
+        )
+
+        return dict(z=z, y=y)

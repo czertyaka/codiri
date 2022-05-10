@@ -83,6 +83,25 @@ class IReference:
         """Unitless washing capacity for other precipitation types, 1"""
         return 5.0
 
+    def terrain_roughness(self, terrain_type: str) -> float:
+        """Underlying terrain roughness, m"""
+        return self.db.load_table("roughness").find_one(terrain=terrain_type)[
+            "roughness"
+        ]
+
+    def diffusion_coefficients(self, atmospheric_class: str) -> dict:
+        """Diffusion coefficients p_z, q_z, p_y and q_y for release
+        height < 50 m
+        :return: dict with keys 'p_z', 'q_z', 'p_y' and 'q_y'
+        """
+        coeffs = dict(
+            self.db.load_table("diffusion_coefficients").find_one(
+                a_class=atmospheric_class
+            )
+        )
+        coeffs.pop("a_class")
+        return coeffs
+
     def __find_nuclide(self, nuclide_name):
         return self.db.load_table("nuclides").find_one(name=nuclide_name)
 

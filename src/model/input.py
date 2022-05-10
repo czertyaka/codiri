@@ -1,4 +1,4 @@
-from .common import log
+from .common import log, pasquill_gifford_classes
 
 
 class Input:
@@ -11,6 +11,7 @@ class Input:
         self.__precipitation_rate = None
         self.__extreme_windspeeds = None
         self.__age = None
+        self.__terrain_type = None
 
     def initialized(self) -> bool:
         return (
@@ -20,6 +21,7 @@ class Input:
             and self.precipitation_rate is not None
             and self.extreme_windspeeds is not None
             and self.age is not None
+            and self.terrain_type is not None
         )
 
     def consistent(self) -> bool:
@@ -68,15 +70,14 @@ class Input:
         self.__precipitation_rate = value
 
     @property
-    def extreme_windspeeds(self) -> list:
+    def extreme_windspeeds(self) -> dict:
         return self.__extreme_windspeeds
 
     @extreme_windspeeds.setter
-    def extreme_windspeeds(self, values: list):
+    def extreme_windspeeds(self, values: dict):
         """Extreme wind speed for each Pasquill-Gifford atmospheric stability
         classes as a list of count 6, m/s"""
-        pasquill_gifford_classes = ["A", "B", "C", "D", "E", "F"]
-        if values.count() != 6:
+        if sorted(values.keys()) != sorted(pasquill_gifford_classes):
             log(
                 f"given wind speeds list ({values}) doesn't provide "
                 f"necessary atmospheric stability classes "
@@ -90,5 +91,20 @@ class Input:
         return self.__age
 
     @age.setter
-    def age(self, value: int):
+    def age(self, value: int) -> None:
         self.__age = value
+
+    @property
+    def terrain_type(self) -> str():
+        return self.__terrain_type
+
+    @terrain_type.setter
+    def terrain_type(self, value: str) -> None:
+        """Underlying terrain type
+        :param value: valid types are "greenland", "agricultural", "forest" and
+            "settlement"
+        :raises ValueError: unknown terrain type
+        """
+        if value not in ["greenland", "agricultural", "forest", "settlement"]:
+            raise ValueError(f"unknown terrain type '{value}'")
+        self.__terrain_type = value
