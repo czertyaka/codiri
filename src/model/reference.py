@@ -74,6 +74,15 @@ class IReference:
         """Deposition rate, m/s"""
         return float(self.__find_nuclide(nuclide)["deposition_rate"])
 
+    def standard_washing_capacity(self, nuclide: str) -> float:
+        """Standard washing capacity, hr/(mm*sec)"""
+        return 0 if self.__find_nuclide(nuclide)["group"] == "IRG" else 1e-5
+
+    @property
+    def unitless_washing_capacity(self) -> float:
+        """Unitless washing capacity for other precipitation types, 1"""
+        return 5.0
+
     def __find_nuclide(self, nuclide_name):
         return self.db.load_table("nuclides").find_one(name=nuclide_name)
 

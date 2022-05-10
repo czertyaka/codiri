@@ -24,6 +24,13 @@ class ReferenceTest(IReference):
     def residence_time(self) -> float:
         return -math.log(2)
 
+    @property
+    def unitless_washing_capacity(self) -> float:
+        return 2
+
+    def standard_washing_capacity(self, nuclide: str) -> float:
+        return 3
+
 
 class ModelTest(Model):
     def __init__(self):
@@ -194,3 +201,15 @@ def test_calculate_concentration_integrals():
     assert model.results.concentration_integrals["A-0"] == dict(
         A=0, B=12, C=4, D=16, E=8, F=20
     )
+
+
+def test_calculate_sediment_detachments():
+    model = ModelTest()
+
+    input = Input()
+    input.precipitation_rate = 1
+    model.input = input
+
+    model._Model__calculate_sediment_detachments("A-0")
+
+    assert model.results.sediment_detachments["A-0"] == 6

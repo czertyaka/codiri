@@ -202,3 +202,20 @@ class Model:
             values[a_class] = activity * dilution_factors[a_class]
 
         self.results.concentration_integrals.insert(nuclide, values)
+
+    def __calculate_sediment_detachments(self, nuclide):
+        """РБ-134-17, p. 29, (17)"""
+
+        precipitation_rate = self.input.precipitation_rate
+        standard_washing_capacity = self.reference.standard_washing_capacity(
+            nuclide
+        )
+        unitless_washing_capacity = self.reference.unitless_washing_capacity
+
+        value = (
+            precipitation_rate
+            * standard_washing_capacity
+            * unitless_washing_capacity
+        )
+
+        self.results.sediment_detachments.insert(nuclide, value)

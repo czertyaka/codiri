@@ -8,7 +8,7 @@ class Input:
         self.__distance = None
         self.__square_side = None
         self.__activities = dict()
-        self.__precipation_rate = None
+        self.__precipitation_rate = None
         self.__extreme_windspeeds = None
         self.__age = None
 
@@ -17,7 +17,7 @@ class Input:
             self.distance is not None
             and self.square_side is not None
             and self.activities.count() > 0
-            and self.precipation_rate is not None
+            and self.precipitation_rate is not None
             and self.extreme_windspeeds is not None
             and self.age is not None
         )
@@ -59,13 +59,13 @@ class Input:
         )
 
     @property
-    def precipation_rate(self) -> float:
-        return self.__precipation_rate
+    def precipitation_rate(self) -> float:
+        return self.__precipitation_rate
 
-    @precipation_rate.setter
-    def precipation_rate(self, value: float):
+    @precipitation_rate.setter
+    def precipitation_rate(self, value: float):
         """Precipation rate, mm/hr"""
-        self.__precipation_rate = value
+        self.__precipitation_rate = value
 
     @property
     def extreme_windspeeds(self) -> list:
