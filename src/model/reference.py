@@ -102,6 +102,16 @@ class IReference:
         coeffs.pop("a_class")
         return coeffs
 
+    @property
+    def terrain_clearance(self) -> float:
+        """Terrain clearance, m"""
+        return 1
+
+    @property
+    def mixing_layer_height(self) -> float:
+        """Mixing layer height, m"""
+        return 100
+
     def __find_nuclide(self, nuclide_name):
         return self.db.load_table("nuclides").find_one(name=nuclide_name)
 

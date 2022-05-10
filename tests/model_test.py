@@ -32,6 +32,17 @@ class ReferenceTest(IReference):
     def standard_washing_capacity(self, nuclide: str) -> float:
         return 3
 
+    @property
+    def terrain_clearance(self) -> float:
+        return 1
+
+    @property
+    def mixing_layer_height(self) -> float:
+        return 1
+
+    def terrain_roughness(self, terrain_type: str) -> float:
+        return 1
+
 
 class ModelTest(Model):
     def __init__(self):
@@ -287,6 +298,62 @@ def test_calculate_height_deposition_factors():
             D=7.117e-5,
             E=7.117e-5,
             F=7.117e-5,
+        ),
+        0.01,
+    )
+
+
+def test_caclculate_dilution_factors():
+    model = ModelTest()
+
+    input = Input()
+    input.square_side = 2
+    input.extreme_windspeeds = dict(A=1, B=1, C=1, D=1, E=1, F=1)
+    input.distance = 1.01
+    model.input = input
+
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="A", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="B", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="C", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="D", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="E", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="F", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+
+    model.results.full_depletions.insert(
+        "A-0", dict(A=1, B=1, C=1, D=1, E=1, F=1)
+    )
+
+    model._Model__caclculate_dilution_factors("A-0")
+
+    assert model.results.dilution_factors["A-0"] == pytest.approx(
+        dict(A=1.029, B=1.029, C=1.029, D=1.029, E=1.029, F=1.029), 0.01
+    )
+
+    input.distance = 10001
+    model.input = input
+
+    model._Model__caclculate_dilution_factors("A-0")
+
+    assert model.results.dilution_factors["A-0"] == pytest.approx(
+        dict(
+            A=5.032e-8,
+            B=5.032e-8,
+            C=5.032e-8,
+            D=5.032e-8,
+            E=5.032e-8,
+            F=5.032e-8,
         ),
         0.01,
     )

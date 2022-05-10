@@ -35,6 +35,8 @@ class Model:
             return
 
         for nuclide in self.input.activities:
+            self.__caclculate_dilution_factors(nuclide)
+            self.__calculate_height_deposition_factors(nuclide)
             self.__calculate_concentration_integrals(nuclide)
             if self.reference.nuclide_group(nuclide) != "IRG":
                 self.__calculate_height_concentration_integrals(nuclide)
@@ -221,7 +223,7 @@ class Model:
 
         self.results.sediment_detachments.insert(nuclide, value)
 
-    def __calculate_height_deposition_factors(self, nuclide):
+    def __calculate_height_deposition_factors(self, nuclide: str):
         """РБ-134-17, p. 28, (13)"""
 
         windspeeds = self.input.extreme_windspeeds
@@ -272,3 +274,61 @@ class Model:
         )
 
         return dict(z=z, y=y)
+
+    def __caclculate_dilution_factors(self, nuclide: str) -> None:
+        """РБ-134-17, p. 27, (11)"""
+
+        windspeeds = self.input.extreme_windspeeds
+        side_half = self.input.square_side / 2
+        depletions = self.results.full_depletions[nuclide]
+        z = self.reference.terrain_clearance
+        h_mix = self.reference.mixing_layer_height
+        h_rel = self.reference.terrain_roughness(self.input.terrain_type)
+        values = dict()
+
+        for a_class in pasquill_gifford_classes:
+            factor = depletions[a_class] / (
+                math.sqrt(2 * math.pi)
+                * windspeeds[a_class]
+                * 4
+                * math.pow(side_half, 2)
+            )
+
+            diffusion_coefficients = self.reference.diffusion_coefficients(
+                a_class
+            )
+
+            def vertical_dispersion_factor(x: float) -> float:
+                """РБ-134-17, p. 27, (12)"""
+
+                value = 0
+                for n in range(-2, 3):
+                    sigma_z = self.__calculate_dispersion_coefficients(
+                        diffusion_coefficients, x
+                    )["z"]
+                    consequent = 2 * math.pow(sigma_z, 2)
+                    exp1 = (
+                        -math.pow((2 * n * h_mix + h_rel - z), 2) / consequent
+                    )
+                    exp2 = (
+                        -math.pow((2 * n * h_mix - h_rel - z), 2) / consequent
+                    )
+                    value += math.exp(exp1) + math.exp(exp2)
+
+                return value
+
+            def subintegral_func(x):
+                diff = self.input.distance - x
+                vert_disp = vertical_dispersion_factor(diff)
+                disp_coeffs = self.__calculate_dispersion_coefficients(
+                    diffusion_coefficients, diff
+                )
+                erf = math.erf(side_half / (math.sqrt(2) * disp_coeffs["y"]))
+                return vert_disp * erf / disp_coeffs["z"]
+
+            values[a_class] = (
+                factor
+                * integrate.quad(subintegral_func, -side_half, side_half)[0]
+            )
+
+        self.results.dilution_factors.insert(nuclide, values)

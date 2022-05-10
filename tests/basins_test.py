@@ -31,7 +31,6 @@ def check_basin(
         contour=contour,
         map_contour=map_contour,
     )
-    print(basin.body.is_valid)
     if basin.body.is_valid:
         assert basin.body.equals(ref_body)
     else:
