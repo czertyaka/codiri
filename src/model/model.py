@@ -34,6 +34,7 @@ class Model:
             return
 
         for nuclide in self.input.activities:
+            self.__calculate_concentration_integrals(nuclide)
             if self.reference.nuclide_group(nuclide) != "IRG":
                 self.__calculate_height_concentration_integrals(nuclide)
                 self.__calculate_depositions(nuclide)
@@ -189,3 +190,15 @@ class Model:
             values[a_class] = activity * height_deposition_factor[a_class]
 
         self.results.height_concentration_integrals.insert(nuclide, values)
+
+    def __calculate_concentration_integrals(self, nuclide):
+        """РБ-134-17, p. 14, (1)"""
+
+        activity = self.input.activities[nuclide]
+        dilution_factors = self.results.dilution_factors[nuclide]
+        values = dict()
+
+        for a_class in pasquill_gifford_classes:
+            values[a_class] = activity * dilution_factors[a_class]
+
+        self.results.concentration_integrals.insert(nuclide, values)

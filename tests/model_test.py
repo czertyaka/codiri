@@ -176,3 +176,21 @@ def test_calculate_height_concentration_integrals():
     assert model.results.height_concentration_integrals["A-0"] == dict(
         A=0, B=12, C=4, D=16, E=8, F=20
     )
+
+
+def test_calculate_concentration_integrals():
+    model = ModelTest()
+
+    input = Input()
+    input.add_activity("A-0", 2)
+    model.input = input
+
+    model.results.dilution_factors.insert(
+        "A-0", dict(A=0, B=6, C=2, D=8, E=4, F=10)
+    )
+
+    model._Model__calculate_concentration_integrals("A-0")
+
+    assert model.results.concentration_integrals["A-0"] == dict(
+        A=0, B=12, C=4, D=16, E=8, F=20
+    )

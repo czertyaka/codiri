@@ -117,6 +117,9 @@ class Results:
         self.__height_deposition_factors = NuclideVsAtmosphericClassTable(
             db, "height_deposition_factors"
         )
+        self.__dilution_factors = NuclideVsAtmosphericClassTable(
+            db, "dilution_factors"
+        )
 
     @property
     def e_max_10(self) -> float:
@@ -186,3 +189,10 @@ class Results:
         atmospheric stability class, sec/m^2
         """
         return self.__height_deposition_factors
+
+    @property
+    def dilution_factors(self) -> NuclideVsAtmosphericClassTable:
+        """Dilution factor in surface air for each radionuclide and each
+        atmospheric stability class, sec/m^3
+        """
+        return self.__dilution_factors
