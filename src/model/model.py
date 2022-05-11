@@ -35,6 +35,8 @@ class Model:
             return
 
         for nuclide in self.input.activities:
+            self.__calculate_sediment_detachments(nuclide)
+            self.__calculate_depletions(nuclide)
             self.__caclculate_dilution_factors(nuclide)
             self.__calculate_height_deposition_factors(nuclide)
             self.__calculate_concentration_integrals(nuclide)
@@ -332,3 +334,81 @@ class Model:
             )
 
         self.results.dilution_factors.insert(nuclide, values)
+
+    def __calculate_depletions(self, nuclide: str) -> None:
+        self.__calculate_rad_depletions(self, nuclide)
+        self.__calculate_dry_depletions(self, nuclide)
+        self.__calculate_wet_depletions(self, nuclide)
+        self.__calculate_full_depletions(self, nuclide)
+
+    def __calculate_rad_depletions(self, nuclide: str) -> None:
+        """РБ-134-17, p. 28, (14)"""
+
+        decay_coeff = self.reference.radio_decay_coeff(nuclide)
+        windspeeds = self.input.extreme_windspeeds
+        dist = self.input.distance
+        values = dict()
+
+        for a_class in pasquill_gifford_classes:
+            values[a_class] = math.exp(
+                -decay_coeff * dist / windspeeds[a_class]
+            )
+
+        self.results.rad_depletions.insert(nuclide, values)
+
+    def __calculate_dry_depletions(self, nuclide: str) -> None:
+        """РБ-134-17, p. 28, (15)"""
+
+        windspeeds = self.input.extreme_windspeeds
+        depositon_rate = self.reference.deposition_rate(nuclide)
+        h_rel = self.reference.terrain_roughness(self.input.terrain_type)
+        dist = self.input.distance
+        values = dict()
+
+        for a_class in pasquill_gifford_classes:
+            factor = (
+                math.sqrt(2 / math.pi) * depositon_rate / windspeeds[a_class]
+            )
+            diffusion_coefficients = self.reference.diffusion_coefficients(
+                a_class
+            )
+
+            def subintegral_func(x: float) -> float:
+                sigma_z = self.__calculate_dispersion_coefficients(
+                    diffusion_coefficients, x
+                )["z"]
+                exp_factor = -math.pow((h_rel / sigma_z), 2) / 2
+                return math.exp(exp_factor) / sigma_z
+
+            integral = integrate.quad(subintegral_func, 0, dist)[0]
+            values[a_class] = math.exp(-factor * integral)
+
+        self.results.dry_depletions.insert(nuclide, values)
+
+    def __calculate_wet_depletions(self, nuclide: str) -> None:
+        """РБ-134-17, p. 28, (16)"""
+
+        windspeeds = self.input.extreme_windspeeds
+        dist = self.input.distance
+        detachment = self.results.sediment_detachments[nuclide]
+        values = dict()
+
+        for a_class in pasquill_gifford_classes:
+            values[a_class] = math.exp(
+                -detachment * dist / windspeeds[a_class]
+            )
+
+        self.results.wet_depletions.insert(nuclide, values)
+
+    def __calculate_full_depletions(self, nuclide: str) -> None:
+        """РБ-134-17, p. 29, (18)"""
+
+        rad = self.results.rad_depletions[nuclide]
+        dry = self.results.dry_depletions[nuclide]
+        wet = self.results.wet_depletions[nuclide]
+        values = dict()
+
+        for a_class in pasquill_gifford_classes:
+            values[a_class] = rad[a_class] * dry[a_class] * wet[a_class]
+
+        self.results.full_depletions.insert(nuclide, values)

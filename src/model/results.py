@@ -60,7 +60,7 @@ class NuclideVsAtmosphericClassTable(NuclideTable):
         """
         if sorted(values.keys()) != sorted(pasquill_gifford_classes):
             raise ValueError
-        row = values
+        row = values.copy()
         row["nuclide"] = nuclide
         self.table.upsert(row, ["nuclide"])
 
@@ -122,6 +122,15 @@ class Results:
         )
         self.__full_depletions = NuclideVsAtmosphericClassTable(
             db, "full_depletions"
+        )
+        self.__rad_depletions = NuclideVsAtmosphericClassTable(
+            db, "rad_depletions"
+        )
+        self.__dry_depletions = NuclideVsAtmosphericClassTable(
+            db, "dry_depletions"
+        )
+        self.__wet_depletions = NuclideVsAtmosphericClassTable(
+            db, "wet_depletions"
         )
 
     @property
@@ -204,3 +213,18 @@ class Results:
     def full_depletions(self) -> NuclideVsAtmosphericClassTable:
         """Full radioactive cloud depletion, unitless"""
         return self.__full_depletions
+
+    @property
+    def rad_depletions(self) -> NuclideVsAtmosphericClassTable:
+        """Radioactive cloud depletion due to radioactive decay, unitless"""
+        return self.__rad_depletions
+
+    @property
+    def dry_depletions(self) -> NuclideVsAtmosphericClassTable:
+        """Radioactive cloud depletion due to dry deposition, unitless"""
+        return self.__dry_depletions
+
+    @property
+    def wet_depletions(self) -> NuclideVsAtmosphericClassTable:
+        """Radioactive cloud depletion due to wet deposition, unitless"""
+        return self.__wet_depletions

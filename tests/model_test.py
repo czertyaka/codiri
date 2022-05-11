@@ -357,3 +357,120 @@ def test_caclculate_dilution_factors():
         ),
         0.01,
     )
+
+
+def test_calculate_rad_depletions():
+    model = ModelTest()
+
+    inp = Input()
+    inp.distance = 1
+    inp.extreme_windspeeds = dict(
+        A=1, B=1 / 2, C=1 / 3, D=1 / 4, E=1 / 5, F=1 / 6
+    )
+    model.input = inp
+
+    model.reference.db["nuclides"].insert(dict(name="A-0", decay_coeff=1))
+
+    model._Model__calculate_rad_depletions("A-0")
+
+    assert model.results.rad_depletions["A-0"] == pytest.approx(
+        dict(
+            A=math.exp(-1),
+            B=math.exp(-2),
+            C=math.exp(-3),
+            D=math.exp(-4),
+            E=math.exp(-5),
+            F=math.exp(-6),
+        ),
+        0.01,
+    )
+
+
+def test_calculate_dry_depletions():
+    model = ModelTest()
+
+    inp = Input()
+    inp.distance = 1
+    inp.extreme_windspeeds = dict(A=1, B=1, C=1, D=1, E=1, F=1)
+    model.input = inp
+
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="A", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="B", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="C", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="D", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="E", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["diffusion_coefficients"].insert(
+        dict(a_class="F", p_z=1, q_z=1, p_y=1, q_y=1)
+    )
+    model.reference.db["nuclides"].insert(dict(name="A-0", deposition_rate=1))
+
+    model._Model__calculate_dry_depletions("A-0")
+
+    assert model.results.dry_depletions["A-0"] == pytest.approx(
+        dict(
+            A=0.799861,
+            B=0.799861,
+            C=0.799861,
+            D=0.799861,
+            E=0.799861,
+            F=0.799861,
+        ),
+        0.01,
+    )
+
+
+def test_calculate_wet_depletions():
+    model = ModelTest()
+
+    inp = Input()
+    inp.distance = 1
+    inp.extreme_windspeeds = dict(
+        A=1, B=1 / 2, C=1 / 3, D=1 / 4, E=1 / 5, F=1 / 6
+    )
+    model.input = inp
+
+    model.results.sediment_detachments.insert("A-0", 1)
+
+    model._Model__calculate_wet_depletions("A-0")
+
+    assert model.results.wet_depletions["A-0"] == pytest.approx(
+        dict(
+            A=math.exp(-1),
+            B=math.exp(-2),
+            C=math.exp(-3),
+            D=math.exp(-4),
+            E=math.exp(-5),
+            F=math.exp(-6),
+        ),
+        0.01,
+    )
+
+
+def test_calculate_full_depletions():
+    model = ModelTest()
+
+    values = dict(A=1, B=2, C=3, D=4, E=5, F=6)
+    model.results.rad_depletions.insert("A-0", values)
+    model.results.dry_depletions.insert("A-0", values)
+    model.results.wet_depletions.insert("A-0", values)
+
+    model._Model__calculate_full_depletions("A-0")
+
+    assert model.results.full_depletions["A-0"] == dict(
+        A=math.pow(1, 3),
+        B=math.pow(2, 3),
+        C=math.pow(3, 3),
+        D=math.pow(4, 3),
+        E=math.pow(5, 3),
+        F=math.pow(6, 3),
+    )
