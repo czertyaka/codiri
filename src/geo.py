@@ -72,6 +72,12 @@ class Map(object):
             _log("failed to make image binary")
             exit()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.img.close()
+
     def plot(self):
         plt.imshow(self.__data)
         plt.show()

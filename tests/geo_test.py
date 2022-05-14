@@ -61,10 +61,10 @@ class TestMap(object):
         dataset.write(data, 1)
         dataset.close()
 
-        mymap = Map("simple.tif")
-        assert mymap.data[0][0] == 0
-        assert mymap.data[0][1] == 255
-        assert mymap.data[1][0] == 0
-        assert mymap.data[1][1] == 0
+        with Map("simple.tif") as mymap:
+            assert mymap.data[0][0] == 0
+            assert mymap.data[0][1] == 255
+            assert mymap.data[1][0] == 0
+            assert mymap.data[1][1] == 0
 
         os.remove("simple.tif")
