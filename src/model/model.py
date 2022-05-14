@@ -67,8 +67,8 @@ class Model:
 
     def __is_input_valid(self):
         nuclides = self.reference.all_nuclides()
-        for activity in self.input.activities:
-            if activity["nuclide"] not in nuclides:
+        for nuclide in self.input.activities:
+            if nuclide not in nuclides:
                 return False
         return True
 
@@ -256,7 +256,7 @@ class Model:
                 * integrate.quad(subintegral_func, -side_half, side_half)[0]
             )
 
-        self.results.height_concentration_integrals.insert(nuclide, values)
+        self.results.height_deposition_factors.insert(nuclide, values)
 
     def __calculate_dispersion_coefficients(
         self, diffusion_coefficients: dict, x: float
@@ -336,10 +336,10 @@ class Model:
         self.results.dilution_factors.insert(nuclide, values)
 
     def __calculate_depletions(self, nuclide: str) -> None:
-        self.__calculate_rad_depletions(self, nuclide)
-        self.__calculate_dry_depletions(self, nuclide)
-        self.__calculate_wet_depletions(self, nuclide)
-        self.__calculate_full_depletions(self, nuclide)
+        self.__calculate_rad_depletions(nuclide)
+        self.__calculate_dry_depletions(nuclide)
+        self.__calculate_wet_depletions(nuclide)
+        self.__calculate_full_depletions(nuclide)
 
     def __calculate_rad_depletions(self, nuclide: str) -> None:
         """РБ-134-17, p. 28, (14)"""

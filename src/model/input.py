@@ -17,7 +17,7 @@ class Input:
         return (
             self.distance is not None
             and self.square_side is not None
-            and self.activities.count() > 0
+            and len(self.activities) > 0
             and self.precipitation_rate is not None
             and self.extreme_windspeeds is not None
             and self.age is not None

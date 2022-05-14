@@ -277,9 +277,7 @@ def test_calculate_height_deposition_factors():
 
     model._Model__calculate_height_deposition_factors("A-0")
 
-    assert model.results.height_concentration_integrals[
-        "A-0"
-    ] == pytest.approx(
+    assert model.results.height_deposition_factors["A-0"] == pytest.approx(
         dict(A=0.199, B=0.199, C=0.199, D=0.199, E=0.199, F=0.199), 0.01
     )
 
@@ -288,9 +286,7 @@ def test_calculate_height_deposition_factors():
 
     model._Model__calculate_height_deposition_factors("A-0")
 
-    assert model.results.height_concentration_integrals[
-        "A-0"
-    ] == pytest.approx(
+    assert model.results.height_deposition_factors["A-0"] == pytest.approx(
         dict(
             A=7.117e-5,
             B=7.117e-5,
