@@ -24,8 +24,16 @@ class Input:
             and self.terrain_type is not None
         )
 
-    def consistent(self) -> bool:
-        return self.distance > (self.square_side / 2) and self.age >= 0
+    def valid(self) -> bool:
+        return (
+            self.distance <= 50000
+            and self.distance > (self.square_side / 2)
+            and self.age >= 0
+        )
+
+    def __str__(self) -> str:
+        return f"{{distance: {self.distance}; square side: {self.square_side};"
+        f" age: {self.age}; terrain type: {self.terrain_type}}}"
 
     @property
     def distance(self) -> float:
@@ -35,9 +43,6 @@ class Input:
     def distance(self, value: float) -> None:
         """Distance between source center and point where doses should be
         calculated, m"""
-        if value > 50000:
-            log(f"given distance ({value/1000} km) exceeds maximum (50 km)")
-            return
         self.__distance = value
 
     @property

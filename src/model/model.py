@@ -1,4 +1,4 @@
-from .common import log, pasquill_gifford_classes
+from .common import pasquill_gifford_classes
 from .input import Input
 from .results import Results
 from .reference import Reference
@@ -25,14 +25,9 @@ class Model:
     def input(self, value):
         self.__input = value
 
-    def reset(self):
-        self.__results = Results()
-        self.input = Input()
-
-    def calculate(self):
+    def calculate(self) -> bool:
         if self.__is_ready() is False:
-            log("model instance is not ready for calculation")
-            return
+            return False
 
         for nuclide in self.input.activities:
             self.__calculate_sediment_detachments(nuclide)
@@ -50,6 +45,8 @@ class Model:
 
         self.__calculate_e_max_10()
 
+        return True
+
     @property
     def results(self):
         return self.__results
@@ -61,7 +58,7 @@ class Model:
     def __is_ready(self):
         return (
             self.input.initialized()
-            and self.input.consistent()
+            and self.input.valid()
             and self.__is_input_valid()
         )
 
