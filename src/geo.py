@@ -5,6 +5,7 @@ import numpy as np
 import cv2 as cv
 from matplotlib import pyplot as plt
 from pyproj import Transformer, Geod
+from copy import deepcopy
 
 
 def _log(msg):
@@ -12,7 +13,9 @@ def _log(msg):
 
 
 def distance(coo0, coo1):
+    coo0 = deepcopy(coo0)
     coo0.transform("EPSG:4326")
+    coo1 = deepcopy(coo1)
     coo1.transform("EPSG:4326")
     geod = Geod(ellps="WGS84")
     return geod.line_length([coo0.lon, coo1.lon], [coo0.lat, coo1.lat])
@@ -47,7 +50,7 @@ class Coordinate(object):
         return self.__crs
 
     def __str__(self):
-        return f"{{lon: {self.lon}; lat: {self.lat}; crs = {self.crs}}}"
+        return f"{{lon: {self.lon}; lat: {self.lat}; crs: {self.crs}}}"
 
 
 class Map(object):

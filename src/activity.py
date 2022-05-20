@@ -221,3 +221,7 @@ class ActivityMap(object):
     @property
     def raster_factor(self):
         return self.__raster_factor
+
+    @property
+    def step(self) -> int:
+        return self.__step
