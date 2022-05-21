@@ -1,4 +1,5 @@
 from ..database import IDatabase, Database
+from .common import log
 
 
 class IReference:
@@ -133,6 +134,7 @@ class Reference(IReference):
     def __init__(self, dbname):
         super(Reference, self).__init__()
         self.__db = Database(dbname)
+        log(f"connection with {dbname} established")
 
     @property
     def db(self) -> Database:

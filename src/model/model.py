@@ -12,9 +12,8 @@ class Model:
     оценки и прогнозирования радиационных последствий аварий на объектах
     ядерного топливного цикла (РБ-134-17)"""
 
-    def __init__(self, reference_data_db_name):
+    def __init__(self):
         self.__results = Results()
-        self.__reference = Reference(reference_data_db_name)
         self.input = Input()
 
     @property
@@ -52,12 +51,17 @@ class Model:
         return self.__results
 
     @property
-    def reference(self):
+    def reference(self) -> Reference:
         return self.__reference
+
+    @reference.setter
+    def reference(self, reference: Reference) -> None:
+        self.__reference = reference
 
     def __is_ready(self):
         return (
-            self.input.initialized()
+            self.reference is not None
+            and self.input.initialized()
             and self.input.valid()
             and self.__is_input_valid()
         )
