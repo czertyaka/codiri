@@ -32,8 +32,10 @@ class Input:
         )
 
     def __str__(self) -> str:
-        return f"{{distance: {self.distance}; square side: {self.square_side};"
-        f" age: {self.age}; terrain type: {self.terrain_type}}}"
+        return str(
+            f"{{distance: {self.distance}; square side: {self.square_side};"
+            f" age: {self.age}; terrain type: {self.terrain_type}}}"
+        )
 
     @property
     def distance(self) -> float:
