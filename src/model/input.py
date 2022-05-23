@@ -12,6 +12,7 @@ class Input:
         self.__extreme_windspeeds = None
         self.__age = None
         self.__terrain_type = None
+        self.__blowout_time = None
 
     def initialized(self) -> bool:
         return (
@@ -22,6 +23,7 @@ class Input:
             and self.extreme_windspeeds is not None
             and self.age is not None
             and self.terrain_type is not None
+            and self.blowout_time is not None
         )
 
     def valid(self) -> bool:
@@ -115,3 +117,12 @@ class Input:
         if value not in ["greenland", "agricultural", "forest", "settlement"]:
             raise ValueError(f"unknown terrain type '{value}'")
         self.__terrain_type = value
+
+    @property
+    def blowout_time(self) -> int:
+        return self.__blowout_time
+
+    @blowout_time.setter
+    def blowout_time(self, value: int) -> None:
+        """Wind operation (blowout) time, sec"""
+        self.__blowout_time = value
