@@ -11,6 +11,21 @@ def _log(msg):
     print("activity: " + msg)
 
 
+def blowout_activity_flow(specific_activity: float, windspeed: float) -> float:
+    """Blowout activity flow due to wind uplift, Bq/(m^s*sec)
+    [specific_activity] = Bq/kg
+    [windspeed] = m/sec
+    """
+    tau = 0.0078  # N/m^2
+    critical_windspeed = 5.2  # m/sec
+    b_critical = 45
+    alpha = 9
+
+    factor = specific_activity * tau * b_critical / windspeed
+    exp = math.exp(alpha * (1 - math.pow(critical_windspeed / windspeed, 2)))
+    return factor * exp
+
+
 class ActivityMapError(Exception):
     """Generic error for creating activity map instance"""
 

@@ -4,6 +4,7 @@ from .results import Results
 from .reference import Reference
 import math
 from scipy import integrate
+from ..activity import blowout_activity_flow
 
 
 class Model:
@@ -186,13 +187,17 @@ class Model:
     def __calculate_height_concentration_integrals(self, nuclide):
         """РБ-134-17, p. 15, (2)"""
 
-        activity = self.input.specific_activities[nuclide]
         height_deposition_factor = self.results.height_deposition_factors[
             nuclide
         ]
+        windspeeds = self.input.extreme_windspeeds
+        specific_activity = self.input.specific_activities[nuclide]
         values = dict()
 
         for a_class in pasquill_gifford_classes:
+            activity = blowout_activity_flow(
+                specific_activity, windspeeds[a_class]
+            )
             values[a_class] = activity * height_deposition_factor[a_class]
 
         self.results.height_concentration_integrals.insert(nuclide, values)
@@ -200,11 +205,15 @@ class Model:
     def __calculate_concentration_integrals(self, nuclide):
         """РБ-134-17, p. 14, (1)"""
 
-        activity = self.input.specific_activities[nuclide]
         dilution_factors = self.results.dilution_factors[nuclide]
+        windspeeds = self.input.extreme_windspeeds
+        specific_activity = self.input.specific_activities[nuclide]
         values = dict()
 
         for a_class in pasquill_gifford_classes:
+            activity = blowout_activity_flow(
+                specific_activity, windspeeds[a_class]
+            )
             values[a_class] = activity * dilution_factors[a_class]
 
         self.results.concentration_integrals.insert(nuclide, values)

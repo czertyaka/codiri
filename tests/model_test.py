@@ -4,7 +4,7 @@ from codiri.src.model.reference import IReference
 from codiri.src.database import InMemoryDatabase
 from codiri.src.model.input import Input
 import math
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import pytest
 
 
@@ -183,14 +183,18 @@ def test_calculate_height_concentration_integrals():
     model = ModelTest()
 
     input = Input()
-    input.add_specific_activity("A-0", 2)
+    activity = 2
+    input.add_specific_activity("A-0", activity)
+    input.extreme_windspeeds = dict(A=1, B=1, C=1, D=1, E=1, F=1)
     model.input = input
 
     model.results.height_deposition_factors.insert(
         "A-0", dict(A=0, B=6, C=2, D=8, E=4, F=10)
     )
 
-    model._Model__calculate_height_concentration_integrals("A-0")
+    with patch("codiri.src.model.model.blowout_activity_flow") as mocked:
+        mocked.return_value = activity
+        model._Model__calculate_height_concentration_integrals("A-0")
 
     assert model.results.height_concentration_integrals["A-0"] == dict(
         A=0, B=12, C=4, D=16, E=8, F=20
@@ -201,14 +205,18 @@ def test_calculate_concentration_integrals():
     model = ModelTest()
 
     input = Input()
-    input.add_specific_activity("A-0", 2)
+    activity = 2
+    input.add_specific_activity("A-0", activity)
+    input.extreme_windspeeds = dict(A=1, B=1, C=1, D=1, E=1, F=1)
     model.input = input
 
     model.results.dilution_factors.insert(
         "A-0", dict(A=0, B=6, C=2, D=8, E=4, F=10)
     )
 
-    model._Model__calculate_concentration_integrals("A-0")
+    with patch("codiri.src.model.model.blowout_activity_flow") as mocked:
+        mocked.return_value = activity
+        model._Model__calculate_concentration_integrals("A-0")
 
     assert model.results.concentration_integrals["A-0"] == dict(
         A=0, B=12, C=4, D=16, E=8, F=20
