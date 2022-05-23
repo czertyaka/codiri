@@ -183,7 +183,7 @@ def test_calculate_height_concentration_integrals():
     model = ModelTest()
 
     input = Input()
-    input.add_activity("A-0", 2)
+    input.add_specific_activity("A-0", 2)
     model.input = input
 
     model.results.height_deposition_factors.insert(
@@ -201,7 +201,7 @@ def test_calculate_concentration_integrals():
     model = ModelTest()
 
     input = Input()
-    input.add_activity("A-0", 2)
+    input.add_specific_activity("A-0", 2)
     model.input = input
 
     model.results.dilution_factors.insert(

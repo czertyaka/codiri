@@ -186,7 +186,7 @@ class Model:
     def __calculate_height_concentration_integrals(self, nuclide):
         """РБ-134-17, p. 15, (2)"""
 
-        activity = self.input.activities[nuclide]
+        activity = self.input.specific_activities[nuclide]
         height_deposition_factor = self.results.height_deposition_factors[
             nuclide
         ]
@@ -200,7 +200,7 @@ class Model:
     def __calculate_concentration_integrals(self, nuclide):
         """РБ-134-17, p. 14, (1)"""
 
-        activity = self.input.activities[nuclide]
+        activity = self.input.specific_activities[nuclide]
         dilution_factors = self.results.dilution_factors[nuclide]
         values = dict()
 

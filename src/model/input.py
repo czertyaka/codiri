@@ -7,7 +7,7 @@ class Input:
     def __init__(self):
         self.__distance = None
         self.__square_side = None
-        self.__activities = dict()
+        self.__specific_activities = dict()
         self.__precipitation_rate = None
         self.__extreme_windspeeds = None
         self.__age = None
@@ -18,7 +18,7 @@ class Input:
         return (
             self.distance is not None
             and self.square_side is not None
-            and len(self.activities) > 0
+            and len(self.specific_activities) > 0
             and self.precipitation_rate is not None
             and self.extreme_windspeeds is not None
             and self.age is not None
@@ -59,14 +59,16 @@ class Input:
         self.__square_side = value
 
     @property
-    def activities(self) -> dict:
-        return self.__activities
+    def specific_activities(self) -> dict:
+        return self.__specific_activities
 
-    def add_activity(self, nuclide: str, activity: float):
-        """Add accidental release activity for specific nuclide, Bq"""
-        prev = self.__activities.get(nuclide)
-        self.__activities[nuclide] = (
-            (prev + activity) if prev is not None else activity
+    def add_specific_activity(self, nuclide: str, specific_activitiy: float):
+        """Add specific activity for specific nuclide, Bq/kg"""
+        prev = self.__specific_activities.get(nuclide)
+        self.__specific_activities[nuclide] = (
+            (prev + specific_activitiy)
+            if prev is not None
+            else specific_activitiy
         )
 
     @property
