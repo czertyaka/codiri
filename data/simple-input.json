@@ -6,14 +6,15 @@
         "age": 20,
         "blowout_time": 3600,
         "soil_density": 1400,
+        "square_side": 500,
         "wind_speed": [
             { "a_class": "A", "value": 3 },
             { "a_class": "B", "value": 5 },
             { "a_class": "C", "value": 8 },
             { "a_class": "D", "value": 18 },
             { "a_class": "E", "value": 18 },
-            { "a_class": "F", "value": 3 },
-        ],
+            { "a_class": "F", "value": 3 }
+        ]
     },
     "basins": [
         {
@@ -22,7 +23,7 @@
             "lat": 1200000,
             "measurements": [
                 { "nuclide": "Cs-137", "specific_activity": 1e6 },
-                { "nuclide": "Sr-90", "specific_activity": 1.5e6 },
+                { "nuclide": "Sr-90", "specific_activity": 1.5e6 }
             ]
         },
         {
@@ -30,25 +31,25 @@
             "lon": 900000,
             "lat": 1300000,
             "measurements": [
-                { "nuclide": "Cs-137", "specific_activity": 1e7 },
+                { "nuclide": "Cs-137", "specific_activity": 1e7 }
             ]
-        },
+        }
     ],
     "points": {
         "map": {
             "ul": {
                 "lon": 1000000,
-                "lat": 2000000,
+                "lat": 2000000
             },
             "lr": {
                 "lon": 2000000,
-                "lat": 1000000,
+                "lat": 1000000
             },
-            "step": 1000,
+            "resolution": 100
         },
         "special": [
             { "name": "City", "lon": 1200000, "lat": 1200000},
-            { "name": "Town", "lon": 1400000, "lat": 1400000},
-        ],
+            { "name": "Town", "lon": 1400000, "lat": 1400000}
+        ]
     }
 }
