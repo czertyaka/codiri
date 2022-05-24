@@ -18,7 +18,7 @@ def blowout_activity_flow(specific_activity: float, windspeed: float) -> float:
     """
     tau = 0.0078  # N/m^2
     critical_windspeed = 5.2  # m/sec
-    b_critical = 45
+    b_critical = 45e-6
     alpha = 9
 
     factor = specific_activity * tau * b_critical / windspeed

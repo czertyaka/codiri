@@ -29,7 +29,7 @@ class Model:
         if self.__is_ready() is False:
             return False
 
-        for nuclide in self.input.activities:
+        for nuclide in self.input.specific_activities:
             self.__calculate_sediment_detachments(nuclide)
             self.__calculate_depletions(nuclide)
             self.__caclculate_dilution_factors(nuclide)
@@ -69,7 +69,7 @@ class Model:
 
     def __is_input_valid(self):
         nuclides = self.reference.all_nuclides()
-        for nuclide in self.input.activities:
+        for nuclide in self.input.specific_activities:
             if nuclide not in nuclides:
                 return False
         return True
@@ -184,6 +184,15 @@ class Model:
 
         self.results.depositions.insert(nuclide, values)
 
+    def __calculate_release(
+        self, specific_activity: float, windspeed: float
+    ) -> float:
+        return (
+            blowout_activity_flow(specific_activity, windspeed)
+            * self.input.blowout_time
+            * math.pow(self.input.square_side, 2)
+        )
+
     def __calculate_height_concentration_integrals(self, nuclide):
         """РБ-134-17, p. 15, (2)"""
 
@@ -195,7 +204,7 @@ class Model:
         values = dict()
 
         for a_class in pasquill_gifford_classes:
-            activity = blowout_activity_flow(
+            activity = self.__calculate_release(
                 specific_activity, windspeeds[a_class]
             )
             values[a_class] = activity * height_deposition_factor[a_class]
@@ -211,7 +220,7 @@ class Model:
         values = dict()
 
         for a_class in pasquill_gifford_classes:
-            activity = blowout_activity_flow(
+            activity = self.__calculate_release(
                 specific_activity, windspeeds[a_class]
             )
             values[a_class] = activity * dilution_factors[a_class]

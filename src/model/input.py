@@ -62,13 +62,13 @@ class Input:
     def specific_activities(self) -> dict:
         return self.__specific_activities
 
-    def add_specific_activity(self, nuclide: str, specific_activitiy: float):
+    def add_specific_activity(self, nuclide: str, specific_activity: float):
         """Add specific activity for specific nuclide, Bq/kg"""
         prev = self.__specific_activities.get(nuclide)
         self.__specific_activities[nuclide] = (
-            (prev + specific_activitiy)
+            (prev + specific_activity)
             if prev is not None
-            else specific_activitiy
+            else specific_activity
         )
 
     @property
