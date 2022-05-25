@@ -29,6 +29,7 @@ from src.model.common import pasquill_gifford_classes
 from src.model.input import Input
 from src.model.model import Model
 from math import log10, floor
+import rasterio
 
 reference = Reference("data/reference_data.db")
 start = datetime.now()
@@ -130,6 +131,20 @@ def make_activity_maps(
             maps[nuclide].add_basin(basin=basin, measurements=[measurement])
 
     return [item for key, item in maps.items()]
+
+
+def save_maps(maps: List[ActivityMap]) -> None:
+    raster_factors = dict()
+    for mp in maps:
+        raster_factors[mp.nuclide] = mp.raster_factor
+        raster_filename = report_bin_dir_name() + f"/{mp.nuclide}_actmap.tif"
+        profile = mp.img.profile
+        data = mp.img.read(1)
+        with rasterio.open(raster_filename, "w", **profile) as f:
+            f.write(data, 1)
+
+    with open(report_bin_dir_name() + "/raster_factors.json", "w") as f:
+        json.dump(raster_factors, f)
 
 
 def plot_maps(maps: List[ActivityMap]) -> None:
@@ -443,6 +458,7 @@ if __name__ == "__main__":
     activity_maps = make_activity_maps(
         basins, inp["basins"], raster.img.bounds, inp["model"]["square_side"]
     )
+    save_maps(activity_maps)
     plot_maps(activity_maps)
     if "map" in inp["points"]:
         calculate_doses_map(activity_maps, inp["points"]["map"])
