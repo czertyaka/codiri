@@ -147,30 +147,6 @@ def save_maps(maps: List[ActivityMap]) -> None:
         json.dump(raster_factors, f)
 
 
-def plot_maps(maps: List[ActivityMap]) -> None:
-    for i in range(len(maps)):
-        actmap = maps[i]
-        bounds = actmap.img.bounds
-        extent = [bounds[0], bounds[2], bounds[1], bounds[3]]
-        data = actmap.img.read(1) / actmap.raster_factor
-        plt.figure()
-        ax = plt.subplot()
-        shw = ax.imshow(
-            data,
-            cmap=plt.get_cmap("YlGn"),
-            norm=LogNorm(vmin=1e7, vmax=data.max()),
-            extent=extent,
-        )
-        plt.colorbar(shw, fraction=0.046, pad=0.04)
-        ax.title.set_text(f"{actmap.nuclide} activity, Bq")
-        ax.tick_params(axis="x", labelrotation=25)
-
-        if show_plots:
-            plt.show()
-        else:
-            plt.savefig(report_dir_name() + f"/{actmap.nuclide}_actmap.png")
-
-
 def dict_of_atm_class_arrays(x_len: int, y_len: int) -> dict:
     d = dict()
     for a_class in pasquill_gifford_classes:
@@ -444,6 +420,41 @@ def plot_doses_map(basins: Dict[str, Basin]) -> None:
     plot_doses_map_contours(x, y, doses, basins)
 
 
+def plot_maps() -> None:
+    with open(report_bin_dir_name() + "/raster_factors.json", "r") as f:
+        raster_factors = json.load(f)
+
+    regex = re.compile(".*_actmap.tif")
+    for _root, _dirs, files in walk(report_bin_dir_name()):
+        for file in files:
+            if regex.match(file):
+                nuclide = file.split("_")[0]
+                with rasterio.open(
+                    report_bin_dir_name() + "/" + file, "r"
+                ) as dataset:
+                    bounds = dataset.bounds
+                    extent = [bounds[0], bounds[2], bounds[1], bounds[3]]
+                    data = dataset.read(1) / raster_factors[nuclide]
+                    plt.figure()
+                    ax = plt.subplot()
+                    shw = ax.imshow(
+                        data,
+                        cmap=plt.get_cmap("YlGn"),
+                        norm=LogNorm(vmin=1e7, vmax=data.max()),
+                        extent=extent,
+                    )
+                    plt.colorbar(shw, fraction=0.046, pad=0.04)
+                    ax.title.set_text(f"{nuclide} activity, Bq")
+                    ax.tick_params(axis="x", labelrotation=25)
+
+                    if show_plots:
+                        plt.show()
+                    else:
+                        plt.savefig(
+                            report_dir_name() + f"/{nuclide}_actmap.png"
+                        )
+
+
 if __name__ == "__main__":
     args = parse_arguments()
     inp = parse_input(args.input)
@@ -459,7 +470,7 @@ if __name__ == "__main__":
         basins, inp["basins"], raster.img.bounds, inp["model"]["square_side"]
     )
     save_maps(activity_maps)
-    plot_maps(activity_maps)
+    plot_maps()
     if "map" in inp["points"]:
         calculate_doses_map(activity_maps, inp["points"]["map"])
         plot_doses_map(basins)
