@@ -149,10 +149,10 @@ def plot_maps(maps: List[ActivityMap]) -> None:
         ax.title.set_text(f"{actmap.nuclide} activity, Bq")
         ax.tick_params(axis="x", labelrotation=45)
 
-    if show_plots:
-        plt.show()
-    else:
-        plt.savefig(report_dir_name() + "/actmaps.png")
+        if show_plots:
+            plt.show()
+        else:
+            plt.savefig(report_dir_name() + f"/{actmap.nuclide}_actmap.png")
 
 
 def dict_of_atm_class_arrays(x_len: int, y_len: int) -> dict:
