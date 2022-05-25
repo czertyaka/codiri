@@ -2,6 +2,7 @@
 
 from src.basins import Basin
 
+import argparse
 from typing import Dict, List
 import json
 import re
@@ -17,7 +18,7 @@ import math
 import scipy.ndimage
 
 _bin_dir_name = None
-_show = True
+_save = True
 _basins = None
 
 
@@ -51,9 +52,11 @@ def plot_act_maps() -> None:
                     ax.title.set_text(f"{nuclide} activity, Bq")
                     ax.tick_params(axis="x", labelrotation=25)
 
-                    plt.savefig(_bin_dir_name + f"/../{nuclide}_actmap.png")
-                    if _show:
-                        plt.show()
+                    if _save:
+                        plt.savefig(
+                            _bin_dir_name + f"/../{nuclide}_actmap.png"
+                        )
+                    plt.show()
 
 
 def plot_doses_map_heatmap(
@@ -77,9 +80,9 @@ def plot_doses_map_heatmap(
             patch = patches.Polygon(xy=array, closed=True)
             ax.add_patch(patch)
 
-        plt.savefig(_bin_dir_name + "/../" + target + "_heatmap.png")
-        if _show:
-            plt.show()
+        if _save:
+            plt.savefig(_bin_dir_name + "/../" + target + "_heatmap.png")
+        plt.show()
 
 
 def plot_doses_map_contours(
@@ -117,9 +120,9 @@ def plot_doses_map_contours(
             patch = patches.Polygon(xy=array, closed=True)
             ax.add_patch(patch)
 
-        plt.savefig(_bin_dir_name + "/../" + target + "_contours.png")
-        if _show:
-            plt.show()
+        if _save:
+            plt.savefig(_bin_dir_name + "/../" + target + "_contours.png")
+        plt.show()
 
 
 def plot_doses_maps() -> None:
@@ -145,16 +148,36 @@ def plot_doses_maps() -> None:
     plot_doses_map_contours(x, y, doses)
 
 
-def make_plots(bin_dir_name: str, show: bool, basins: Dict[str, Basin] = None):
+def make_plots(bin_dir_name: str, save: bool, basins: Dict[str, Basin] = None):
     global _bin_dir_name
     _bin_dir_name = bin_dir_name
-    global _show
-    _show = show
+    global _save
+    _save = save
     global _basins
     _basins = basins if basins is not None else dict()
     plot_act_maps()
     plot_doses_maps()
 
 
+def init_parser(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "-r", "--report_dir", help="report directory", required=True
+    )
+    parser.add_argument(
+        "-s",
+        "--save",
+        action="store_true",
+        help="save plots in report directory",
+    )
+
+
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Plot data from report")
+    init_parser(parser)
+    args = parser.parse_args()
+    return args
+
+
 if __name__ == "__main__":
-    pass
+    args = parse_arguments()
+    make_plots(args.report_dir + "/bin", args.save)

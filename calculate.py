@@ -24,12 +24,11 @@ from src.model.input import Input
 from src.model.model import Model
 from plot import make_plots
 
-reference = Reference("data/reference_data.db")
-start = datetime.now()
-output_directory = TemporaryDirectory()
-output_directory_name = output_directory.name
-show_plots = True
-model_input = dict()
+_reference = Reference("data/reference_data.db")
+_start = datetime.now()
+_output_directory = TemporaryDirectory()
+_output_directory_name = _output_directory.name
+_model_input = dict()
 
 
 def init_parser(parser: argparse.ArgumentParser) -> None:
@@ -51,8 +50,8 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def report_dir_name() -> str:
-    report_dir_name = f"/report_{start.strftime('%d-%m-%Y_%H-%M-%S')}"
-    return output_directory_name + report_dir_name
+    report_dir_name = f"/report_{_start.strftime('%d-%m-%Y_%H-%M-%S')}"
+    return _output_directory_name + report_dir_name
 
 
 def report_bin_dir_name() -> str:
@@ -144,20 +143,21 @@ def dict_of_atm_class_arrays(x_len: int, y_len: int) -> dict:
 
 def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
     inp = Input()
-    inp.square_side = model_input["square_side"]
-    inp.precipitation_rate = model_input["precipitation_rate"]
-    inp.terrain_type = model_input["terrain_type"]
-    inp.blowout_time = model_input["blowout_time"]
-    inp.age = model_input["age"]
+    global _model_input
+    inp.square_side = _model_input["square_side"]
+    inp.precipitation_rate = _model_input["precipitation_rate"]
+    inp.terrain_type = _model_input["terrain_type"]
+    inp.blowout_time = _model_input["blowout_time"]
+    inp.age = _model_input["age"]
     ws = dict()
-    for ws_data in model_input["wind_speed"]:
+    for ws_data in _model_input["wind_speed"]:
         ws[ws_data["a_class"]] = ws_data["value"]
     inp.extreme_windspeeds = ws
 
-    soil_density = model_input["soil_density"]
+    soil_density = _model_input["soil_density"]
 
     model = Model()
-    model.reference = reference
+    model.reference = _reference
 
     activities = actmap.img.read(1) / actmap.raster_factor
     square_area = pow(inp.square_side, 2)
@@ -316,10 +316,11 @@ def calculate_doses_in_special_points(
 if __name__ == "__main__":
     args = parse_arguments()
     inp = parse_input(args.input)
-    model_input = inp["model"]
+    _model_input = inp["model"]
+    save_plots = False
     if args.output is not None:
-        output_directory_name = args.output
-        show_plots = False
+        _output_directory_name = args.output
+        save_plots = True
     print(f"report directory: {report_dir_name()}")
     prepare_output(args.input)
     raster = Map(inp["geotiff_filename"])
@@ -334,4 +335,4 @@ if __name__ == "__main__":
         calculate_doses_in_special_points(
             activity_maps, inp["points"]["special"]
         )
-    make_plots(report_bin_dir_name(), show_plots, basins)
+    make_plots(report_bin_dir_name(), save_plots, basins)
