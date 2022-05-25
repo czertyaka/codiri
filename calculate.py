@@ -138,8 +138,9 @@ def plot_maps(maps: List[ActivityMap]) -> None:
         bounds = actmap.img.bounds
         extent = [bounds[0], bounds[2], bounds[1], bounds[3]]
         data = actmap.img.read(1) / actmap.raster_factor
-        ax = plt.gca()
-        shw = plt.imshow(
+        plt.figure()
+        ax = plt.subplot()
+        shw = ax.imshow(
             data,
             cmap=plt.get_cmap("YlGn"),
             norm=LogNorm(vmin=1e7, vmax=data.max()),
@@ -147,7 +148,7 @@ def plot_maps(maps: List[ActivityMap]) -> None:
         )
         plt.colorbar(shw, fraction=0.046, pad=0.04)
         ax.title.set_text(f"{actmap.nuclide} activity, Bq")
-        ax.tick_params(axis="x", labelrotation=45)
+        ax.tick_params(axis="x", labelrotation=25)
 
         if show_plots:
             plt.show()
@@ -340,7 +341,8 @@ def plot_doses_map_heatmap(
     basins: Dict[str, Basin],
 ) -> None:
     for target in doses:
-        ax = plt.gca()
+        plt.figure()
+        ax = plt.subplot()
         data = doses[target]
 
         extent = [x.min(), x.max(), y.min(), y.max()]
@@ -369,7 +371,8 @@ def plot_doses_map_contours(
 ) -> None:
     count = 0
     for target in doses:
-        ax = plt.gca()
+        plt.figure()
+        ax = plt.subplot()
         count += 1
         data = doses[target]
         exponent = find_exp(data.max())
