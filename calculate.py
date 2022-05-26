@@ -142,6 +142,20 @@ def dict_of_atm_class_arrays(x_len: int, y_len: int) -> dict:
     return d
 
 
+def list_of_atm_classes_names(prefix: str) -> list:
+    lst = list()
+    for a_class in pasquill_gifford_classes:
+        lst.append(prefix + "_" + a_class)
+    return lst
+
+
+def dict_of_atm_class_to_list(d: Dict[str, float]) -> List[float]:
+    lst = list()
+    for a_class in pasquill_gifford_classes:
+        lst.append(d[a_class])
+    return lst
+
+
 def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
     inp = Input()
     global _model_input
@@ -314,13 +328,39 @@ def calculate_doses_in_special_points(
     writer = csv.writer(
         f, delimiter=";", quotechar="'", quoting=csv.QUOTE_MINIMAL
     )
-    writer.writerow(["point", "x", "y", "nuclide", "E_max, Sv"])
+    e_total_hdr = list_of_atm_classes_names("e_total_10")
+    e_inh_hdr = list_of_atm_classes_names("e_inh")
+    e_surface_hdr = list_of_atm_classes_names("e_surface")
+    e_cloud_hdr = list_of_atm_classes_names("e_cloud")
+    concentration_integral_hdr = list_of_atm_classes_names(
+        "concentration_integral"
+    )
+    deposition_hdr = list_of_atm_classes_names("deposition")
+    depletion_hdr = list_of_atm_classes_names("depletion")
+
+    writer.writerow(
+        [
+            "point",
+            "x",
+            "y",
+            "nuclide",
+            "E_max",
+            *e_total_hdr,
+            *e_inh_hdr,
+            *e_surface_hdr,
+            *e_cloud_hdr,
+            *concentration_integral_hdr,
+            *deposition_hdr,
+            *depletion_hdr,
+        ]
+    )
 
     for point_data in inp:
         coo = Coordinate(lon=point_data["lon"], lat=point_data["lat"])
         row = point_data["name"]
         for act_map in activity_maps:
-            dose = calculate_dose(act_map, coo)[0]
+            results = calculate_dose(act_map, coo)
+            dose = results[0]
             row += f"; {act_map.nuclide}: {dose:.2e}"
             writer.writerow(
                 [
@@ -329,6 +369,13 @@ def calculate_doses_in_special_points(
                     point_data["lat"],
                     act_map.nuclide,
                     dose,
+                    *dict_of_atm_class_to_list(results[1]),
+                    *dict_of_atm_class_to_list(results[2]),
+                    *dict_of_atm_class_to_list(results[3]),
+                    *dict_of_atm_class_to_list(results[4]),
+                    *dict_of_atm_class_to_list(results[5]),
+                    *dict_of_atm_class_to_list(results[6]),
+                    *dict_of_atm_class_to_list(results[7]),
                 ]
             )
         print(row)
