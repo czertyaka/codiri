@@ -12,6 +12,7 @@ from collections import Counter
 from copy import deepcopy
 from tempfile import TemporaryDirectory
 import rasterio
+import csv
 
 from src.model.reference import Reference
 from src.geo import Map
@@ -299,18 +300,30 @@ def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
 def calculate_doses_in_special_points(
     activity_maps: List[ActivityMap], inp: List
 ) -> None:
-    msg = str()
+    f = open(report_dir_name() + "/special_points.csv", "w")
+    writer = csv.writer(
+        f, delimiter=";", quotechar="'", quoting=csv.QUOTE_MINIMAL
+    )
+    writer.writerow(["point", "x", "y", "nuclide", "E_max, Sv"])
+
     for point_data in inp:
         coo = Coordinate(lon=point_data["lon"], lat=point_data["lat"])
         row = point_data["name"]
         for act_map in activity_maps:
             dose = calculate_dose(act_map, coo)[0]
             row += f"; {act_map.nuclide}: {dose:.2e}"
+            writer.writerow(
+                [
+                    point_data["name"],
+                    point_data["lon"],
+                    point_data["lat"],
+                    act_map.nuclide,
+                    dose,
+                ]
+            )
         print(row)
-        msg += row + "\n"
 
-    with open(report_dir_name() + "/special_points.txt", "w") as f:
-        f.write(msg)
+    f.close()
 
 
 if __name__ == "__main__":
@@ -331,8 +344,8 @@ if __name__ == "__main__":
     save_act_maps(activity_maps)
     if "map" in inp["points"]:
         calculate_doses_map(activity_maps, inp["points"]["map"])
+        make_plots(report_bin_dir_name(), save_plots, basins)
     if "special" in inp["points"]:
         calculate_doses_in_special_points(
             activity_maps, inp["points"]["special"]
         )
-    make_plots(report_bin_dir_name(), save_plots, basins)
