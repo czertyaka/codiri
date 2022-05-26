@@ -43,10 +43,10 @@ def plot_act_maps() -> None:
 
     regex = re.compile(".*_actmap.tif")
     for _root, _dirs, files in walk(_bin_dir_name):
+        found = False
         for file in files:
-            if not regex.match(file):
-                _log(f"no files matching '{regex.pattern}'")
-            else:
+            if regex.match(file):
+                found = True
                 nuclide = file.split("_")[0]
                 with rasterio.open(_bin_dir_name + "/" + file, "r") as dataset:
                     bounds = dataset.bounds
@@ -69,6 +69,8 @@ def plot_act_maps() -> None:
                             _bin_dir_name + f"/../{nuclide}_actmap.png"
                         )
                     plt.show()
+        if not found:
+            _log(f"no files matching '{regex.pattern}'")
 
 
 def plot_doses_map_heatmap(
@@ -152,14 +154,16 @@ def plot_doses_maps() -> None:
     regex = re.compile(".*_e_max.npy")
     doses = dict()
     for _root, _dirs, files in walk(_bin_dir_name):
+        found = False
         for file in files:
-            if not regex.match(file):
-                _log(f"no files matching '{regex.pattern}'")
-            else:
+            if regex.match(file):
+                found = True
                 nuclide = file.split("_")[0]
                 with open(_bin_dir_name + "/" + file, "rb") as f:
                     doses[nuclide] = np.load(f)
                     sum_doses += doses[nuclide]
+        if not found:
+            _log(f"no files matching '{regex.pattern}'")
 
     doses["sum"] = sum_doses
 
