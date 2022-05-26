@@ -243,6 +243,11 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
                     + Counter(depletions)
                 )
 
+    for a_class in depletions:
+        depletions[a_class] = depletions[a_class] / np.count_nonzero(
+            activities
+        )
+
     return (
         e_max,
         e_total_10,
