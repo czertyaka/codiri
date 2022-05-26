@@ -170,6 +170,7 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
     e_cloud = dict()
     concentration_integrals = dict()
     depositions = dict()
+    depletions = dict()
 
     for i in range(actmap.img.width):
         for j in range(actmap.img.height):
@@ -223,6 +224,10 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
                     Counter(model.results.depositions[actmap.nuclide])
                     + Counter(depositions)
                 )
+                depletions = dict(
+                    Counter(model.results.full_depletions[actmap.nuclide])
+                    + Counter(depletions)
+                )
 
     return (
         e_max,
@@ -232,6 +237,7 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
         e_cloud,
         concentration_integrals,
         depositions,
+        depletions,
     )
 
 
@@ -254,6 +260,7 @@ def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
     e_cloud = dict_of_atm_class_arrays(len(y), len(x))
     concentration_integrals = dict_of_atm_class_arrays(len(y), len(x))
     depositions = dict_of_atm_class_arrays(len(y), len(x))
+    depletions = dict_of_atm_class_arrays(len(y), len(x))
 
     for act_map in activity_maps:
         nuclide = act_map.nuclide
@@ -271,6 +278,7 @@ def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
                         a_class
                     ]
                     depositions[a_class][i][j] = results[6][a_class]
+                    depletions[a_class][i][j] = results[7][a_class]
                 print(
                     f"ts: {datetime.now().strftime('%H:%M:%S')};"
                     f" j = {j}/{len(x)}; i = {i}/{len(y)}; coo: {coo}; "
@@ -295,6 +303,8 @@ def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
             np.savez(f, **concentration_integrals)
         with open(make_bin_data_name(nuclide, "depositions.npz"), "wb") as f:
             np.savez(f, **depositions)
+        with open(make_bin_data_name(nuclide, "depletions.npz"), "wb") as f:
+            np.savez(f, **depletions)
 
 
 def calculate_doses_in_special_points(
