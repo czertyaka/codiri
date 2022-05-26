@@ -25,7 +25,7 @@ from src.model.input import Input
 from src.model.model import Model
 from plot import make_plots
 
-_reference = Reference("data/reference_data.db")
+_reference = None
 _start = datetime.now()
 _output_directory = TemporaryDirectory()
 _output_directory_name = _output_directory.name
@@ -51,7 +51,9 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def report_dir_name() -> str:
+    global _start
     report_dir_name = f"/report_{_start.strftime('%d-%m-%Y_%H-%M-%S')}"
+    global _output_directory_name
     return _output_directory_name + report_dir_name
 
 
@@ -172,6 +174,7 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
     soil_density = _model_input["soil_density"]
 
     model = Model()
+    global _reference
     model.reference = _reference
 
     activities = actmap.img.read(1) / actmap.raster_factor
@@ -392,6 +395,7 @@ if __name__ == "__main__":
     args = parse_arguments()
     inp = parse_input(args.input)
     _model_input = inp["model"]
+    _reference = Reference(inp["database_name"])
     save_plots = False
     if args.output is not None:
         _output_directory_name = args.output

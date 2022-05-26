@@ -1,5 +1,6 @@
 {
     "geotiff_filename": "../data/water.tiff",
+    "database_name": "../data/reference_data.db",
     "model": {
         "precipitation_rate": 1,
         "terrain_type": "forest",
