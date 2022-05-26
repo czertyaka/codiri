@@ -52,13 +52,13 @@ def parse_arguments() -> argparse.Namespace:
 
 def report_dir_name() -> str:
     global _start
-    report_dir_name = f"/report_{_start.strftime('%d-%m-%Y_%H-%M-%S')}"
+    report_dir_name = f"report_{_start.strftime('%d-%m-%Y_%H-%M-%S')}"
     global _output_directory_name
-    return _output_directory_name + report_dir_name
+    return path.join(_output_directory_name, report_dir_name)
 
 
 def report_bin_dir_name() -> str:
-    return report_dir_name() + "/bin"
+    return path.join(report_dir_name(), "bin")
 
 
 def prepare_output(input_filename: str) -> None:
@@ -66,7 +66,7 @@ def prepare_output(input_filename: str) -> None:
     mkdir(report_bin_dir_name())
     copy(
         input_filename,
-        report_dir_name() + "/input.json",
+        path.join(report_dir_name(), "input.json")
     )
 
 
@@ -127,13 +127,13 @@ def save_act_maps(maps: List[ActivityMap]) -> None:
     raster_factors = dict()
     for mp in maps:
         raster_factors[mp.nuclide] = mp.raster_factor
-        raster_filename = report_bin_dir_name() + f"/{mp.nuclide}_actmap.tif"
+        raster_filename = path.join(report_bin_dir_name(), f"{mp.nuclide}_actmap.tif")
         profile = mp.img.profile
         data = mp.img.read(1)
         with rasterio.open(raster_filename, "w", **profile) as f:
             f.write(data, 1)
 
-    with open(report_bin_dir_name() + "/raster_factors.json", "w") as f:
+    with open(path.join(report_bin_dir_name(), "raster_factors.json"), "w") as f:
         json.dump(raster_factors, f)
 
 
@@ -263,8 +263,8 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
     )
 
 
-def make_bin_data_name(nuclide_name: str, value_name: str) -> str:
-    return report_bin_dir_name() + "/" + nuclide_name + "_" + value_name
+def make_bin_data_name(nuclide_name: str, value_name: str) -> path:
+    return path.join(report_bin_dir_name(), (nuclide_name + "_" + value_name))
 
 
 def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
@@ -272,7 +272,7 @@ def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
     x = np.linspace(start=inp["ul"]["lon"], stop=inp["lr"]["lon"], num=res)
     y = np.linspace(start=inp["ul"]["lat"], stop=inp["lr"]["lat"], num=res)
 
-    with open(report_bin_dir_name() + "/coords.npy", "wb") as f:
+    with open(path.join(report_bin_dir_name(), "coords.npy"), "wb") as f:
         np.savez(f, x=x, y=y)
 
     e_max = np.zeros((len(y), len(x)))
@@ -332,7 +332,7 @@ def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
 def calculate_doses_in_special_points(
     activity_maps: List[ActivityMap], inp: List
 ) -> None:
-    f = open(report_dir_name() + "/special_points.csv", "w")
+    f = open(path.join(report_dir_name(), "special_points.csv"), "w")
     writer = csv.writer(
         f, delimiter=";", quotechar="'", quoting=csv.QUOTE_MINIMAL
     )

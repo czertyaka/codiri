@@ -6,7 +6,7 @@ import argparse
 from typing import Dict, List
 import json
 import re
-from os import walk
+from os import walk, path
 from os.path import isfile
 import rasterio
 from matplotlib import pyplot as plt
@@ -33,12 +33,12 @@ def find_exp(number) -> int:
 
 
 def plot_act_maps() -> None:
-    raster_factors_filename = _bin_dir_name + "/raster_factors.json"
+    raster_factors_filename = path.join(_bin_dir_name, "raster_factors.json")
     if not isfile(raster_factors_filename):
         _log(f"{raster_factors_filename} is missing")
         return
 
-    with open(_bin_dir_name + "/raster_factors.json", "r") as f:
+    with open(raster_factors_filename, "r") as f:
         raster_factors = json.load(f)
 
     regex = re.compile(".*_actmap.tif")
@@ -48,7 +48,7 @@ def plot_act_maps() -> None:
             if regex.match(file):
                 found = True
                 nuclide = file.split("_")[0]
-                with rasterio.open(_bin_dir_name + "/" + file, "r") as dataset:
+                with rasterio.open(path.join(_bin_dir_name, file), "r") as dataset:
                     bounds = dataset.bounds
                     extent = [bounds[0], bounds[2], bounds[1], bounds[3]]
                     data = dataset.read(1) / raster_factors[nuclide]
@@ -66,7 +66,7 @@ def plot_act_maps() -> None:
 
                     if _save:
                         plt.savefig(
-                            _bin_dir_name + f"/../{nuclide}_actmap.png"
+                            path.join(_bin_dir_name, "..", f"{nuclide}_actmap.png")
                         )
                     plt.show()
         if not found:
@@ -95,7 +95,7 @@ def plot_doses_map_heatmap(
             ax.add_patch(patch)
 
         if _save:
-            plt.savefig(_bin_dir_name + "/../" + target + "_heatmap.png")
+            plt.savefig(path.join(_bin_dir_name, "..", target + "_heatmap.png"))
         plt.show()
 
 
@@ -135,12 +135,12 @@ def plot_doses_map_contours(
             ax.add_patch(patch)
 
         if _save:
-            plt.savefig(_bin_dir_name + "/../" + target + "_contours.png")
+            plt.savefig(path.join(_bin_dir_name, "..", target + "_contours.png"))
         plt.show()
 
 
 def plot_doses_maps() -> None:
-    coords_filename = _bin_dir_name + "/coords.npy"
+    coords_filename = path.join(_bin_dir_name, "coords.npy")
     if not isfile(coords_filename):
         _log(f"{coords_filename} is missing")
         return
@@ -159,7 +159,7 @@ def plot_doses_maps() -> None:
             if regex.match(file):
                 found = True
                 nuclide = file.split("_")[0]
-                with open(_bin_dir_name + "/" + file, "rb") as f:
+                with open(path.join(_bin_dir_name, file), "rb") as f:
                     doses[nuclide] = np.load(f)
                     sum_doses += doses[nuclide]
         if not found:
@@ -203,4 +203,4 @@ def parse_arguments() -> argparse.Namespace:
 
 if __name__ == "__main__":
     args = parse_arguments()
-    make_plots(args.report_dir + "/bin", args.save)
+    make_plots(path.join(args.report_dir, "bin"), args.save)
