@@ -7,6 +7,7 @@ from typing import Dict, List
 import json
 import re
 from os import walk
+from os.path import isfile
 import rasterio
 from matplotlib import pyplot as plt
 from matplotlib import ticker
@@ -22,19 +23,30 @@ _save = True
 _basins = None
 
 
+def _log(msg: str) -> None:
+    print(f"plot: {msg}")
+
+
 def find_exp(number) -> int:
     base10 = log10(abs(number))
     return floor(base10)
 
 
 def plot_act_maps() -> None:
+    raster_factors_filename = _bin_dir_name + "/raster_factors.json"
+    if not isfile(raster_factors_filename):
+        _log(f"{raster_factors_filename} is missing")
+        return
+
     with open(_bin_dir_name + "/raster_factors.json", "r") as f:
         raster_factors = json.load(f)
 
     regex = re.compile(".*_actmap.tif")
     for _root, _dirs, files in walk(_bin_dir_name):
         for file in files:
-            if regex.match(file):
+            if not regex.match(file):
+                _log(f"no files matching '{regex.pattern}'")
+            else:
                 nuclide = file.split("_")[0]
                 with rasterio.open(_bin_dir_name + "/" + file, "r") as dataset:
                     bounds = dataset.bounds
@@ -126,7 +138,12 @@ def plot_doses_map_contours(
 
 
 def plot_doses_maps() -> None:
-    with open(_bin_dir_name + "/coords.npy", "rb") as f:
+    coords_filename = _bin_dir_name + "/coords.npy"
+    if not isfile(coords_filename):
+        _log(f"{coords_filename} is missing")
+        return
+
+    with open(coords_filename, "rb") as f:
         data = np.load(f)
         x = data["x"]
         y = data["y"]
@@ -136,7 +153,9 @@ def plot_doses_maps() -> None:
     doses = dict()
     for _root, _dirs, files in walk(_bin_dir_name):
         for file in files:
-            if regex.match(file):
+            if not regex.match(file):
+                _log(f"no files matching '{regex.pattern}'")
+            else:
                 nuclide = file.split("_")[0]
                 with open(_bin_dir_name + "/" + file, "rb") as f:
                     doses[nuclide] = np.load(f)
