@@ -1,5 +1,5 @@
 __pycache__/
 local-*
 data/
-!data/reference_data.db
+!data/reference_data.db*
 !data/simple-input.json
