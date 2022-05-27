@@ -16,7 +16,7 @@ import csv
 
 from src.model.reference import Reference
 from src.geo import Map
-from src.basins import BasinsFinder, Basin
+from src.basins import Basin
 from src.geo import Coordinate, distance
 from src.activity import ActivityMap
 from src.measurement import Measurement, SoilActivity
@@ -24,6 +24,7 @@ from src.model.common import pasquill_gifford_classes
 from src.model.input import Input
 from src.model.model import Model
 from plot import make_plots
+from utils import find_basins, parse_input
 
 _reference = None
 _start = datetime.now()
@@ -64,31 +65,7 @@ def report_bin_dir_name() -> str:
 def prepare_output(input_filename: str) -> None:
     mkdir(report_dir_name())
     mkdir(report_bin_dir_name())
-    copy(
-        input_filename,
-        path.join(report_dir_name(), "input.json")
-    )
-
-
-def parse_input(filename: str) -> dict:
-    if not path.isfile(filename):
-        raise ValueError(f"file {filename} not found")
-    with open(filename, "r") as fp:
-        return json.load(fp)
-
-
-def find_basins(raster: Map, inp: List) -> Dict[str, Basin]:
-    basins = dict()
-    basins_finder = BasinsFinder(map=raster, approx_error=1)
-    for basin_data in inp:
-        coo = Coordinate(lon=basin_data["lon"], lat=basin_data["lat"])
-        name = basin_data["name"]
-        basins[name] = basins_finder.get_basin(coo)
-        if basins[name] is None:
-            raise ValueError(
-                f"basin '{name}' weren't found in provided raster data"
-            )
-    return basins
+    copy(input_filename, path.join(report_dir_name(), "input.json"))
 
 
 def make_activity_maps(
@@ -127,13 +104,17 @@ def save_act_maps(maps: List[ActivityMap]) -> None:
     raster_factors = dict()
     for mp in maps:
         raster_factors[mp.nuclide] = mp.raster_factor
-        raster_filename = path.join(report_bin_dir_name(), f"{mp.nuclide}_actmap.tif")
+        raster_filename = path.join(
+            report_bin_dir_name(), f"{mp.nuclide}_actmap.tif"
+        )
         profile = mp.img.profile
         data = mp.img.read(1)
         with rasterio.open(raster_filename, "w", **profile) as f:
             f.write(data, 1)
 
-    with open(path.join(report_bin_dir_name(), "raster_factors.json"), "w") as f:
+    with open(
+        path.join(report_bin_dir_name(), "raster_factors.json"), "w"
+    ) as f:
         json.dump(raster_factors, f)
 
 

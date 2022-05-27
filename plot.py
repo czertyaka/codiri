@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 from src.basins import Basin
+from utils import find_basins, parse_input
+from src.geo import Map
 
 import argparse
 from typing import Dict, List
@@ -48,7 +50,9 @@ def plot_act_maps() -> None:
             if regex.match(file):
                 found = True
                 nuclide = file.split("_")[0]
-                with rasterio.open(path.join(_bin_dir_name, file), "r") as dataset:
+                with rasterio.open(
+                    path.join(_bin_dir_name, file), "r"
+                ) as dataset:
                     bounds = dataset.bounds
                     extent = [bounds[0], bounds[2], bounds[1], bounds[3]]
                     data = dataset.read(1) / raster_factors[nuclide]
@@ -66,7 +70,9 @@ def plot_act_maps() -> None:
 
                     if _save:
                         plt.savefig(
-                            path.join(_bin_dir_name, "..", f"{nuclide}_actmap.png")
+                            path.join(
+                                _bin_dir_name, "..", f"{nuclide}_actmap.png"
+                            )
                         )
                     plt.show()
         if not found:
@@ -95,7 +101,9 @@ def plot_doses_map_heatmap(
             ax.add_patch(patch)
 
         if _save:
-            plt.savefig(path.join(_bin_dir_name, "..", target + "_heatmap.png"))
+            plt.savefig(
+                path.join(_bin_dir_name, "..", target + "_heatmap.png")
+            )
         plt.show()
 
 
@@ -135,7 +143,9 @@ def plot_doses_map_contours(
             ax.add_patch(patch)
 
         if _save:
-            plt.savefig(path.join(_bin_dir_name, "..", target + "_contours.png"))
+            plt.savefig(
+                path.join(_bin_dir_name, "..", target + "_contours.png")
+            )
         plt.show()
 
 
@@ -171,7 +181,7 @@ def plot_doses_maps() -> None:
     plot_doses_map_contours(x, y, doses)
 
 
-def make_plots(bin_dir_name: str, save: bool, basins: Dict[str, Basin] = None):
+def make_plots(bin_dir_name: str, save: bool, basins: Dict[str, Basin]):
     global _bin_dir_name
     _bin_dir_name = bin_dir_name
     global _save
@@ -186,6 +196,7 @@ def init_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-r", "--report_dir", help="report directory", required=True
     )
+    parser.add_argument("-i", "--input", help="JSON file with input data")
     parser.add_argument(
         "-s",
         "--save",
@@ -203,4 +214,9 @@ def parse_arguments() -> argparse.Namespace:
 
 if __name__ == "__main__":
     args = parse_arguments()
-    make_plots(path.join(args.report_dir, "bin"), args.save)
+    basins = None
+    if args.input is not None:
+        inp = parse_input(args.input)
+        raster = Map(inp["geotiff_filename"])
+        basins = find_basins(raster, inp["basins"])
+    make_plots(path.join(args.report_dir, "bin"), args.save, basins)
