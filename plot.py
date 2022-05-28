@@ -13,6 +13,7 @@ from os.path import isfile
 import rasterio
 from matplotlib import pyplot as plt
 from matplotlib import ticker
+import matplotlib.image as image
 from matplotlib.colors import LogNorm
 import matplotlib.patches as patches
 import numpy as np
@@ -37,6 +38,22 @@ def find_exp(number) -> int:
     return floor(base10)
 
 
+def add_compass_image(fig, ax) -> None:
+    compass_filename = path.join("data", "compass.png")
+    if not isfile(compass_filename):
+        _log(f"{compass_filename} is missing")
+        return
+    fig_size = fig.get_size_inches() * fig.dpi
+    ax_pos = ax.get_position()
+    x_min = ax_pos.bounds[0] * fig_size[0]
+    y_max = (ax_pos.bounds[1] + ax_pos.bounds[3]) * fig_size[1]
+    im = image.imread(compass_filename)
+    im_width, im_height, _ = im.shape
+    fig.figimage(
+        im, xo=x_min + im_width * 0.1, yo=y_max - im_height * 1.1, alpha=1
+    )
+
+
 def plot_act_maps() -> None:
     raster_factors_filename = path.join(_bin_dir_name, "raster_factors.json")
     if not isfile(raster_factors_filename):
@@ -59,7 +76,7 @@ def plot_act_maps() -> None:
                     bounds = dataset.bounds
                     extent = [bounds[0], bounds[2], bounds[1], bounds[3]]
                     data = dataset.read(1) / raster_factors[nuclide]
-                    plt.figure()
+                    fig = new_figure()
                     ax = plt.subplot()
                     shw = ax.imshow(
                         data,
@@ -70,6 +87,7 @@ def plot_act_maps() -> None:
                     plt.colorbar(shw, fraction=0.046, pad=0.04)
                     ax.title.set_text(f"{nuclide} activity, Bq")
                     ax.tick_params(axis="x", labelrotation=25)
+                    add_compass_image(fig, ax)
 
                     global _save
                     if _save:
@@ -100,8 +118,8 @@ def add_special_points(ax, x_0: float, y_0: float) -> None:
             )
 
 
-def new_figure() -> None:
-    plt.figure(figsize=(8, 8), dpi=150)
+def new_figure():
+    return plt.figure(figsize=(8, 8), dpi=150)
 
 
 def add_basins(ax, x_0: float, y_0: float) -> None:
@@ -133,7 +151,7 @@ def plot_doses_map_heatmap(
     x: List[float], y: List[float], doses: Dict[str, np.ndarray]
 ) -> None:
     for target in doses:
-        new_figure()
+        fig = new_figure()
         ax = plt.subplot()
         data = doses[target]
 
@@ -152,6 +170,8 @@ def plot_doses_map_heatmap(
         ax.set_xlabel("X, km")
         ax.set_ylabel("Y, km")
 
+        add_compass_image(fig, ax)
+
         global _save
         if _save:
             global _report_dir_name
@@ -166,7 +186,7 @@ def plot_doses_map_contours(
 ) -> None:
     count = 0
     for target in doses:
-        new_figure()
+        fig = new_figure()
         ax = plt.subplot()
         count += 1
         data = doses[target]
@@ -196,6 +216,8 @@ def plot_doses_map_contours(
 
         ax.set_xlabel("X, km")
         ax.set_ylabel("Y, km")
+
+        add_compass_image(fig, ax)
 
         global _save
         if _save:
@@ -242,7 +264,7 @@ def make_plots(
     report_dir_name: str,
     save: bool,
     quiet: bool = False,
-    basins: Dict[str, Basin] = None
+    basins: Dict[str, Basin] = None,
 ):
     global _report_dir_name
     _report_dir_name = report_dir_name
