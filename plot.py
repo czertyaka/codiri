@@ -116,10 +116,10 @@ def plot_doses_map_heatmap(
         add_basins(ax)
         add_special_points(ax)
 
+        global _save
         if _save:
-            plt.savefig(
-                path.join(_bin_dir_name, "..", target + "_heatmap.png")
-            )
+            global _report_dir_name
+            plt.savefig(path.join(_report_dir_name, target + "_heatmap.png"))
         plt.show()
 
 
@@ -155,10 +155,10 @@ def plot_doses_map_contours(
         add_basins(ax)
         add_special_points(ax)
 
+        global _save
         if _save:
-            plt.savefig(
-                path.join(_bin_dir_name, "..", target + "_contours.png")
-            )
+            global _report_dir_name
+            plt.savefig(path.join(_report_dir_name, target + "_contours.png"))
         plt.show()
 
 
