@@ -85,8 +85,8 @@ def add_special_points(ax, x_0: float, y_0: float) -> None:
     global _special_points
     if _special_points is not None:
         for point in _special_points:
-            x = point["lon"] - x_0
-            y = point["lat"] - y_0
+            x = point["lon"] / 1000 - x_0
+            y = point["lat"] / 1000 - y_0
             ax.scatter(x, y, c="red")
             ax.annotate(point["name"], (x, y))
 
@@ -97,8 +97,8 @@ def add_basins(ax, x_0: float, y_0: float) -> None:
         basin = _basins[basin_name]
         array = np.transpose(np.array(basin.body.exterior.xy))
         for row in array:
-            row[0] = row[0] - x_0
-            row[1] = row[1] - y_0
+            row[0] = row[0] / 1000 - x_0
+            row[1] = row[1] / 1000 - y_0
         patch = patches.Polygon(xy=array, closed=True)
         ax.add_patch(patch)
 
@@ -107,10 +107,13 @@ def make_centralized_coords(
     coords: List[float], num=int
 ) -> Tuple[float, List[float]]:
     center = (coords[0] + coords[-1]) / 2
-    new_coords = np.linspace(
-        start=(coords[0] - center), stop=(coords[-1] - center), num=num
+    new_coords = (
+        np.linspace(
+            start=(coords[0] - center), stop=(coords[-1] - center), num=num
+        )
+        / 1000
     )
-    return (center, new_coords)
+    return (center / 1000, new_coords)
 
 
 def plot_doses_map_heatmap(
@@ -132,6 +135,9 @@ def plot_doses_map_heatmap(
 
         add_basins(ax, x_0, y_0)
         add_special_points(ax, x_0, y_0)
+
+        ax.set_xlabel("X, km")
+        ax.set_ylabel("Y, km")
 
         global _save
         if _save:
@@ -169,6 +175,9 @@ def plot_doses_map_contours(
 
         add_basins(ax, x_0, y_0)
         add_special_points(ax, x_0, y_0)
+
+        ax.set_xlabel("X, km")
+        ax.set_ylabel("Y, km")
 
         global _save
         if _save:
