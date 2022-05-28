@@ -88,7 +88,16 @@ def add_special_points(ax, x_0: float, y_0: float) -> None:
             x = point["lon"] / 1000 - x_0
             y = point["lat"] / 1000 - y_0
             ax.scatter(x, y, c="red")
-            ax.annotate(point["name"], (x, y))
+            ax.annotate(
+                point["name"],
+                (x, y),
+                textcoords="offset pixels",
+                xytext=(5, 5),
+            )
+
+
+def new_figure() -> None:
+    plt.figure(figsize=(8, 8), dpi=150)
 
 
 def add_basins(ax, x_0: float, y_0: float) -> None:
@@ -120,7 +129,7 @@ def plot_doses_map_heatmap(
     x: List[float], y: List[float], doses: Dict[str, np.ndarray]
 ) -> None:
     for target in doses:
-        plt.figure()
+        new_figure()
         ax = plt.subplot()
         data = doses[target]
 
@@ -151,7 +160,7 @@ def plot_doses_map_contours(
 ) -> None:
     count = 0
     for target in doses:
-        plt.figure()
+        new_figure()
         ax = plt.subplot()
         count += 1
         data = doses[target]
