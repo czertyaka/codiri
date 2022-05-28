@@ -23,6 +23,7 @@ import scipy.ndimage
 _report_dir_name = None
 _bin_dir_name = None
 _save = True
+_quiet = False
 _basins = None
 _special_points = None
 
@@ -70,13 +71,16 @@ def plot_act_maps() -> None:
                     ax.title.set_text(f"{nuclide} activity, Bq")
                     ax.tick_params(axis="x", labelrotation=25)
 
+                    global _save
                     if _save:
                         plt.savefig(
                             path.join(
                                 _bin_dir_name, "..", f"{nuclide}_actmap.png"
                             )
                         )
-                    plt.show()
+                    global _quiet
+                    if not _quiet:
+                        plt.show()
         if not found:
             _log(f"no files matching '{regex.pattern}'")
 
@@ -152,7 +156,9 @@ def plot_doses_map_heatmap(
         if _save:
             global _report_dir_name
             plt.savefig(path.join(_report_dir_name, target + "_heatmap.png"))
-        plt.show()
+        global _quiet
+        if not _quiet:
+            plt.show()
 
 
 def plot_doses_map_contours(
@@ -195,7 +201,9 @@ def plot_doses_map_contours(
         if _save:
             global _report_dir_name
             plt.savefig(path.join(_report_dir_name, target + "_contours.png"))
-        plt.show()
+        global _quiet
+        if not _quiet:
+            plt.show()
 
 
 def plot_doses_maps() -> None:
@@ -231,7 +239,10 @@ def plot_doses_maps() -> None:
 
 
 def make_plots(
-    report_dir_name: str, save: bool, basins: Dict[str, Basin] = None
+    report_dir_name: str,
+    save: bool,
+    quiet: bool = False,
+    basins: Dict[str, Basin] = None
 ):
     global _report_dir_name
     _report_dir_name = report_dir_name
@@ -239,6 +250,8 @@ def make_plots(
     _bin_dir_name = path.join(report_dir_name, "bin")
     global _save
     _save = save
+    global _quiet
+    _quiet = quiet
     inp = parse_input(path.join(report_dir_name, "input.json"))
     if basins is None:
         raster = Map(inp["geotiff_filename"])
@@ -262,6 +275,12 @@ def init_parser(parser: argparse.ArgumentParser) -> None:
         action="store_true",
         help="save plots in report directory",
     )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="do not show plots",
+    )
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -274,4 +293,4 @@ def parse_arguments() -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_arguments()
     basins = None
-    make_plots(args.report_dir, args.save)
+    make_plots(args.report_dir, args.save, args.quiet)
