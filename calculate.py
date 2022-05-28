@@ -391,7 +391,7 @@ if __name__ == "__main__":
     save_act_maps(activity_maps)
     if "map" in inp["points"]:
         calculate_doses_map(activity_maps, inp["points"]["map"])
-        make_plots(report_bin_dir_name(), save_plots, basins)
+        make_plots(report_dir_name(), save_plots, basins)
     if "special" in inp["points"]:
         calculate_doses_in_special_points(
             activity_maps, inp["points"]["special"]

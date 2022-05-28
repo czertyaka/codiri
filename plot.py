@@ -20,6 +20,7 @@ from math import log10, floor
 import math
 import scipy.ndimage
 
+_report_dir_name = None
 _bin_dir_name = None
 _save = True
 _basins = None
@@ -181,13 +182,21 @@ def plot_doses_maps() -> None:
     plot_doses_map_contours(x, y, doses)
 
 
-def make_plots(bin_dir_name: str, save: bool, basins: Dict[str, Basin]):
+def make_plots(
+    report_dir_name: str, save: bool, basins: Dict[str, Basin] = None
+):
+    global _report_dir_name
+    _report_dir_name = report_dir_name
     global _bin_dir_name
-    _bin_dir_name = bin_dir_name
+    _bin_dir_name = path.join(report_dir_name, "bin")
     global _save
     _save = save
+    if basins is None:
+        inp = parse_input(path.join(report_dir_name, "input.json"))
+        raster = Map(inp["geotiff_filename"])
+        basins = find_basins(raster, inp["basins"])
     global _basins
-    _basins = basins if basins is not None else dict()
+    _basins = basins
     plot_act_maps()
     plot_doses_maps()
 
@@ -196,7 +205,6 @@ def init_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-r", "--report_dir", help="report directory", required=True
     )
-    parser.add_argument("-i", "--input", help="JSON file with input data")
     parser.add_argument(
         "-s",
         "--save",
@@ -215,8 +223,4 @@ def parse_arguments() -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_arguments()
     basins = None
-    if args.input is not None:
-        inp = parse_input(args.input)
-        raster = Map(inp["geotiff_filename"])
-        basins = find_basins(raster, inp["basins"])
-    make_plots(path.join(args.report_dir, "bin"), args.save, basins)
+    make_plots(args.report_dir, args.save)
