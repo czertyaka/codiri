@@ -5,7 +5,7 @@ from utils import find_basins, parse_input
 from src.geo import Map
 
 import argparse
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import json
 import re
 from os import walk, path
@@ -81,21 +81,36 @@ def plot_act_maps() -> None:
             _log(f"no files matching '{regex.pattern}'")
 
 
-def add_special_points(ax) -> None:
+def add_special_points(ax, x_0: float, y_0: float) -> None:
     global _special_points
     if _special_points is not None:
         for point in _special_points:
-            ax.scatter(point["lon"], point["lat"], c="red")
-            ax.annotate(point["name"], (point["lon"], point["lat"]))
+            x = point["lon"] - x_0
+            y = point["lat"] - y_0
+            ax.scatter(x, y, c="red")
+            ax.annotate(point["name"], (x, y))
 
 
-def add_basins(ax) -> None:
+def add_basins(ax, x_0: float, y_0: float) -> None:
     global _basins
     for basin_name in _basins:
         basin = _basins[basin_name]
         array = np.transpose(np.array(basin.body.exterior.xy))
+        for row in array:
+            row[0] = row[0] - x_0
+            row[1] = row[1] - y_0
         patch = patches.Polygon(xy=array, closed=True)
         ax.add_patch(patch)
+
+
+def make_centralized_coords(
+    coords: List[float], num=int
+) -> Tuple[float, List[float]]:
+    center = (coords[0] + coords[-1]) / 2
+    new_coords = np.linspace(
+        start=(coords[0] - center), stop=(coords[-1] - center), num=num
+    )
+    return (center, new_coords)
 
 
 def plot_doses_map_heatmap(
@@ -106,15 +121,17 @@ def plot_doses_map_heatmap(
         ax = plt.subplot()
         data = doses[target]
 
-        extent = [x.min(), x.max(), y.min(), y.max()]
+        x_0, dist_x = make_centralized_coords(x, data.shape[0])
+        y_0, dist_y = make_centralized_coords(y, data.shape[1])
+        extent = [dist_x.min(), dist_x.max(), dist_y.min(), dist_y.max()]
         cb = plt.imshow(
             data, extent=extent, vmin=np.min(data), vmax=np.max(data)
         )
         plt.colorbar(cb)
         plt.title(f"Doses for {target}, Sv")
 
-        add_basins(ax)
-        add_special_points(ax)
+        add_basins(ax, x_0, y_0)
+        add_special_points(ax, x_0, y_0)
 
         global _save
         if _save:
@@ -137,12 +154,12 @@ def plot_doses_map_contours(
             data = data * math.pow(10, -exponent)
 
         data = scipy.ndimage.zoom(data, 50)
-        x = np.linspace(start=x[0], stop=x[-1], num=data.shape[0])
-        y = np.linspace(start=y[0], stop=y[-1], num=data.shape[1])
+        x_0, dist_x = make_centralized_coords(x, data.shape[0])
+        y_0, dist_y = make_centralized_coords(y, data.shape[1])
         ax.set_title(f"Effective dose for {target}, 1E{exponent} Sv")
         cnt = ax.contour(
-            x,
-            y,
+            dist_x,
+            dist_y,
             data,
             locator=ticker.LogLocator(base=1.00001),
             # levels=10,
@@ -150,8 +167,8 @@ def plot_doses_map_contours(
         )
         ax.clabel(cnt, inline_spacing=0)
 
-        add_basins(ax)
-        add_special_points(ax)
+        add_basins(ax, x_0, y_0)
+        add_special_points(ax, x_0, y_0)
 
         global _save
         if _save:
