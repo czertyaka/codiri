@@ -140,12 +140,10 @@ def plot_doses_map_contours(
         x = np.linspace(start=x[0], stop=x[-1], num=data.shape[0])
         y = np.linspace(start=y[0], stop=y[-1], num=data.shape[1])
         ax.set_title(f"Effective dose for {target}, 1E{exponent} Sv")
-        extent = [x.min(), x.max(), y.min(), y.max()]
         cnt = ax.contour(
             x,
             y,
             data,
-            extent=extent,
             locator=ticker.LogLocator(base=1.00001),
             # levels=10,
             corner_mask=False,
