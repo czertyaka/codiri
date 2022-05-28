@@ -161,7 +161,7 @@ def plot_doses_map_heatmap(
         cb = plt.imshow(
             data, extent=extent, vmin=np.min(data), vmax=np.max(data)
         )
-        plt.colorbar(cb)
+        plt.colorbar(cb, fraction=0.046, pad=0.04)
         plt.title(f"Doses for {target}, Sv")
 
         add_basins(ax, x_0, y_0)
