@@ -172,6 +172,9 @@ def plot_doses_map_contours(
             corner_mask=False,
         )
         ax.clabel(cnt, inline_spacing=0)
+        ax.minorticks_on()
+        ax.grid(which="major", color="grey", linestyle="-", alpha=0.5)
+        ax.grid(which="minor", color="grey", linestyle=":", alpha=0.5)
 
         add_basins(ax, x_0, y_0)
         add_special_points(ax, x_0, y_0)
