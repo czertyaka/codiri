@@ -24,6 +24,7 @@ _report_dir_name = None
 _bin_dir_name = None
 _save = True
 _basins = None
+_special_points = None
 
 
 def _log(msg: str) -> None:
@@ -80,6 +81,23 @@ def plot_act_maps() -> None:
             _log(f"no files matching '{regex.pattern}'")
 
 
+def add_special_points(ax) -> None:
+    global _special_points
+    if _special_points is not None:
+        for point in _special_points:
+            ax.scatter(point["lon"], point["lat"], c="red")
+            ax.annotate(point["name"], (point["lon"], point["lat"]))
+
+
+def add_basins(ax) -> None:
+    global _basins
+    for basin_name in _basins:
+        basin = _basins[basin_name]
+        array = np.transpose(np.array(basin.body.exterior.xy))
+        patch = patches.Polygon(xy=array, closed=True)
+        ax.add_patch(patch)
+
+
 def plot_doses_map_heatmap(
     x: List[float], y: List[float], doses: Dict[str, np.ndarray]
 ) -> None:
@@ -95,11 +113,8 @@ def plot_doses_map_heatmap(
         plt.colorbar(cb)
         plt.title(f"Doses for {target}, Sv")
 
-        for basin_name in _basins:
-            basin = _basins[basin_name]
-            array = np.transpose(np.array(basin.body.exterior.xy))
-            patch = patches.Polygon(xy=array, closed=True)
-            ax.add_patch(patch)
+        add_basins(ax)
+        add_special_points(ax)
 
         if _save:
             plt.savefig(
@@ -137,11 +152,8 @@ def plot_doses_map_contours(
         )
         ax.clabel(cnt, inline_spacing=0)
 
-        for basin_name in _basins:
-            basin = _basins[basin_name]
-            array = np.transpose(np.array(basin.body.exterior.xy))
-            patch = patches.Polygon(xy=array, closed=True)
-            ax.add_patch(patch)
+        add_basins(ax)
+        add_special_points(ax)
 
         if _save:
             plt.savefig(
@@ -191,10 +203,13 @@ def make_plots(
     _bin_dir_name = path.join(report_dir_name, "bin")
     global _save
     _save = save
+    inp = parse_input(path.join(report_dir_name, "input.json"))
     if basins is None:
-        inp = parse_input(path.join(report_dir_name, "input.json"))
         raster = Map(inp["geotiff_filename"])
         basins = find_basins(raster, inp["basins"])
+    if "special" in inp["points"]:
+        global _special_points
+        _special_points = inp["points"]["special"]
     global _basins
     _basins = basins
     plot_act_maps()
