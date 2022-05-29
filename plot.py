@@ -141,7 +141,7 @@ def new_figure():
     return plt.figure(figsize=(8, 8), dpi=150)
 
 
-def add_basins(ax, x_0: float, y_0: float) -> None:
+def add_basins(ax, x_0: float, y_0: float, label=False) -> None:
     global _basins
     for basin_name in _basins:
         basin = _basins[basin_name]
@@ -151,6 +151,35 @@ def add_basins(ax, x_0: float, y_0: float) -> None:
             row[1] = row[1] / 1000 - y_0
         patch = patches.Polygon(xy=array, closed=True)
         ax.add_patch(patch)
+        if label:
+            center = basin.body.centroid.coords[0]
+            x_c = center[0] / 1000 - x_0
+            y_c = center[1] / 1000 - y_0
+            ax.annotate(
+                basin_name,
+                (x_c, y_c),
+            )
+
+
+def plot_basins(raster: Map):
+    bounds = raster.img.bounds
+    x_0, x = make_centralized_coords([bounds.left, bounds.right], 2)
+    y_0, y = make_centralized_coords([bounds.bottom, bounds.top], 2)
+    fig = new_figure()
+    ax = plt.subplot()
+    ax.axis([x[0], x[-1], y[0], y[-1]])
+    add_basins(ax, x_0, y_0, label=True)
+    add_axes_labels(ax)
+    add_compass_image(fig, ax)
+    add_grid(ax)
+
+    global _save
+    if _save:
+        global _report_dir_name
+        plt.savefig(path.join(_report_dir_name, "basins.png"))
+    global _quiet
+    if not _quiet:
+        plt.show()
 
 
 def make_centralized_coords(
@@ -294,14 +323,15 @@ def make_plots(
     global _quiet
     _quiet = quiet
     inp = parse_input(path.join(report_dir_name, "input.json"))
+    raster = Map(inp["geotiff_filename"])
     if basins is None:
-        raster = Map(inp["geotiff_filename"])
         basins = find_basins(raster, inp["basins"])
     if "special" in inp["points"]:
         global _special_points
         _special_points = inp["points"]["special"]
     global _basins
     _basins = basins
+    plot_basins(raster)
     plot_act_maps()
     plot_doses_maps()
 
