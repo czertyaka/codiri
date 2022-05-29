@@ -20,6 +20,7 @@ import numpy as np
 from math import log10, floor
 import math
 import scipy.ndimage
+import locale
 
 _report_dir_name = None
 _bin_dir_name = None
@@ -265,12 +266,19 @@ def plot_doses_maps() -> None:
     plot_doses_map_contours(x, y, doses)
 
 
+def init_plt() -> None:
+    locale.setlocale(locale.LC_NUMERIC, "ru_RU")
+    plt.rcdefaults()
+    plt.rcParams['axes.formatter.use_locale'] = True
+
+
 def make_plots(
     report_dir_name: str,
     save: bool,
     quiet: bool = False,
     basins: Dict[str, Basin] = None,
 ):
+    init_plt()
     global _report_dir_name
     _report_dir_name = report_dir_name
     global _bin_dir_name
