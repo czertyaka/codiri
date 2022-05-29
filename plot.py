@@ -65,6 +65,7 @@ def add_axes_labels(ax) -> None:
     ax.set_xlabel("X, km")
     ax.set_ylabel("Y, km")
 
+
 def plot_act_maps() -> None:
     raster_factors_filename = path.join(_bin_dir_name, "raster_factors.json")
     if not isfile(raster_factors_filename):
@@ -85,8 +86,12 @@ def plot_act_maps() -> None:
                     path.join(_bin_dir_name, file), "r"
                 ) as dataset:
                     bounds = dataset.bounds
-                    _x_0, dist_x = make_centralized_coords([bounds[0], bounds[2]], 2)
-                    _y_0, dist_y = make_centralized_coords([bounds[1], bounds[3]], 2)
+                    _x_0, dist_x = make_centralized_coords(
+                        [bounds[0], bounds[2]], 2
+                    )
+                    _y_0, dist_y = make_centralized_coords(
+                        [bounds[1], bounds[3]], 2
+                    )
                     extent = [dist_x[0], dist_x[1], dist_y[0], dist_y[1]]
                     data = dataset.read(1) / raster_factors[nuclide]
                     fig = new_figure()
@@ -269,7 +274,8 @@ def plot_doses_maps() -> None:
 def init_plt() -> None:
     locale.setlocale(locale.LC_NUMERIC, "ru_RU")
     plt.rcdefaults()
-    plt.rcParams['axes.formatter.use_locale'] = True
+    plt.rcParams["axes.formatter.use_locale"] = True
+    plt.rcParams["font.size"] = 14
 
 
 def make_plots(
