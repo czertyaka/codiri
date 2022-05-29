@@ -54,6 +54,16 @@ def add_compass_image(fig, ax) -> None:
     )
 
 
+def add_grid(ax) -> None:
+    ax.minorticks_on()
+    ax.grid(which="major", color="grey", linestyle="-", alpha=0.5)
+    ax.grid(which="minor", color="grey", linestyle=":", alpha=0.5)
+
+
+def add_axes_labels(ax) -> None:
+    ax.set_xlabel("X, km")
+    ax.set_ylabel("Y, km")
+
 def plot_act_maps() -> None:
     raster_factors_filename = path.join(_bin_dir_name, "raster_factors.json")
     if not isfile(raster_factors_filename):
@@ -74,7 +84,9 @@ def plot_act_maps() -> None:
                     path.join(_bin_dir_name, file), "r"
                 ) as dataset:
                     bounds = dataset.bounds
-                    extent = [bounds[0], bounds[2], bounds[1], bounds[3]]
+                    _x_0, dist_x = make_centralized_coords([bounds[0], bounds[2]], 2)
+                    _y_0, dist_y = make_centralized_coords([bounds[1], bounds[3]], 2)
+                    extent = [dist_x[0], dist_x[1], dist_y[0], dist_y[1]]
                     data = dataset.read(1) / raster_factors[nuclide]
                     fig = new_figure()
                     ax = plt.subplot()
@@ -86,7 +98,8 @@ def plot_act_maps() -> None:
                     )
                     plt.colorbar(shw, fraction=0.046, pad=0.04)
                     ax.title.set_text(f"{nuclide} activity, Bq")
-                    ax.tick_params(axis="x", labelrotation=25)
+                    add_axes_labels(ax)
+                    add_grid(ax)
                     add_compass_image(fig, ax)
 
                     global _save
@@ -166,10 +179,7 @@ def plot_doses_map_heatmap(
 
         add_basins(ax, x_0, y_0)
         add_special_points(ax, x_0, y_0)
-
-        ax.set_xlabel("X, km")
-        ax.set_ylabel("Y, km")
-
+        add_axes_labels(ax)
         add_compass_image(fig, ax)
 
         global _save
@@ -207,16 +217,11 @@ def plot_doses_map_contours(
             corner_mask=False,
         )
         ax.clabel(cnt, inline_spacing=0)
-        ax.minorticks_on()
-        ax.grid(which="major", color="grey", linestyle="-", alpha=0.5)
-        ax.grid(which="minor", color="grey", linestyle=":", alpha=0.5)
 
         add_basins(ax, x_0, y_0)
         add_special_points(ax, x_0, y_0)
-
-        ax.set_xlabel("X, km")
-        ax.set_ylabel("Y, km")
-
+        add_axes_labels(ax)
+        add_grid(ax)
         add_compass_image(fig, ax)
 
         global _save
