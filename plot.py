@@ -62,8 +62,9 @@ def add_grid(ax) -> None:
 
 
 def add_axes_labels(ax) -> None:
-    ax.set_xlabel("X, km")
-    ax.set_ylabel("Y, km")
+    ax.set_xlabel("X, км")
+    ax.set_ylabel("Y, км")
+
 
 def plot_act_maps() -> None:
     raster_factors_filename = path.join(_bin_dir_name, "raster_factors.json")
@@ -85,8 +86,12 @@ def plot_act_maps() -> None:
                     path.join(_bin_dir_name, file), "r"
                 ) as dataset:
                     bounds = dataset.bounds
-                    _x_0, dist_x = make_centralized_coords([bounds[0], bounds[2]], 2)
-                    _y_0, dist_y = make_centralized_coords([bounds[1], bounds[3]], 2)
+                    _x_0, dist_x = make_centralized_coords(
+                        [bounds[0], bounds[2]], 2
+                    )
+                    _y_0, dist_y = make_centralized_coords(
+                        [bounds[1], bounds[3]], 2
+                    )
                     extent = [dist_x[0], dist_x[1], dist_y[0], dist_y[1]]
                     data = dataset.read(1) / raster_factors[nuclide]
                     fig = new_figure()
@@ -98,7 +103,7 @@ def plot_act_maps() -> None:
                         extent=extent,
                     )
                     plt.colorbar(shw, fraction=0.046, pad=0.04)
-                    ax.title.set_text(f"{nuclide} activity, Bq")
+                    ax.title.set_text(f"Активность {nuclide}, Бк")
                     add_axes_labels(ax)
                     add_grid(ax)
                     add_compass_image(fig, ax)
@@ -176,7 +181,7 @@ def plot_doses_map_heatmap(
             data, extent=extent, vmin=np.min(data), vmax=np.max(data)
         )
         plt.colorbar(cb, fraction=0.046, pad=0.04)
-        plt.title(f"Doses for {target}, Sv")
+        plt.title(f"Эффективная доза {target}, Зв")
 
         add_basins(ax, x_0, y_0)
         add_special_points(ax, x_0, y_0)
@@ -208,7 +213,7 @@ def plot_doses_map_contours(
         data = scipy.ndimage.zoom(data, 50)
         x_0, dist_x = make_centralized_coords(x, data.shape[0])
         y_0, dist_y = make_centralized_coords(y, data.shape[1])
-        ax.set_title(f"Effective dose for {target}, 1E{exponent} Sv")
+        ax.set_title(f"Эффективная доза {target}, 1E{exponent} Зв")
         cnt = ax.contour(
             dist_x,
             dist_y,
@@ -260,16 +265,16 @@ def plot_doses_maps() -> None:
         if not found:
             _log(f"no files matching '{regex.pattern}'")
 
-    doses["sum"] = sum_doses
+    doses["суммарная"] = sum_doses
 
     plot_doses_map_heatmap(x, y, doses)
     plot_doses_map_contours(x, y, doses)
 
 
 def init_plt() -> None:
-    locale.setlocale(locale.LC_NUMERIC, "ru_RU")
+    locale.setlocale(locale.LC_NUMERIC, "ru_RU.UTF-8")
     plt.rcdefaults()
-    plt.rcParams['axes.formatter.use_locale'] = True
+    plt.rcParams["axes.formatter.use_locale"] = True
 
 
 def make_plots(
