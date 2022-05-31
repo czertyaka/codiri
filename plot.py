@@ -180,7 +180,7 @@ def plot_doses_map_heatmap(
         cb = plt.imshow(
             data, extent=extent, vmin=np.min(data), vmax=np.max(data)
         )
-        plt.colorbar(cb, fraction=0.046, pad=0.04)
+        plt.colorbar(cb, fraction=0.046, pad=0.04, format="%.2e")
         plt.title(f"Эффективная доза {target}, Зв")
 
         add_basins(ax, x_0, y_0)
