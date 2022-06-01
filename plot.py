@@ -66,7 +66,6 @@ def add_axes_labels(ax) -> None:
     ax.set_ylabel("Y, км")
 
 
-
 def plot_act_maps() -> None:
     raster_factors_filename = path.join(_bin_dir_name, "raster_factors.json")
     if not isfile(raster_factors_filename):
@@ -211,7 +210,11 @@ def plot_doses_map_heatmap(
             data, extent=extent, vmin=np.min(data), vmax=np.max(data)
         )
         plt.colorbar(cb, fraction=0.046, pad=0.04, format="%.2e")
-        plt.title(f"Эффективная доза {target}, Зв")
+        if target == "sum":
+            name = "Суммарная эффективная доза, Зв"
+        else:
+            name = f"Эффективная доза {target}, Зв"
+        plt.title(name)
 
         add_basins(ax, x_0, y_0)
         add_special_points(ax, x_0, y_0)
@@ -243,7 +246,11 @@ def plot_doses_map_contours(
         data = scipy.ndimage.zoom(data, 50)
         x_0, dist_x = make_centralized_coords(x, data.shape[0])
         y_0, dist_y = make_centralized_coords(y, data.shape[1])
-        ax.set_title(f"Эффективная доза {target}, 1E{exponent} Зв")
+        if target == "sum":
+            name = f"Суммарная эффективная доза, 1E{exponent} Зв"
+        else:
+            name = f"Эффективная доза {target}, 1E{exponent} Зв"
+        ax.set_title(name)
         cnt = ax.contour(
             dist_x,
             dist_y,
@@ -295,7 +302,7 @@ def plot_doses_maps() -> None:
         if not found:
             _log(f"no files matching '{regex.pattern}'")
 
-    doses["суммарная"] = sum_doses
+    doses["sum"] = sum_doses
 
     plot_doses_map_heatmap(x, y, doses)
     plot_doses_map_contours(x, y, doses)
