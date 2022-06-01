@@ -23,5 +23,5 @@ def find_basins(raster: Map, inp: List) -> Dict[str, Basin]:
 def parse_input(filename: str) -> dict:
     if not path.isfile(filename):
         raise ValueError(f"file {filename} not found")
-    with open(filename, "r") as fp:
+    with open(filename, "r", encoding="utf-8") as fp:
         return json.load(fp)
