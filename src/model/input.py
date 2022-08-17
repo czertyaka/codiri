@@ -14,9 +14,6 @@ class BaseInput:
             ]
         )
 
-    def valid(self) -> bool:
-        raise NotImplementedError
-
     def __str__(self) -> str:
         return str(self.__values)
 
@@ -51,11 +48,6 @@ class Input(BaseInput):
         return (
             super(Input, self).initialized()
             and len(self.specific_activities) > 0
-        )
-
-    def valid(self) -> bool:
-        return self.distance <= 50000 and self.distance > (
-            self.square_side / 2
         )
 
     def __set_value(

@@ -42,12 +42,6 @@ class TestBaseInput(unittest.TestCase):
         inp["1"] = 1
         self.assertEqual(inp["1"], 1)
 
-    def test_base_input_valid(self):
-        with self.assertRaises(NotImplementedError):
-            BaseInput(()).valid()
-        with self.assertRaises(NotImplementedError):
-            BaseInput(("1", "2")).valid()
-
 
 class TestInput(unittest.TestCase):
     def test_input_init(self):
@@ -125,16 +119,6 @@ class TestInput(unittest.TestCase):
         inp.add_specific_activity("Cs-137", 1)
         self.assertTrue(inp.initialized())
 
-    def test_input_valid(self):
-        inp = Input()
-        inp.distance = 50001
-        self.assertFalse(inp.valid())
-        inp.distance = 100
-        inp.square_side = 200
-        self.assertFalse(inp.valid())
-        inp.square_side = 100
-        self.assertTrue(inp.valid())
-
 
 class ReferenceTest(IReference):
     def __init__(self):
@@ -171,15 +155,77 @@ class ReferenceTest(IReference):
     def terrain_roughness(self, terrain_type: str) -> float:
         return 1
 
+    def all_nuclides(self) -> list:
+        return ["Cs-137", "Sr-90"]
+
 
 class ModelTest(Model):
     def __init__(self):
         self._Model__results = Results()
         self.__reference = ReferenceTest()
+        validInput = Input()
+        validInput.distance = 1
+        validInput.square_side = 1
+        validInput.precipitation_rate = 1
+        validInput.extreme_windspeeds = {
+            "A": 1,
+            "B": 1,
+            "C": 1,
+            "D": 1,
+            "E": 1,
+            "F": 1,
+        }
+        validInput.age = 1
+        validInput.terrain_type = "greenland"
+        validInput.blowout_time = 1
+        validInput.add_specific_activity("Cs-137", 1)
+        self.input = validInput
 
     @property
     def reference(self):
         return self.__reference
+
+    @reference.setter
+    def reference(self, value):
+        self.__reference = value
+
+
+class TestModelIsReady(unittest.TestCase):
+    def setUp(self):
+        self.model = ModelTest()
+
+    def test_no_reference(self):
+        self.model.reference = None
+        self.assertFalse(self.model._Model__is_ready())
+
+    def test_no_input(self):
+        self.model.input = None
+        self.assertFalse(self.model._Model__is_ready())
+
+    def test_empty_input(self):
+        self.model.input = Input()
+        self.assertFalse(self.model._Model__is_ready())
+
+    def test_partially_initalized_input(self):
+        self.model.input._BaseInput__values["distance"] = None
+        self.assertFalse(self.model._Model__is_ready())
+
+    def test_large_distance(self):
+        self.model.input.distance = 50001
+        self.assertFalse(self.model._Model__is_ready())
+
+    def test_little_distance(self):
+        self.model.input.distance = self.model.input.square_side / 2
+        self.assertFalse(self.model._Model__is_ready())
+        self.model.input.distance = (self.model.input.square_side / 2) * 0.9
+        self.assertFalse(self.model._Model__is_ready())
+
+    def test_unknown_nuclide(self):
+        self.model.input.add_specific_activity("DeadBeef-123", 1)
+        self.assertFalse(self.model._Model__is_ready())
+
+    def test_positive(self):
+        self.assertTrue(self.model._Model__is_ready())
 
 
 def test_calculate_e_max_10():

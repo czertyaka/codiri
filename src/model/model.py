@@ -1,4 +1,4 @@
-from .common import pasquill_gifford_classes
+from .common import pasquill_gifford_classes, log
 from .input import Input
 from .results import Results
 from .reference import IReference
@@ -57,17 +57,23 @@ class Model:
         return self.__reference
 
     def __is_ready(self):
-        return (
-            self.reference is not None
-            and self.input.initialized()
-            and self.input.valid()
-            and self.__is_input_valid()
-        )
+        return self.reference is not None and self.__is_input_ready()
 
-    def __is_input_valid(self):
-        nuclides = self.reference.all_nuclides()
+    def __is_input_ready(self):
+        if (
+            self.input is None
+            or not self.input.initialized()
+            or self.input.distance > 5000
+            or self.input.distance <= self.input.square_side / 2
+        ):
+            log(f"input is not ready '{self.input}'")
+            return False
         for nuclide in self.input.specific_activities:
-            if nuclide not in nuclides:
+            if nuclide not in self.reference.all_nuclides():
+                log(
+                    f"unknown nuclide '{nuclide}'"
+                    f" (list of known nuclides '{self.reference.all_nuclides()}')"
+                )
                 return False
         return True
 
