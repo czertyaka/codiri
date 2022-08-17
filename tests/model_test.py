@@ -49,6 +49,78 @@ class TestBaseInput(unittest.TestCase):
             BaseInput(("1", "2")).valid()
 
 
+class TestInput(unittest.TestCase):
+    def test_input_init(self):
+        self.assertEqual(
+            Input()._BaseInput__values,
+            {
+                "distance": None,
+                "square_side": None,
+                "specific_activities": dict(),
+                "precipitation_rate": None,
+                "extreme_windspeeds": None,
+                "age": None,
+                "terrain_type": None,
+                "blowout_time": None,
+            },
+        )
+
+    def test_input_extreme_windspeeds(self):
+        inp = Input()
+        with self.assertRaises(ValueError):
+            inp.extreme_windspeeds = {}
+        with self.assertRaises(ValueError):
+            inp.extreme_windspeeds = {"1": 1}
+        inp.extreme_windspeeds = {
+            "A": 1,
+            "B": 1,
+            "C": 1,
+            "D": 1,
+            "E": 1,
+            "F": 1,
+        }
+
+    def test_input_terrain_type(self):
+        inp = Input()
+        inp.terrain_type = "greenland"
+        inp.terrain_type = "agricultural"
+        inp.terrain_type = "forest"
+        inp.terrain_type = "settlement"
+        with self.assertRaises(ValueError):
+            inp.terrain_type = "invalid"
+
+    def test_input_initalized(self):
+        inp = Input()
+        self.assertFalse(inp.initialized())
+        inp.distance = 1
+        inp.square_side = 1
+        inp.precipitation_rate = 1
+        inp.extreme_windspeeds = {
+            "A": 1,
+            "B": 1,
+            "C": 1,
+            "D": 1,
+            "E": 1,
+            "F": 1,
+        }
+        inp.age = 1
+        inp.terrain_type = "greenland"
+        inp.blowout_time = 1
+        self.assertFalse(inp.initialized())
+        inp.add_specific_activity("Cs-137", 1)
+        self.assertTrue(inp.initialized())
+
+    def test_input_valid(self):
+        inp = Input()
+        inp.distance = 50001
+        self.assertFalse(inp.valid())
+        inp.distance = 100
+        inp.square_side = 200
+        self.assertFalse(inp.valid())
+        inp.square_side = 100
+        self.assertTrue(inp.valid())
+
+
 class ReferenceTest(IReference):
     def __init__(self):
         super(ReferenceTest, self).__init__()

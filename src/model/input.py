@@ -45,12 +45,18 @@ class Input(BaseInput):
                 "blowout_time",
             )
         )
+        self["specific_activities"] = dict()
+
+    def initialized(self) -> bool:
+        return (
+            super(Input, self).initialized()
+            and len(self.specific_activities) > 0
+        )
 
     def valid(self) -> bool:
         return (
             self.distance <= 50000
             and self.distance > (self.square_side / 2)
-            and self.age >= 0
         )
 
     @property
@@ -92,7 +98,7 @@ class Input(BaseInput):
     @precipitation_rate.setter
     def precipitation_rate(self, value: float):
         """Precipation rate, mm/hr"""
-        self["precipitation_rate = value"]
+        self["precipitation_rate"] = value
 
     @property
     def extreme_windspeeds(self) -> dict:
@@ -103,12 +109,11 @@ class Input(BaseInput):
         """Extreme wind speed for each Pasquill-Gifford atmospheric stability
         classes as a list of count 6, m/s"""
         if sorted(values.keys()) != sorted(pasquill_gifford_classes):
-            log(
+            raise ValueError(
                 f"given wind speeds list ({values}) doesn't provide "
                 f"necessary atmospheric stability classes "
                 f"({pasquill_gifford_classes})"
             )
-            return
         self["extreme_windspeeds"] = values
 
     @property
