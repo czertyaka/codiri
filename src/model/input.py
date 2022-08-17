@@ -1,5 +1,5 @@
 from .common import log, pasquill_gifford_classes
-from typing import Tuple
+from typing import Tuple, Callable
 
 
 class BaseInput:
@@ -45,7 +45,7 @@ class Input(BaseInput):
                 "blowout_time",
             )
         )
-        self["specific_activities"] = dict()
+        self.__set_value("specific_activities", dict())
 
     def initialized(self) -> bool:
         return (
@@ -54,10 +54,16 @@ class Input(BaseInput):
         )
 
     def valid(self) -> bool:
-        return (
-            self.distance <= 50000
-            and self.distance > (self.square_side / 2)
+        return self.distance <= 50000 and self.distance > (
+            self.square_side / 2
         )
+
+    def __set_value(
+        self, key, item, validator: Callable = lambda x: True, err_msg=""
+    ):
+        if not validator(item):
+            raise ValueError(err_msg)
+        self[key] = item
 
     @property
     def distance(self) -> float:
@@ -67,7 +73,12 @@ class Input(BaseInput):
     def distance(self, value: float) -> None:
         """Distance between source center and point where doses should be
         calculated, m"""
-        self["distance"] = value
+        self.__set_value(
+            "distance",
+            value,
+            lambda x: x >= 0,
+            f"invalid distance '{value} m'",
+        )
 
     @property
     def square_side(self) -> float:
@@ -76,7 +87,12 @@ class Input(BaseInput):
     @square_side.setter
     def square_side(self, value: float) -> float:
         """Square-shaped surface source side length, m"""
-        self["square_side"] = value
+        self.__set_value(
+            "square_side",
+            value,
+            lambda x: x >= 0,
+            f"invalid square side '{value} m'",
+        )
 
     @property
     def specific_activities(self) -> dict:
@@ -84,6 +100,10 @@ class Input(BaseInput):
 
     def add_specific_activity(self, nuclide: str, specific_activity: float):
         """Add specific activity for specific nuclide, Bq/kg"""
+        if specific_activity < 0:
+            raise ValueError(
+                f"invalid specific activity '{specific_activity} Bq/kg'"
+            )
         prev = self["specific_activities"].get(nuclide)
         self["specific_activities"][nuclide] = (
             (prev + specific_activity)
@@ -98,7 +118,12 @@ class Input(BaseInput):
     @precipitation_rate.setter
     def precipitation_rate(self, value: float):
         """Precipation rate, mm/hr"""
-        self["precipitation_rate"] = value
+        self.__set_value(
+            "precipitation_rate",
+            value,
+            lambda x: x >= 0,
+            f"invalid precipitation rate '{value} mm/hr'",
+        )
 
     @property
     def extreme_windspeeds(self) -> dict:
@@ -108,13 +133,14 @@ class Input(BaseInput):
     def extreme_windspeeds(self, values: dict):
         """Extreme wind speed for each Pasquill-Gifford atmospheric stability
         classes as a list of count 6, m/s"""
-        if sorted(values.keys()) != sorted(pasquill_gifford_classes):
-            raise ValueError(
-                f"given wind speeds list ({values}) doesn't provide "
-                f"necessary atmospheric stability classes "
-                f"({pasquill_gifford_classes})"
-            )
-        self["extreme_windspeeds"] = values
+        self.__set_value(
+            "extreme_windspeeds",
+            values,
+            lambda x: sorted(x.keys()) == sorted(pasquill_gifford_classes),
+            f"given wind speeds list ({values}) doesn't provide "
+            f"necessary atmospheric stability classes "
+            f"({pasquill_gifford_classes})",
+        )
 
     @property
     def age(self) -> int:
@@ -122,7 +148,10 @@ class Input(BaseInput):
 
     @age.setter
     def age(self, value: int) -> None:
-        self["age"] = value
+        """Control group age, years"""
+        self.__set_value(
+            "age", value, lambda x: x >= 0, f"invalid age '{value} years'"
+        )
 
     @property
     def terrain_type(self) -> str():
@@ -135,9 +164,13 @@ class Input(BaseInput):
             "settlement"
         :raises ValueError: unknown terrain type
         """
-        if value not in ["greenland", "agricultural", "forest", "settlement"]:
-            raise ValueError(f"unknown terrain type '{value}'")
-        self["terrain_type"] = value
+        self.__set_value(
+            "terrain_type",
+            value,
+            lambda x: x
+            in ["greenland", "agricultural", "forest", "settlement"],
+            f"unknown terrain type '{value}'",
+        )
 
     @property
     def blowout_time(self) -> int:
@@ -146,4 +179,9 @@ class Input(BaseInput):
     @blowout_time.setter
     def blowout_time(self, value: int) -> None:
         """Wind operation (blowout) time, sec"""
-        self["blowout_time"] = value
+        self.__set_value(
+            "blowout_time",
+            value,
+            lambda x: x > 0,
+            f"invalid wind operation '{value} sec'",
+        )

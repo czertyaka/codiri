@@ -65,6 +65,21 @@ class TestInput(unittest.TestCase):
             },
         )
 
+    def test_input_simple_setters(self):
+        inp = Input()
+        with self.assertRaises(ValueError):
+            inp.distance = -1
+        with self.assertRaises(ValueError):
+            inp.square_side = -1
+        with self.assertRaises(ValueError):
+            inp.precipitation_rate = -1
+        with self.assertRaises(ValueError):
+            inp.age = -1
+        with self.assertRaises(ValueError):
+            inp.blowout_time = -1
+        with self.assertRaises(ValueError):
+            inp.blowout_time = 0
+
     def test_input_extreme_windspeeds(self):
         inp = Input()
         with self.assertRaises(ValueError):
