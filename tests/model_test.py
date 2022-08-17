@@ -2,10 +2,51 @@ from codiri.src.model.model import Model
 from codiri.src.model.results import Results
 from codiri.src.model.reference import IReference
 from codiri.src.database import InMemoryDatabase
-from codiri.src.model.input import Input
+from codiri.src.model.input import BaseInput, Input
 import math
 from unittest.mock import MagicMock, patch
 import pytest
+import unittest
+
+
+class TestBaseInput(unittest.TestCase):
+    def test_base_input_init(self):
+        self.assertEqual(BaseInput(())._BaseInput__values, dict())
+        self.assertEqual(BaseInput(("1"))._BaseInput__values, {"1": None})
+        self.assertEqual(
+            BaseInput(("1", "2"))._BaseInput__values, {"1": None, "2": None}
+        )
+
+    def test_base_input_initialized(self):
+        inp = BaseInput(("1", "2"))
+        self.assertFalse(inp.initialized())
+        inp["1"] = 1
+        self.assertFalse(inp.initialized())
+        inp["2"] = 2
+        self.assertTrue(inp.initialized())
+
+    def test_base_input_str(self):
+        self.assertEqual(str(BaseInput(())), "{}")
+        self.assertEqual(str(BaseInput(("1"))), "{'1': None}")
+        self.assertEqual(str(BaseInput(("1", "2"))), "{'1': None, '2': None}")
+        inp = BaseInput(["1", "2"])
+        inp["1"] = 1
+        inp["2"] = 2
+        self.assertEqual(str(inp), "{'1': 1, '2': 2}")
+
+    def test_base_input_setitem(self):
+        inp = BaseInput(("1", "2"))
+        with self.assertRaises(KeyError):
+            inp["0"] = 0
+        self.assertEqual(inp["1"], None)
+        inp["1"] = 1
+        self.assertEqual(inp["1"], 1)
+
+    def test_base_input_valid(self):
+        with self.assertRaises(NotImplementedError):
+            BaseInput(()).valid()
+        with self.assertRaises(NotImplementedError):
+            BaseInput(("1", "2")).valid()
 
 
 class ReferenceTest(IReference):

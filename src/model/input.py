@@ -1,29 +1,49 @@
 from .common import log, pasquill_gifford_classes
+from typing import Tuple
 
 
-class Input:
+class BaseInput:
+    def __init__(self, item_names: Tuple[str]):
+        self.__values = dict.fromkeys(item_names, None)
+
+    def initialized(self) -> bool:
+        return all(
+            [
+                False if item is None else True
+                for item in self.__values.values()
+            ]
+        )
+
+    def valid(self) -> bool:
+        raise NotImplementedError
+
+    def __str__(self) -> str:
+        return str(self.__values)
+
+    def __getitem__(self, key):
+        return self.__values[key]
+
+    def __setitem__(self, key, item):
+        if key not in self.__values:
+            raise KeyError(f"input has no {key} field")
+        self.__values[key] = item
+
+
+class Input(BaseInput):
     """Holds input data for model"""
 
     def __init__(self):
-        self.__distance = None
-        self.__square_side = None
-        self.__specific_activities = dict()
-        self.__precipitation_rate = None
-        self.__extreme_windspeeds = None
-        self.__age = None
-        self.__terrain_type = None
-        self.__blowout_time = None
-
-    def initialized(self) -> bool:
-        return (
-            self.distance is not None
-            and self.square_side is not None
-            and len(self.specific_activities) > 0
-            and self.precipitation_rate is not None
-            and self.extreme_windspeeds is not None
-            and self.age is not None
-            and self.terrain_type is not None
-            and self.blowout_time is not None
+        super(Input, self).__init__(
+            (
+                "distance",
+                "square_side",
+                "specific_activities",
+                "precipitation_rate",
+                "extreme_windspeeds",
+                "age",
+                "terrain_type",
+                "blowout_time",
+            )
         )
 
     def valid(self) -> bool:
@@ -33,39 +53,33 @@ class Input:
             and self.age >= 0
         )
 
-    def __str__(self) -> str:
-        return str(
-            f"{{distance: {self.distance}; square side: {self.square_side};"
-            f" age: {self.age}; terrain type: {self.terrain_type}}}"
-        )
-
     @property
     def distance(self) -> float:
-        return self.__distance
+        return self["distance"]
 
     @distance.setter
     def distance(self, value: float) -> None:
         """Distance between source center and point where doses should be
         calculated, m"""
-        self.__distance = value
+        self["distance"] = value
 
     @property
     def square_side(self) -> float:
-        return self.__square_side
+        return self["square_side"]
 
     @square_side.setter
     def square_side(self, value: float) -> float:
         """Square-shaped surface source side length, m"""
-        self.__square_side = value
+        self["square_side"] = value
 
     @property
     def specific_activities(self) -> dict:
-        return self.__specific_activities
+        return self["specific_activities"]
 
     def add_specific_activity(self, nuclide: str, specific_activity: float):
         """Add specific activity for specific nuclide, Bq/kg"""
-        prev = self.__specific_activities.get(nuclide)
-        self.__specific_activities[nuclide] = (
+        prev = self["specific_activities"].get(nuclide)
+        self["specific_activities"][nuclide] = (
             (prev + specific_activity)
             if prev is not None
             else specific_activity
@@ -73,16 +87,16 @@ class Input:
 
     @property
     def precipitation_rate(self) -> float:
-        return self.__precipitation_rate
+        return self["precipitation_rate"]
 
     @precipitation_rate.setter
     def precipitation_rate(self, value: float):
         """Precipation rate, mm/hr"""
-        self.__precipitation_rate = value
+        self["precipitation_rate = value"]
 
     @property
     def extreme_windspeeds(self) -> dict:
-        return self.__extreme_windspeeds
+        return self["extreme_windspeeds"]
 
     @extreme_windspeeds.setter
     def extreme_windspeeds(self, values: dict):
@@ -95,19 +109,19 @@ class Input:
                 f"({pasquill_gifford_classes})"
             )
             return
-        self.__extreme_windspeeds = values
+        self["extreme_windspeeds"] = values
 
     @property
     def age(self) -> int:
-        return self.__age
+        return self["age"]
 
     @age.setter
     def age(self, value: int) -> None:
-        self.__age = value
+        self["age"] = value
 
     @property
     def terrain_type(self) -> str():
-        return self.__terrain_type
+        return self["terrain_type"]
 
     @terrain_type.setter
     def terrain_type(self, value: str) -> None:
@@ -118,13 +132,13 @@ class Input:
         """
         if value not in ["greenland", "agricultural", "forest", "settlement"]:
             raise ValueError(f"unknown terrain type '{value}'")
-        self.__terrain_type = value
+        self["terrain_type"] = value
 
     @property
     def blowout_time(self) -> int:
-        return self.__blowout_time
+        return self["blowout_time"]
 
     @blowout_time.setter
     def blowout_time(self, value: int) -> None:
         """Wind operation (blowout) time, sec"""
-        self.__blowout_time = value
+        self["blowout_time"] = value
