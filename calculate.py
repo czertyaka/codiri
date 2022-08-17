@@ -154,9 +154,8 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
 
     soil_density = _model_input["soil_density"]
 
-    model = Model()
     global _reference
-    model.reference = _reference
+    model = Model(_reference)
 
     activities = actmap.img.read(1) / actmap.raster_factor
     square_area = pow(inp.square_side, 2)

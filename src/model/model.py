@@ -1,7 +1,7 @@
 from .common import pasquill_gifford_classes
 from .input import Input
 from .results import Results
-from .reference import Reference
+from .reference import IReference
 import math
 from scipy import integrate
 from ..activity import blowout_activity_flow
@@ -13,7 +13,8 @@ class Model:
     оценки и прогнозирования радиационных последствий аварий на объектах
     ядерного топливного цикла (РБ-134-17)"""
 
-    def __init__(self):
+    def __init__(self, reference: IReference):
+        self.__reference = reference
         self.__results = Results()
         self.input = Input()
 
@@ -52,12 +53,8 @@ class Model:
         return self.__results
 
     @property
-    def reference(self) -> Reference:
+    def reference(self) -> IReference:
         return self.__reference
-
-    @reference.setter
-    def reference(self, reference: Reference) -> None:
-        self.__reference = reference
 
     def __is_ready(self):
         return (
