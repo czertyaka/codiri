@@ -2,3 +2,4 @@ __pycache__/
 local-*
 data/
 !data/simple-input.json
+!data/compass.png
