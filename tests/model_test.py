@@ -314,6 +314,8 @@ def test_calculate_height_concentration_integrals():
     activity = 2
     input.add_specific_activity("A-0", activity)
     input.extreme_windspeeds = dict(A=1, B=1, C=1, D=1, E=1, F=1)
+    input.blowout_time = 1
+    input.square_side = 1
     model.input = input
 
     model.results.height_deposition_factors.insert(
@@ -336,6 +338,8 @@ def test_calculate_concentration_integrals():
     activity = 2
     input.add_specific_activity("A-0", activity)
     input.extreme_windspeeds = dict(A=1, B=1, C=1, D=1, E=1, F=1)
+    input.blowout_time = 1
+    input.square_side = 1
     model.input = input
 
     model.results.dilution_factors.insert(
