@@ -10,7 +10,13 @@ import pytest
 import unittest
 
 
-class TestLazyEvaluation(unittest.TestCase):
+class TestCaseBase(unittest.TestCase):
+    def assertCallRaises(self, errorType, call):
+        with self.assertRaises(errorType):
+            call()
+
+
+class TestLazyEvaluation(TestCaseBase):
     def test_do_not_exec_on_creation(self):
         self.assertEqual(LazyEvaluation(lambda: None).results, dict())
         self.assertEqual(LazyEvaluation(lambda: 1).results, dict())
@@ -23,10 +29,6 @@ class TestLazyEvaluation(unittest.TestCase):
         self.assertEqual(LazyEvaluation(lambda x: x).exec((1,)), 1)
         self.assertEqual(LazyEvaluation(lambda x: x**2).exec((2,)), 4)
         self.assertEqual(LazyEvaluation(lambda x, y: x**y).exec((2, 3)), 8)
-
-    def assertCallRaises(self, errorType, call):
-        with self.assertRaises(errorType):
-            call()
 
     def test_exec_wrong_params(self):
         self.assertCallRaises(
@@ -62,7 +64,7 @@ class TestLazyEvaluation(unittest.TestCase):
         self.assertEqual(evalution.results, {(1,): None, (2,): None})
 
 
-class TestFormulas(unittest.TestCase):
+class TestFormulas(TestCaseBase):
     def test_effective_dose(self):
         nuclide_aclass_doses = [
             {
@@ -85,7 +87,7 @@ class TestFormulas(unittest.TestCase):
         self.assertEqual(effective_dose(nuclide_aclass_doses), 18)
 
 
-class TestBaseInput(unittest.TestCase):
+class TestBaseInput(TestCaseBase):
     def test_base_input_init(self):
         self.assertEqual(BaseInput(())._BaseInput__values, dict())
         self.assertEqual(BaseInput(("1"))._BaseInput__values, {"1": None})
@@ -119,7 +121,7 @@ class TestBaseInput(unittest.TestCase):
         self.assertEqual(inp["1"], 1)
 
 
-class TestInput(unittest.TestCase):
+class TestInput(TestCaseBase):
     def test_input_init(self):
         self.assertEqual(
             Input()._BaseInput__values,
@@ -266,7 +268,7 @@ class ModelTest(Model):
         self.__reference = value
 
 
-class TestModelIsReady(unittest.TestCase):
+class TestModelIsReady(TestCaseBase):
     def setUp(self):
         self.model = ModelTest()
 
