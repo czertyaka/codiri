@@ -42,7 +42,7 @@ def acute_total_effective_dose(
         surf_ed (float): effective dose due to surface irradiation, Sv
         nuclide_groups (Dict[str, str]): dictionary of all nuclides and corresponding groups
     
-    No Longer Returned:
+    Returns:
         float: acute total effective dose due to the specific nuclide, Sv
     """
     if nuclide not in nuclide_groups.keys():
