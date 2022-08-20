@@ -61,8 +61,9 @@ def total_effective_dose_for_period(
     surf_ed: float,
     food_ed: float,
     nuclide_groups: Dict[str, str],
-):
+) -> float:
     """Calculate total effective dose due to specific nuclide for a period
+    SM-134-17: (4)
 
     Args:
         years (int): period, years
@@ -72,6 +73,9 @@ def total_effective_dose_for_period(
         surf_ed (float): effective dose due to surface irradiation, Sv
         food_ed (float): effective dose due to  dietary intake, Sv
         nuclide_groups (Dict[str, str]): dictionary of all nuclides and corresponding groups
+
+    Returns:
+        total effective dose due to specific nuclide for a period, Sv
     """
     if nuclide not in nuclide_groups.keys():
         raise ValueError(f"unknown nuclide '{nuclide}'")
@@ -83,6 +87,22 @@ def total_effective_dose_for_period(
         return cloud_ed + inh_ed + surf_ed + food_ed
     else:
         raise NotImplementedError
+
+
+def effective_dose_cloud(
+    concentration_integral: float, dose_coefficicent: float
+) -> float:
+    """Calculate effecive dose due to external exposure form radioactive cloud
+    SM-134-17: (5)
+
+    Args:
+        concentration_integral (float): Dose conversion factor for external exposure from radioactive cloud, (Sv*m^3)/(Bq*s)
+        dose_coefficicent (float): Concentration in surface air time integral, Bq*s/m^3
+
+    Returns:
+        float: effecive dose due to external exposure form radioactive cloud, Sv
+    """
+    return concentration_integral * dose_coefficicent
 
 
 class Model:

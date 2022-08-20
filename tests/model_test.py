@@ -3,6 +3,7 @@ from codiri.src.model.model import (
     effective_dose,
     acute_total_effective_dose,
     total_effective_dose_for_period,
+    effective_dose_cloud
 )
 from codiri.src.model.results import Results
 from codiri.src.model.reference import IReference
@@ -136,7 +137,13 @@ class TestFormulas(unittest.TestCase):
         self.assertRaises(
             ValueError,
             lambda: total_effective_dose_for_period(
-                -1, "Cs-137", cloud_ed, inh_ed, surf_ed, food_ed, nuclide_groups
+                -1,
+                "Cs-137",
+                cloud_ed,
+                inh_ed,
+                surf_ed,
+                food_ed,
+                nuclide_groups,
             ),
         )
         self.assertRaises(
@@ -148,10 +155,20 @@ class TestFormulas(unittest.TestCase):
         self.assertRaises(
             ValueError,
             lambda: total_effective_dose_for_period(
-                1, "unknown", cloud_ed, inh_ed, surf_ed, food_ed, nuclide_groups
+                1,
+                "unknown",
+                cloud_ed,
+                inh_ed,
+                surf_ed,
+                food_ed,
+                nuclide_groups,
             ),
         )
 
+    def test_effective_dose_cloud(self):
+        dc = 3
+        ci = 7
+        self.assertEqual(effective_dose_cloud(dc, ci), dc * ci)
 
 class TestBaseInput(unittest.TestCase):
     def test_base_input_init(self):
