@@ -1,4 +1,4 @@
-from codiri.src.model.model import Model
+from codiri.src.model.model import Model, effective_dose
 from codiri.src.model.results import Results
 from codiri.src.model.reference import IReference
 from codiri.src.database import InMemoryDatabase
@@ -60,6 +60,29 @@ class TestLazyEvaluation(unittest.TestCase):
         evalution.exec((2,))
         mock.assert_has_calls([call(1), call(2)])
         self.assertEqual(evalution.results, {(1,): None, (2,): None})
+
+
+class TestFormulas(unittest.TestCase):
+    def test_effective_dose(self):
+        nuclide_aclass_doses = [
+            {
+                "A": 1,
+                "B": 2,
+                "C": 3,
+                "D": 2,
+                "E": 1,
+                "F": 0,
+            },
+            {
+                "A": 1,
+                "B": 4,
+                "C": 9,
+                "D": 16,
+                "E": 9,
+                "F": 4,
+            },
+        ]
+        self.assertEqual(effective_dose(nuclide_aclass_doses), 18)
 
 
 class TestBaseInput(unittest.TestCase):

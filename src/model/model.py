@@ -5,6 +5,21 @@ from .reference import IReference
 import math
 from scipy import integrate
 from ..activity import blowout_activity_flow
+from typing import List, Dict
+
+
+def effective_dose(nuclide_aclass_doses: List[Dict[str, float]]) -> float:
+    """ Calculate effective dose
+    SM-134-17: (1), (2)
+    :param nuclide_aclass_doses: effective doses per nuclide per atmospheric
+    class
+    :return effective dose:
+    """
+    aclass_doses = dict.fromkeys(pasquill_gifford_classes, 0)
+    for nuclide_doses in nuclide_aclass_doses:
+        for aclass in pasquill_gifford_classes:
+            aclass_doses[aclass] += nuclide_doses[aclass]
+    return max(aclass_doses.values())
 
 
 class Model:
