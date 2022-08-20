@@ -3,7 +3,7 @@ from codiri.src.model.model import (
     effective_dose,
     acute_total_effective_dose,
     total_effective_dose_for_period,
-    effective_dose_cloud
+    effective_dose_cloud,
 )
 from codiri.src.model.results import Results
 from codiri.src.model.reference import IReference
@@ -170,6 +170,7 @@ class TestFormulas(unittest.TestCase):
         ci = 7
         self.assertEqual(effective_dose_cloud(dc, ci), dc * ci)
 
+
 class TestBaseInput(unittest.TestCase):
     def test_base_input_init(self):
         self.assertEqual(BaseInput(())._BaseInput__values, dict())
@@ -324,11 +325,11 @@ class ModelTest(Model):
     def __init__(self):
         self._Model__results = Results()
         self.__reference = ReferenceTest()
-        validInput = Input()
-        validInput.distance = 1
-        validInput.square_side = 1
-        validInput.precipitation_rate = 1
-        validInput.extreme_windspeeds = {
+        valid_input = Input()
+        valid_input.distance = 1
+        valid_input.square_side = 1
+        valid_input.precipitation_rate = 1
+        valid_input.extreme_windspeeds = {
             "A": 1,
             "B": 1,
             "C": 1,
@@ -336,11 +337,11 @@ class ModelTest(Model):
             "E": 1,
             "F": 1,
         }
-        validInput.age = 1
-        validInput.terrain_type = "greenland"
-        validInput.blowout_time = 1
-        validInput.add_specific_activity("Cs-137", 1)
-        self.input = validInput
+        valid_input.age = 1
+        valid_input.terrain_type = "greenland"
+        valid_input.blowout_time = 1
+        valid_input.add_specific_activity("Cs-137", 1)
+        self.input = valid_input
 
     @property
     def reference(self):

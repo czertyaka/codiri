@@ -13,7 +13,8 @@ def effective_dose(nuclide_aclass_doses: List[Dict[str, float]]) -> float:
     SM-134-17: (1), (2)
 
     Args:
-        nuclide_aclass_doses (List[Dict[str, float]]): effective doses per nuclide per atmospheric class, Sv
+        nuclide_aclass_doses (List[Dict[str, float]]): effective doses per
+            nuclide per atmospheric class, Sv
 
     Returns:
         float: effective dose, Sv
@@ -40,7 +41,8 @@ def acute_total_effective_dose(
         cloud_ed (float): effective dose due to radioactive cloud, Sv
         inh_ed (float): effective dose due to nuclide inhalation, Sv
         surf_ed (float): effective dose due to surface irradiation, Sv
-        nuclide_groups (Dict[str, str]): dictionary of all nuclides and corresponding groups
+        nuclide_groups (Dict[str, str]): dictionary of all nuclides and
+            corresponding groups
 
     Returns:
         float: acute total effective dose due to the specific nuclide, Sv
@@ -72,7 +74,8 @@ def total_effective_dose_for_period(
         inh_ed (float): effective dose due to nuclide inhalation, Sv
         surf_ed (float): effective dose due to surface irradiation, Sv
         food_ed (float): effective dose due to  dietary intake, Sv
-        nuclide_groups (Dict[str, str]): dictionary of all nuclides and corresponding groups
+        nuclide_groups (Dict[str, str]): dictionary of all nuclides and
+            corresponding groups
 
     Returns:
         total effective dose due to specific nuclide for a period, Sv
@@ -96,11 +99,14 @@ def effective_dose_cloud(
     SM-134-17: (5)
 
     Args:
-        concentration_integral (float): Dose conversion factor for external exposure from radioactive cloud, (Sv*m^3)/(Bq*s)
-        dose_coefficicent (float): Concentration in surface air time integral, Bq*s/m^3
+        concentration_integral (float): Dose conversion factor for external
+            exposure from radioactive cloud, (Sv*m^3)/(Bq*s)
+        dose_coefficicent (float): Concentration in surface air time integral,
+            Bq*s/m^3
 
     Returns:
-        float: effecive dose due to external exposure form radioactive cloud, Sv
+        float: effecive dose due to external exposure form radioactive cloud,
+            Sv
     """
     return concentration_integral * dose_coefficicent
 
@@ -170,7 +176,8 @@ class Model:
             if nuclide not in self.reference.all_nuclides():
                 log(
                     f"unknown nuclide '{nuclide}'"
-                    f" (list of known nuclides '{self.reference.all_nuclides()}')"
+                    " (list of known nuclides"
+                    f" '{self.reference.all_nuclides()}')"
                 )
                 return False
         return True
