@@ -14,13 +14,7 @@ import pytest
 import unittest
 
 
-class TestCaseBase(unittest.TestCase):
-    def assertCallRaises(self, errorType, call):
-        with self.assertRaises(errorType):
-            call()
-
-
-class TestLazyEvaluation(TestCaseBase):
+class TestLazyEvaluation(unittest.TestCase):
     def test_do_not_exec_on_creation(self):
         self.assertEqual(LazyEvaluation(lambda: None).results, dict())
         self.assertEqual(LazyEvaluation(lambda: 1).results, dict())
@@ -35,16 +29,16 @@ class TestLazyEvaluation(TestCaseBase):
         self.assertEqual(LazyEvaluation(lambda x, y: x**y).exec((2, 3)), 8)
 
     def test_exec_wrong_params(self):
-        self.assertCallRaises(
+        self.assertRaises(
             TypeError, lambda: LazyEvaluation(lambda: None).exec(1)
         )
-        self.assertCallRaises(
+        self.assertRaises(
             TypeError, lambda: LazyEvaluation(lambda: None).exec((1,))
         )
-        self.assertCallRaises(
+        self.assertRaises(
             TypeError, lambda: LazyEvaluation(lambda x: None).exec()
         )
-        self.assertCallRaises(
+        self.assertRaises(
             TypeError, lambda: LazyEvaluation(lambda x: None).exec((1, 2))
         )
 
@@ -68,7 +62,7 @@ class TestLazyEvaluation(TestCaseBase):
         self.assertEqual(evalution.results, {(1,): None, (2,): None})
 
 
-class TestFormulas(TestCaseBase):
+class TestFormulas(unittest.TestCase):
     def test_effective_dose(self):
         nuclide_aclass_doses = [
             {
@@ -107,7 +101,7 @@ class TestFormulas(TestCaseBase):
             ),
             cloud_ed + inh_ed + surf_ed,
         )
-        self.assertCallRaises(
+        self.assertRaises(
             ValueError,
             lambda: acute_total_effective_dose(
                 "unknown", cloud_ed, inh_ed, surf_ed, nuclide_groups
@@ -115,7 +109,7 @@ class TestFormulas(TestCaseBase):
         )
 
 
-class TestBaseInput(TestCaseBase):
+class TestBaseInput(unittest.TestCase):
     def test_base_input_init(self):
         self.assertEqual(BaseInput(())._BaseInput__values, dict())
         self.assertEqual(BaseInput(("1"))._BaseInput__values, {"1": None})
@@ -149,7 +143,7 @@ class TestBaseInput(TestCaseBase):
         self.assertEqual(inp["1"], 1)
 
 
-class TestInput(TestCaseBase):
+class TestInput(unittest.TestCase):
     def test_input_init(self):
         self.assertEqual(
             Input()._BaseInput__values,
@@ -296,7 +290,7 @@ class ModelTest(Model):
         self.__reference = value
 
 
-class TestModelIsReady(TestCaseBase):
+class TestModelIsReady(unittest.TestCase):
     def setUp(self):
         self.model = ModelTest()
 
