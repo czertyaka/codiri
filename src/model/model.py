@@ -95,7 +95,7 @@ def total_effective_dose_for_period(
 def effective_dose_cloud(
     concentration_integral: float, dose_coefficicent: float
 ) -> float:
-    """Calculate effecive dose due to external exposure form radioactive cloud
+    """Calculate effective dose due to external exposure form radioactive cloud
     SM-134-17: (5)
 
     Args:
@@ -109,6 +109,26 @@ def effective_dose_cloud(
             Sv
     """
     return concentration_integral * dose_coefficicent
+
+
+def effective_dose_surface(
+    deposition: float, dose_coefficicent: float, residence_time_coeff: float
+) -> float:
+    """Calculate effective dose due to external exposure form contaminated soil
+    SM-134-17: (6)
+
+    Args:
+        deposition (float): Summarized deposition value on ground surface due
+            to dry and wet deposition, Bq/m^2
+        dose_coefficicent (float): Dose conversion factor for external exposure
+            from soil surface, (Sv*m^2)/(Bq*s)
+        residence_time_coeff (float): Residence time coefficient, s
+
+    Returns:
+        float: effective dose due to external exposure form contaminated soil,
+            Sv
+    """
+    return deposition * dose_coefficicent * residence_time_coeff
 
 
 class Model:

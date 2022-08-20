@@ -4,6 +4,7 @@ from codiri.src.model.model import (
     acute_total_effective_dose,
     total_effective_dose_for_period,
     effective_dose_cloud,
+    effective_dose_surface,
 )
 from codiri.src.model.results import Results
 from codiri.src.model.reference import IReference
@@ -169,6 +170,14 @@ class TestFormulas(unittest.TestCase):
         dc = 3
         ci = 7
         self.assertEqual(effective_dose_cloud(dc, ci), dc * ci)
+
+    def tes_effective_dose_surface(self):
+        depo = 3
+        dc = 7
+        rtc = 2
+        self.assertEqual(
+            effective_dose_surface(depo, dc, rtc), depo * dc * rtc
+        )
 
 
 class TestBaseInput(unittest.TestCase):
