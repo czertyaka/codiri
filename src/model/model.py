@@ -9,17 +9,41 @@ from typing import List, Dict
 
 
 def effective_dose(nuclide_aclass_doses: List[Dict[str, float]]) -> float:
-    """ Calculate effective dose
+    """Calculate effective dose
     SM-134-17: (1), (2)
     :param nuclide_aclass_doses: effective doses per nuclide per atmospheric
-    class
-    :return effective dose:
+    class, Sv
+    :return: effective dose, Sv
     """
     aclass_doses = dict.fromkeys(pasquill_gifford_classes, 0)
     for nuclide_doses in nuclide_aclass_doses:
         for aclass in pasquill_gifford_classes:
             aclass_doses[aclass] += nuclide_doses[aclass]
     return max(aclass_doses.values())
+
+
+def acute_total_effective_dose(
+    nuclide: str,
+    cloud_ed: float,
+    inh_ed: float,
+    surf_ed: float,
+    nuclide_groups: Dict[str, str],
+):
+    """Calculate acute total effective dose due to the specific nuclide
+    SM-134-17: (3)
+    :param nuclide: nuclide
+    :param cloud_ed: effective dose due to radioactive cloud, Sv
+    :param inh_ed: effective dose due to nuclide inhalation, Sv
+    :param surf_ed: effective dose due to surface irradiation, Sv
+    :param nuclide_groups: dictionary of all nuclides and corresponding groups
+    :return: acute total effective dose, Sv
+    """
+    if nuclide not in nuclide_groups.keys():
+        raise ValueError(f"unknown nuclide '{nuclide}'")
+    if nuclide_groups[nuclide] == "IRG":
+        return cloud_ed
+    else:
+        return cloud_ed + inh_ed + surf_ed
 
 
 class Model:
