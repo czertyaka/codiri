@@ -9,12 +9,94 @@ from codiri.src.model.model import (
 from codiri.src.model.results import Results
 from codiri.src.model.reference import IReference
 from codiri.src.database import InMemoryDatabase
-from codiri.src.model.input import FixedMap, Input
+from codiri.src.model.input import Input
 from codiri.src.model.lazy_eval import LazyEvaluation
+from codiri.src.model.common import (
+    MapImpl,
+    FixedMap,
+    ValidatingMap,
+    ValidatingFixedMap,
+)
 import math
 from unittest.mock import MagicMock, patch, call
 import pytest
 import unittest
+
+
+class TestMap(unittest.TestCase):
+    def test_init_str(self):
+        map_types = [MapImpl, ValidatingMap]
+        for map_type in map_types:
+            with self.subTest():
+                self.assertEqual(str(map_type()), "{}")
+                self.assertEqual(str(map_type(("a",))), "{'a': None}")
+                self.assertEqual(
+                    str(map_type(("a", "b"))), "{'a': None, 'b': None}"
+                )
+
+
+class TestMapImpl(unittest.TestCase):
+    def test_iter_setitem_getitem(self):
+        map_impl = MapImpl()
+        map_impl["a"] = 1
+        map_impl["b"] = 2
+        ref = {"a": 1, "b": 2}
+        for key in map_impl:
+            self.assertEqual(map_impl[key], ref[key])
+
+    def test_initialized(self):
+        map_impl = MapImpl(("1", "2"))
+        self.assertFalse(map_impl.initialized())
+        map_impl["1"] = 1
+        self.assertFalse(map_impl.initialized())
+        map_impl["2"] = 2
+        self.assertTrue(map_impl.initialized())
+
+
+class TestFixedMap(unittest.TestCase):
+    def test_init_str(self):
+        self.assertEqual(str(FixedMap(("a",))), "{'a': None}")
+        self.assertEqual(str(FixedMap(("a", "b"))), "{'a': None, 'b': None}")
+
+    def test_setitem(self):
+        fmap = FixedMap(("a", "b"))
+        fmap["a"] = 1
+        fmap["b"] = 2
+        with self.assertRaises(KeyError):
+            fmap["c"] = 3
+
+
+class TestValidatingMap(unittest.TestCase):
+    def test_setitem(self):
+        vmap = ValidatingMap()
+
+        def validator(x):
+            return x > 0
+
+        vmap["a"] = (1, validator, str())
+        self.assertEqual(vmap["a"], 1)
+        with self.assertRaises(ValueError):
+            vmap["a"] = (-1, validator, str())
+        self.assertEqual(vmap["a"], 1)
+
+
+class TestValidatingFixedMap(unittest.TestCase):
+    def test_setitem(self):
+        vfmap = ValidatingFixedMap(("a", "b"))
+
+        def validator(x):
+            return x > 0
+
+        vfmap["a"] = (1, validator, str())
+        vfmap["b"] = (2, validator, str())
+        self.assertEqual(vfmap["a"], 1)
+        self.assertEqual(vfmap["b"], 2)
+        with self.assertRaises(KeyError):
+            vfmap["c"] = (3, validator, str())
+        with self.assertRaises(ValueError):
+            vfmap["a"] = (-1, validator, str())
+        with self.assertRaises((ValueError, KeyError)):
+            vfmap["c"] = (-1, validator, str())
 
 
 class TestLazyEvaluation(unittest.TestCase):
@@ -180,55 +262,18 @@ class TestFormulas(unittest.TestCase):
         )
 
 
-class TestFixedMap(unittest.TestCase):
-    def test_fixed_map_init(self):
-        self.assertEqual(FixedMap(())._FixedMap__values, dict())
-        self.assertEqual(FixedMap(("1"))._FixedMap__values, {"1": None})
-        self.assertEqual(
-            FixedMap(("1", "2"))._FixedMap__values, {"1": None, "2": None}
-        )
-
-    def test_fixed_map_initialized(self):
-        inp = FixedMap(("1", "2"))
-        self.assertFalse(inp.initialized())
-        inp["1"] = 1
-        self.assertFalse(inp.initialized())
-        inp["2"] = 2
-        self.assertTrue(inp.initialized())
-
-    def test_fixed_map_str(self):
-        self.assertEqual(str(FixedMap(())), "{}")
-        self.assertEqual(str(FixedMap(("1"))), "{'1': None}")
-        self.assertEqual(str(FixedMap(("1", "2"))), "{'1': None, '2': None}")
-        inp = FixedMap(["1", "2"])
-        inp["1"] = 1
-        inp["2"] = 2
-        self.assertEqual(str(inp), "{'1': 1, '2': 2}")
-
-    def test_fixed_map_setitem(self):
-        inp = FixedMap(("1", "2"))
-        with self.assertRaises(KeyError):
-            inp["0"] = 0
-        self.assertEqual(inp["1"], None)
-        inp["1"] = 1
-        self.assertEqual(inp["1"], 1)
-
-
 class TestInput(unittest.TestCase):
     def test_input_init(self):
-        self.assertEqual(
-            Input()._FixedMap__values,
-            {
-                "distance": None,
-                "square_side": None,
-                "specific_activities": dict(),
-                "precipitation_rate": None,
-                "extreme_windspeeds": None,
-                "age": None,
-                "terrain_type": None,
-                "blowout_time": None,
-            },
-        )
+        values = Input().values
+        self.assertEqual(values["distance"], None)
+        self.assertEqual(values["square_side"], None)
+        self.assertEqual(values["precipitation_rate"], None)
+        self.assertEqual(values["extreme_windspeeds"], None)
+        self.assertEqual(values["age"], None)
+        self.assertEqual(values["terrain_type"], None)
+        self.assertEqual(values["blowout_time"], None)
+
+        self.assertEqual(str(values["specific_activities"]), "{}")
 
     def test_input_simple_setters(self):
         inp = Input()
@@ -285,6 +330,7 @@ class TestInput(unittest.TestCase):
         }
         inp.age = 1
         inp.terrain_type = "greenland"
+        self.assertFalse(inp.initialized())
         inp.blowout_time = 1
         self.assertFalse(inp.initialized())
         inp.add_specific_activity("Cs-137", 1)
@@ -375,10 +421,6 @@ class TestModelIsReady(unittest.TestCase):
 
     def test_empty_input(self):
         self.model.input = Input()
-        self.assertFalse(self.model._Model__is_ready())
-
-    def test_partially_initalized_input(self):
-        self.model.input._FixedMap__values["distance"] = None
         self.assertFalse(self.model._Model__is_ready())
 
     def test_large_distance(self):
