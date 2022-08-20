@@ -11,9 +11,12 @@ from typing import List, Dict
 def effective_dose(nuclide_aclass_doses: List[Dict[str, float]]) -> float:
     """Calculate effective dose
     SM-134-17: (1), (2)
-    :param nuclide_aclass_doses: effective doses per nuclide per atmospheric
-    class, Sv
-    :return: effective dose, Sv
+    
+    Args:
+        nuclide_aclass_doses (List[Dict[str, float]]): effective doses per nuclide per atmospheric class, Sv
+    
+    Returns:
+        float: effective dose, Sv
     """
     aclass_doses = dict.fromkeys(pasquill_gifford_classes, 0)
     for nuclide_doses in nuclide_aclass_doses:
@@ -28,15 +31,19 @@ def acute_total_effective_dose(
     inh_ed: float,
     surf_ed: float,
     nuclide_groups: Dict[str, str],
-):
+) -> float:
     """Calculate acute total effective dose due to the specific nuclide
     SM-134-17: (3)
-    :param nuclide: nuclide
-    :param cloud_ed: effective dose due to radioactive cloud, Sv
-    :param inh_ed: effective dose due to nuclide inhalation, Sv
-    :param surf_ed: effective dose due to surface irradiation, Sv
-    :param nuclide_groups: dictionary of all nuclides and corresponding groups
-    :return: acute total effective dose, Sv
+    
+    Args:
+        nuclide (str): nuclide
+        cloud_ed (float): effective dose due to radioactive cloud, Sv
+        inh_ed (float): effective dose due to nuclide inhalation, Sv
+        surf_ed (float): effective dose due to surface irradiation, Sv
+        nuclide_groups (Dict[str, str]): dictionary of all nuclides and corresponding groups
+    
+    No Longer Returned:
+        float: acute total effective dose due to the specific nuclide, Sv
     """
     if nuclide not in nuclide_groups.keys():
         raise ValueError(f"unknown nuclide '{nuclide}'")
