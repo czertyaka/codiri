@@ -1,12 +1,22 @@
 from .common import pasquill_gifford_classes
-from typing import Tuple, Callable
+from typing import Tuple, Callable, Dict
 
 
 class BaseInput:
     def __init__(self, item_names: Tuple[str]):
+        """BaseInput constructor
+
+        Args:
+            item_names (Tuple[str]): tuple of data fields names
+        """
         self.__values = dict.fromkeys(item_names, None)
 
     def initialized(self) -> bool:
+        """Check if all fields have values
+
+        Returns:
+            bool: check result
+        """
         return all(
             [
                 False if item is None else True
@@ -30,6 +40,7 @@ class Input(BaseInput):
     """Holds input data for model"""
 
     def __init__(self):
+        """Input constructor"""
         super(Input, self).__init__(
             (
                 "distance",
@@ -45,6 +56,11 @@ class Input(BaseInput):
         self.__set_value("specific_activities", dict())
 
     def initialized(self) -> bool:
+        """Check if all fields have values
+
+        Returns:
+            bool: check result
+        """
         return (
             super(Input, self).initialized()
             and len(self.specific_activities) > 0
@@ -53,18 +69,39 @@ class Input(BaseInput):
     def __set_value(
         self, key, item, validator: Callable = lambda x: True, err_msg=""
     ):
+        """Validate and set a value for a field by given name
+
+        Args:
+            key (TYPE): field name
+            item (TYPE): value
+            validator (Callable, optional): validating function
+            err_msg (str, optional): error message for failed validation
+
+        Raises:
+            ValueError: validation of field value failed
+        """
         if not validator(item):
             raise ValueError(err_msg)
         self[key] = item
 
     @property
     def distance(self) -> float:
+        """Get distance between source center and point where doses should be
+        calculated
+
+        Returns:
+            float: distance, m
+        """
         return self["distance"]
 
     @distance.setter
-    def distance(self, value: float) -> None:
-        """Distance between source center and point where doses should be
-        calculated, m"""
+    def distance(self, value: float):
+        """Set distance between source center and point where doses should be
+        calculated
+
+        Args:
+            value (float): distance, m
+        """
         self.__set_value(
             "distance",
             value,
@@ -74,11 +111,20 @@ class Input(BaseInput):
 
     @property
     def square_side(self) -> float:
+        """Get square-shaped surface source side length
+
+        Returns:
+            float: square size length, m
+        """
         return self["square_side"]
 
     @square_side.setter
     def square_side(self, value: float) -> float:
-        """Square-shaped surface source side length, m"""
+        """Set square-shaped surface source side length
+
+        Args:
+            value (float): square size length, m
+        """
         self.__set_value(
             "square_side",
             value,
@@ -87,11 +133,25 @@ class Input(BaseInput):
         )
 
     @property
-    def specific_activities(self) -> dict:
+    def specific_activities(self) -> Dict[str, float]:
+        """Get specific activities of the source
+
+        Returns:
+            Dict[str, float]: specific activities dictionary, where key is
+                nuclide name and value is Bq/kg
+        """
         return self["specific_activities"]
 
     def add_specific_activity(self, nuclide: str, specific_activity: float):
-        """Add specific activity for specific nuclide, Bq/kg"""
+        """Add specific activity for a nuclide
+
+        Args:
+            nuclide (str): nuclide name
+            specific_activity (float): specific activity, Bq/kg
+
+        Raises:
+            ValueError: specific activity validation failed
+        """
         if specific_activity < 0:
             raise ValueError(
                 f"invalid specific activity '{specific_activity} Bq/kg'"
@@ -105,11 +165,20 @@ class Input(BaseInput):
 
     @property
     def precipitation_rate(self) -> float:
+        """Get precipation rate
+
+        Returns:
+            float: precipation rate, mm/hr
+        """
         return self["precipitation_rate"]
 
     @precipitation_rate.setter
     def precipitation_rate(self, value: float):
-        """Precipation rate, mm/hr"""
+        """Set precipation rate
+
+        Args:
+            value (float): precipation rate, mm/hr
+        """
         self.__set_value(
             "precipitation_rate",
             value,
@@ -118,13 +187,23 @@ class Input(BaseInput):
         )
 
     @property
-    def extreme_windspeeds(self) -> dict:
+    def extreme_windspeeds(self) -> Dict[str, float]:
+        """Get extreme windspeeds
+
+        Returns:
+            Dict[str, float]: windspeeds dictionary for each Pasquill-Gifford
+                atmospheric stability class, m/s
+        """
         return self["extreme_windspeeds"]
 
     @extreme_windspeeds.setter
-    def extreme_windspeeds(self, values: dict):
-        """Extreme wind speed for each Pasquill-Gifford atmospheric stability
-        classes as a list of count 6, m/s"""
+    def extreme_windspeeds(self, values: Dict[str, float]):
+        """Set extreme windspeeds
+
+        Args:
+            values (Dict[str, float]): windspeeds dictionary for each
+                Pasquill-Gifford atmospheric stability class, m/s
+        """
         self.__set_value(
             "extreme_windspeeds",
             values,
@@ -136,25 +215,40 @@ class Input(BaseInput):
 
     @property
     def age(self) -> int:
+        """Get population group age
+
+        Returns:
+            int: population group age, year
+        """
         return self["age"]
 
     @age.setter
-    def age(self, value: int) -> None:
-        """Control group age, years"""
+    def age(self, value: int):
+        """Set population group age
+
+        Args:
+            value (int): population group age, year
+        """
         self.__set_value(
             "age", value, lambda x: x >= 0, f"invalid age '{value} years'"
         )
 
     @property
-    def terrain_type(self) -> str():
+    def terrain_type(self) -> str:
+        """Get underlying terrain type
+
+        Returns:
+            str: terrain type
+        """
         return self["terrain_type"]
 
     @terrain_type.setter
-    def terrain_type(self, value: str) -> None:
-        """Underlying terrain type
-        :param value: valid types are "greenland", "agricultural", "forest" and
-            "settlement"
-        :raises ValueError: unknown terrain type
+    def terrain_type(self, value: str):
+        """Set underlying terrain type, valid values are "greenland",
+            "agricultural", "forest" and "settlement"
+
+        Args:
+            value (str): terrain type
         """
         self.__set_value(
             "terrain_type",
@@ -166,11 +260,20 @@ class Input(BaseInput):
 
     @property
     def blowout_time(self) -> int:
+        """Get wind operation (blowout) time
+
+        Returns:
+            int: time, s
+        """
         return self["blowout_time"]
 
     @blowout_time.setter
-    def blowout_time(self, value: int) -> None:
-        """Wind operation (blowout) time, sec"""
+    def blowout_time(self, value: int):
+        """Set wind operation (blowout) time
+
+        Args:
+            value (int): time, s
+        """
         self.__set_value(
             "blowout_time",
             value,
