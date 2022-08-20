@@ -1,15 +1,15 @@
 from .common import pasquill_gifford_classes
-from typing import Tuple, Callable, Dict
+from typing import Tuple, Callable, Dict, Any
 
 
 class FixedMap:
-    def __init__(self, item_names: Tuple[str]):
+    def __init__(self, keys: Tuple[str]):
         """FixedMap constructor
 
         Args:
-            item_names (Tuple[str]): tuple of data fields names
+            keys (Tuple[str]): tuple of data fields names
         """
-        self.__values = dict.fromkeys(item_names, None)
+        self.__values = dict.fromkeys(keys, None)
 
     def initialized(self) -> bool:
         """Check if all fields have values
@@ -36,7 +36,37 @@ class FixedMap:
         self.__values[key] = item
 
 
-class Input(FixedMap):
+class ValidatingFixedMap(FixedMap):
+
+    """Summary"""
+
+    def __init__(self, keys: Tuple[str]):
+        """Summary
+
+        Args:
+            keys (Tuple[str]): Description
+        """
+        super(ValidatingFixedMap, self).__init__(keys)
+
+    def __setitem__(self, key, item: Tuple[Any, Callable, str]):
+        """Summary
+
+        Args:
+            key (TYPE): Description
+            item (Tuple[Any, Callable, str]): Description
+
+        Raises:
+            ValueError: Description
+        """
+        value = item[0]
+        validator = item[1]
+        err_msg = item[2]
+        if not validator(value):
+            raise ValueError(err_msg)
+        super(ValidatingFixedMap, self).__setitem__(key, value)
+
+
+class Input(ValidatingFixedMap):
     """Holds input data for model"""
 
     def __init__(self):
@@ -53,7 +83,7 @@ class Input(FixedMap):
                 "blowout_time",
             )
         )
-        self.__set_value("specific_activities", dict())
+        self["specific_activities"] = dict(), lambda x: True, str()
 
     def initialized(self) -> bool:
         """Check if all fields have values
@@ -65,24 +95,6 @@ class Input(FixedMap):
             super(Input, self).initialized()
             and len(self.specific_activities) > 0
         )
-
-    def __set_value(
-        self, key, item, validator: Callable = lambda x: True, err_msg=""
-    ):
-        """Validate and set a value for a field by given name
-
-        Args:
-            key (TYPE): field name
-            item (TYPE): value
-            validator (Callable, optional): validating function
-            err_msg (str, optional): error message for failed validation
-
-        Raises:
-            ValueError: validation of field value failed
-        """
-        if not validator(item):
-            raise ValueError(err_msg)
-        self[key] = item
 
     @property
     def distance(self) -> float:
@@ -102,8 +114,7 @@ class Input(FixedMap):
         Args:
             value (float): distance, m
         """
-        self.__set_value(
-            "distance",
+        self["distance"] = (
             value,
             lambda x: x >= 0,
             f"invalid distance '{value} m'",
@@ -125,8 +136,7 @@ class Input(FixedMap):
         Args:
             value (float): square size length, m
         """
-        self.__set_value(
-            "square_side",
+        self["square_side"] = (
             value,
             lambda x: x >= 0,
             f"invalid square side '{value} m'",
@@ -179,8 +189,7 @@ class Input(FixedMap):
         Args:
             value (float): precipation rate, mm/hr
         """
-        self.__set_value(
-            "precipitation_rate",
+        self["precipitation_rate"] = (
             value,
             lambda x: x >= 0,
             f"invalid precipitation rate '{value} mm/hr'",
@@ -204,13 +213,11 @@ class Input(FixedMap):
             values (Dict[str, float]): windspeeds dictionary for each
                 Pasquill-Gifford atmospheric stability class, m/s
         """
-        self.__set_value(
-            "extreme_windspeeds",
+        self["extreme_windspeeds"] = (
             values,
             lambda x: sorted(x.keys()) == sorted(pasquill_gifford_classes),
-            f"given wind speeds list ({values}) doesn't provide "
-            f"necessary atmospheric stability classes "
-            f"({pasquill_gifford_classes})",
+            f"given wind speeds list ({values}) doesn't provide necessary "
+            f"atmospheric stability classes ({pasquill_gifford_classes})",
         )
 
     @property
@@ -229,9 +236,7 @@ class Input(FixedMap):
         Args:
             value (int): population group age, year
         """
-        self.__set_value(
-            "age", value, lambda x: x >= 0, f"invalid age '{value} years'"
-        )
+        self["age"] = value, lambda x: x >= 0, f"invalid age '{value} years'"
 
     @property
     def terrain_type(self) -> str:
@@ -250,8 +255,7 @@ class Input(FixedMap):
         Args:
             value (str): terrain type
         """
-        self.__set_value(
-            "terrain_type",
+        self["terrain_type"] = (
             value,
             lambda x: x
             in ["greenland", "agricultural", "forest", "settlement"],
@@ -274,8 +278,7 @@ class Input(FixedMap):
         Args:
             value (int): time, s
         """
-        self.__set_value(
-            "blowout_time",
+        self["blowout_time"] = (
             value,
             lambda x: x > 0,
             f"invalid wind operation '{value} sec'",
