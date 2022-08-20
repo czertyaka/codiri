@@ -2,6 +2,7 @@ from codiri.src.model.model import (
     Model,
     effective_dose,
     acute_total_effective_dose,
+    total_effective_dose_for_period,
 )
 from codiri.src.model.results import Results
 from codiri.src.model.reference import IReference
@@ -105,6 +106,49 @@ class TestFormulas(unittest.TestCase):
             ValueError,
             lambda: acute_total_effective_dose(
                 "unknown", cloud_ed, inh_ed, surf_ed, nuclide_groups
+            ),
+        )
+
+    def test_total_effective_dose_for_period(self):
+        nuclide_groups = {"Cs-137": "aerosol", "Xe-133": "IRG"}
+        cloud_ed = 1
+        inh_ed = 2
+        surf_ed = 3
+        food_ed = 4
+        self.assertEqual(
+            total_effective_dose_for_period(
+                1, "Xe-133", cloud_ed, inh_ed, surf_ed, food_ed, nuclide_groups
+            ),
+            cloud_ed,
+        )
+        self.assertEqual(
+            total_effective_dose_for_period(
+                1, "Cs-137", cloud_ed, inh_ed, surf_ed, food_ed, nuclide_groups
+            ),
+            cloud_ed + inh_ed + surf_ed + food_ed,
+        )
+        self.assertRaises(
+            ValueError,
+            lambda: total_effective_dose_for_period(
+                0, "Cs-137", cloud_ed, inh_ed, surf_ed, food_ed, nuclide_groups
+            ),
+        )
+        self.assertRaises(
+            ValueError,
+            lambda: total_effective_dose_for_period(
+                -1, "Cs-137", cloud_ed, inh_ed, surf_ed, food_ed, nuclide_groups
+            ),
+        )
+        self.assertRaises(
+            NotImplementedError,
+            lambda: total_effective_dose_for_period(
+                2, "Cs-137", cloud_ed, inh_ed, surf_ed, food_ed, nuclide_groups
+            ),
+        )
+        self.assertRaises(
+            ValueError,
+            lambda: total_effective_dose_for_period(
+                1, "unknown", cloud_ed, inh_ed, surf_ed, food_ed, nuclide_groups
             ),
         )
 

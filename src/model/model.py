@@ -11,10 +11,10 @@ from typing import List, Dict
 def effective_dose(nuclide_aclass_doses: List[Dict[str, float]]) -> float:
     """Calculate effective dose
     SM-134-17: (1), (2)
-    
+
     Args:
         nuclide_aclass_doses (List[Dict[str, float]]): effective doses per nuclide per atmospheric class, Sv
-    
+
     Returns:
         float: effective dose, Sv
     """
@@ -34,14 +34,14 @@ def acute_total_effective_dose(
 ) -> float:
     """Calculate acute total effective dose due to the specific nuclide
     SM-134-17: (3)
-    
+
     Args:
         nuclide (str): nuclide
         cloud_ed (float): effective dose due to radioactive cloud, Sv
         inh_ed (float): effective dose due to nuclide inhalation, Sv
         surf_ed (float): effective dose due to surface irradiation, Sv
         nuclide_groups (Dict[str, str]): dictionary of all nuclides and corresponding groups
-    
+
     Returns:
         float: acute total effective dose due to the specific nuclide, Sv
     """
@@ -51,6 +51,38 @@ def acute_total_effective_dose(
         return cloud_ed
     else:
         return cloud_ed + inh_ed + surf_ed
+
+
+def total_effective_dose_for_period(
+    years: int,
+    nuclide: str,
+    cloud_ed: float,
+    inh_ed: float,
+    surf_ed: float,
+    food_ed: float,
+    nuclide_groups: Dict[str, str],
+):
+    """Calculate total effective dose due to specific nuclide for a period
+
+    Args:
+        years (int): period, years
+        nuclide (str): nuclide
+        cloud_ed (float): effective dose due to radioactive cloud, Sv
+        inh_ed (float): effective dose due to nuclide inhalation, Sv
+        surf_ed (float): effective dose due to surface irradiation, Sv
+        food_ed (float): effective dose due to  dietary intake, Sv
+        nuclide_groups (Dict[str, str]): dictionary of all nuclides and corresponding groups
+    """
+    if nuclide not in nuclide_groups.keys():
+        raise ValueError(f"unknown nuclide '{nuclide}'")
+    if years <= 0:
+        raise ValueError(f"invalid period '{years}'")
+    if nuclide_groups[nuclide] == "IRG":
+        return cloud_ed
+    elif years == 1:
+        return cloud_ed + inh_ed + surf_ed + food_ed
+    else:
+        raise NotImplementedError
 
 
 class Model:
