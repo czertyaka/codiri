@@ -9,7 +9,7 @@ from codiri.src.model.model import (
 from codiri.src.model.results import Results
 from codiri.src.model.reference import IReference
 from codiri.src.database import InMemoryDatabase
-from codiri.src.model.input import BaseInput, Input
+from codiri.src.model.input import FixedMap, Input
 from codiri.src.model.lazy_eval import LazyEvaluation
 import math
 from unittest.mock import MagicMock, patch, call
@@ -180,33 +180,33 @@ class TestFormulas(unittest.TestCase):
         )
 
 
-class TestBaseInput(unittest.TestCase):
-    def test_base_input_init(self):
-        self.assertEqual(BaseInput(())._BaseInput__values, dict())
-        self.assertEqual(BaseInput(("1"))._BaseInput__values, {"1": None})
+class TestFixedMap(unittest.TestCase):
+    def test_fixed_map_init(self):
+        self.assertEqual(FixedMap(())._FixedMap__values, dict())
+        self.assertEqual(FixedMap(("1"))._FixedMap__values, {"1": None})
         self.assertEqual(
-            BaseInput(("1", "2"))._BaseInput__values, {"1": None, "2": None}
+            FixedMap(("1", "2"))._FixedMap__values, {"1": None, "2": None}
         )
 
-    def test_base_input_initialized(self):
-        inp = BaseInput(("1", "2"))
+    def test_fixed_map_initialized(self):
+        inp = FixedMap(("1", "2"))
         self.assertFalse(inp.initialized())
         inp["1"] = 1
         self.assertFalse(inp.initialized())
         inp["2"] = 2
         self.assertTrue(inp.initialized())
 
-    def test_base_input_str(self):
-        self.assertEqual(str(BaseInput(())), "{}")
-        self.assertEqual(str(BaseInput(("1"))), "{'1': None}")
-        self.assertEqual(str(BaseInput(("1", "2"))), "{'1': None, '2': None}")
-        inp = BaseInput(["1", "2"])
+    def test_fixed_map_str(self):
+        self.assertEqual(str(FixedMap(())), "{}")
+        self.assertEqual(str(FixedMap(("1"))), "{'1': None}")
+        self.assertEqual(str(FixedMap(("1", "2"))), "{'1': None, '2': None}")
+        inp = FixedMap(["1", "2"])
         inp["1"] = 1
         inp["2"] = 2
         self.assertEqual(str(inp), "{'1': 1, '2': 2}")
 
-    def test_base_input_setitem(self):
-        inp = BaseInput(("1", "2"))
+    def test_fixed_map_setitem(self):
+        inp = FixedMap(("1", "2"))
         with self.assertRaises(KeyError):
             inp["0"] = 0
         self.assertEqual(inp["1"], None)
@@ -217,7 +217,7 @@ class TestBaseInput(unittest.TestCase):
 class TestInput(unittest.TestCase):
     def test_input_init(self):
         self.assertEqual(
-            Input()._BaseInput__values,
+            Input()._FixedMap__values,
             {
                 "distance": None,
                 "square_side": None,
@@ -378,7 +378,7 @@ class TestModelIsReady(unittest.TestCase):
         self.assertFalse(self.model._Model__is_ready())
 
     def test_partially_initalized_input(self):
-        self.model.input._BaseInput__values["distance"] = None
+        self.model.input._FixedMap__values["distance"] = None
         self.assertFalse(self.model._Model__is_ready())
 
     def test_large_distance(self):

@@ -2,9 +2,9 @@ from .common import pasquill_gifford_classes
 from typing import Tuple, Callable, Dict
 
 
-class BaseInput:
+class FixedMap:
     def __init__(self, item_names: Tuple[str]):
-        """BaseInput constructor
+        """FixedMap constructor
 
         Args:
             item_names (Tuple[str]): tuple of data fields names
@@ -36,7 +36,7 @@ class BaseInput:
         self.__values[key] = item
 
 
-class Input(BaseInput):
+class Input(FixedMap):
     """Holds input data for model"""
 
     def __init__(self):
