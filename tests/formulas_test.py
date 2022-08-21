@@ -4,6 +4,7 @@ from codiri.src.model.formulas import (
     total_effective_dose_for_period,
     effective_dose_cloud,
     effective_dose_surface,
+    residence_time_coeff,
 )
 import unittest
 
@@ -114,10 +115,22 @@ class TestFormulas(unittest.TestCase):
         ci = 7
         self.assertEqual(effective_dose_cloud(dc, ci), dc * ci)
 
-    def tes_effective_dose_surface(self):
+    def test_effective_dose_surface(self):
         depo = 3
         dc = 7
         rtc = 2
         self.assertEqual(
             effective_dose_surface(depo, dc, rtc), depo * dc * rtc
+        )
+
+    def test_residence_time_coeff(self):
+        dose_rate_decay_coeff = 1
+        radioactive_decay_coeff = 2
+        residence_time = 3
+        self.assertAlmostEqual(
+            residence_time_coeff(
+                dose_rate_decay_coeff, radioactive_decay_coeff, residence_time
+            ),
+            0.333,
+            3,
         )

@@ -10,6 +10,7 @@ from .formulas import (
     total_effective_dose_for_period,
     effective_dose_cloud,
     effective_dose_surface,
+    residence_time_coeff,
 )
 import math
 from scipy import integrate
@@ -112,13 +113,29 @@ class Model:
 
     def _set_effective_doses_exposure_sources_levals(self):
         """Set effective doses for all exposure sources lazy evaluations"""
+        self.__residence_time_coeff = LEval(
+            lambda nuclide: residence_time_coeff(
+                self._reference.dose_rate_decay_coeff,
+                self._reference.radio_decay_coeff(nuclide),
+                self._reference.residence_time(
+                    0
+                ),  # TODO: get years from input
+            )
+        )
         # TODO
         self.__ed_surf = LEval(
-            lambda aclass, nuclide: effective_dose_surface(1, 1, 1)
+            lambda aclass, nuclide: effective_dose_surface(
+                1,
+                self._reference.surface_dose_coeff(nuclide),
+                self.__residence_time_coeff.exec((nuclide,)),
+            )
         )
         # TODO
         self.__ed_cloud = LEval(
-            lambda aclass, nuclide: effective_dose_cloud(1, 1)
+            lambda aclass, nuclide: effective_dose_cloud(
+                1,
+                self._reference.cloud_dose_coeff(nuclide),
+            )
         )
 
     def _set_effective_doses_total_levals(self):

@@ -38,11 +38,25 @@ class IReference:
         return 1.27e-9
 
     @property
-    def residence_time(self) -> float:
+    def residence_time(self, time: int) -> float:
         """Population residence time in contaminated region for acute phase of
-        a radiation accident, sec
+        a radiation accident
+
+        Args:
+            time (int): years since accident
+
+        Returns:
+            float: residence time, s
         """
-        return 3.15e7
+        if time == 0:
+            return 8.64e5
+        elif time == 1:
+            return 3.15e7
+        else:
+            raise ValueError(
+                f"residence time for '{time} years' from accident"
+                " had been requested"
+            )
 
     def nuclide_group(self, nuclide: str) -> str:
         """Nuclide group, e.g. aerosol, IRG etc."""

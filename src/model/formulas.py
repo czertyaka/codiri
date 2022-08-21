@@ -1,5 +1,6 @@
 from typing import Dict, List
 from .common import pasquill_gifford_classes
+import math
 
 
 def effective_dose(nuclide_aclass_doses: List[Dict[str, float]]) -> float:
@@ -123,3 +124,23 @@ def effective_dose_surface(
             Sv
     """
     return deposition * dose_coefficicent * residence_time_coeff
+
+
+def residence_time_coeff(
+    dose_rate_decay_coeff: float,
+    radioactive_decay_coeff: float,
+    residence_time: float,
+) -> float:
+    """Calculate residence time coefficient
+    SM-134-17: (7)
+
+    Args:
+        dose_rate_decay_coeff (float): dose rate decay coefficient, s^-1
+        radioactive_decay_coeff (float): radioactive decay coefficient, s^-1
+        residence_time (float): residence time, s
+
+    Returns:
+        float: residence time coefficient, 1
+    """
+    decay_coeff = dose_rate_decay_coeff + radioactive_decay_coeff
+    return (1 - math.exp(-decay_coeff * residence_time)) / decay_coeff
