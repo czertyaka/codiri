@@ -2,7 +2,7 @@ from .common import pasquill_gifford_classes, log
 from .input import Input
 from .results import Results
 from .reference import IReference
-from .constraints import IConstraints
+from .constraints import IConstraints, ConstraintsComplianceError
 import math
 from scipy import integrate
 from ..activity import blowout_activity_flow
@@ -50,69 +50,42 @@ class Model:
     ядерного топливного цикла (РБ-134-17)"""
 
     def __init__(self, reference: IReference):
-        self.__reference = reference
+        """Model constructor
+
+        Args:
+            reference (IReference): Reference data class interface
+
+        Raises:
+            ValueError: invalid reference instance
+        """
+        if reference is None:
+            raise ValueError("invalid reference instance")
+        self._reference = reference
+        self._constraints = DefaultConstraints(reference.all_nuclides())
         self.__results = Results()
-        self.input = Input()
 
-    @property
-    def input(self):
-        return self.__input
-
-    @input.setter
-    def input(self, value):
-        self.__input = value
-
-    def calculate(self) -> bool:
-        if self.__is_ready() is False:
+    def calculate(self, inp: Input) -> bool:
+        if not self.validate_input(inp):
             return False
-
-        for nuclide in self.input.specific_activities:
-            self.__calculate_sediment_detachments(nuclide)
-            self.__calculate_depletions(nuclide)
-            self.__caclculate_dilution_factors(nuclide)
-            self.__calculate_height_deposition_factors(nuclide)
-            self.__calculate_concentration_integrals(nuclide)
-            if self.reference.nuclide_group(nuclide) != "IRG":
-                self.__calculate_height_concentration_integrals(nuclide)
-                self.__calculate_depositions(nuclide)
-                self.__calculate_e_inh(nuclide)
-                self.__calculate_e_surface(nuclide)
-            self.__calculate_e_cloud(nuclide)
-            self.__calculate_e_total_10(nuclide)
-
-        self.__calculate_e_max_10()
-
         return True
 
-    @property
-    def results(self):
-        return self.__results
+    def validate_input(self, inp: Input) -> bool:
+        """Validate input
 
-    @property
-    def reference(self) -> IReference:
-        return self.__reference
+        Args:
+            inp (Input): input
 
-    def __is_ready(self):
-        return self.reference is not None and self.__is_input_ready()
-
-    def __is_input_ready(self):
-        if (
-            self.input is None
-            or not self.input.initialized()
-            or self.input.distance > 5000
-            or self.input.distance <= self.input.square_side / 2
-        ):
-            log(f"input is not ready '{self.input}'")
-            return False
-        for nuclide in self.input.specific_activities:
-            if nuclide not in self.reference.all_nuclides():
-                log(
-                    f"unknown nuclide '{nuclide}'"
-                    " (list of known nuclides"
-                    f" '{self.reference.all_nuclides()}')"
-                )
-                return False
-        return True
+        Returns:
+            bool: validation result
+        """
+        if inp is not None and inp.initialized():
+            try:
+                self._constraints.validate(inp)
+                return True
+            except ConstraintsComplianceError as err:
+                log(f"input failed to comply constraints: {err}")
+        log(f"invalid input: {inp}")
+        return False
 
     def __calculate_e_max_10(self):
         """РБ-134-17, p. 3, (1)"""

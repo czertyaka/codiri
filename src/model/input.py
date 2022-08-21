@@ -29,6 +29,9 @@ class Input:
     def values(self):
         return self.__values
 
+    def __str__(self):
+        return str(self.__values)
+
     def initialized(self) -> bool:
         """Check if all fields have values
 
