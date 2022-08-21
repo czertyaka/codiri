@@ -12,6 +12,7 @@ from .formulas import (
     effective_dose_surface,
     residence_time_coeff,
     effective_dose_inhalation,
+    effective_dose_food,
 )
 import math
 from scipy import integrate
@@ -118,6 +119,13 @@ class Model:
         Args:
             inp (Input): input data
         """
+        self._ed_food = LEval(
+            lambda aclass, nuclide: effective_dose_food(
+                1,  # TODO: food dose conversion coeff
+                dict(),  # TODO: food specific activity
+                dict(),  # TODO: food intake
+            )
+        )
         self._ed_inh = LEval(
             lambda aclass, nuclide: effective_dose_inhalation(
                 1,  # TODO: concentration integral
@@ -157,7 +165,7 @@ class Model:
                 self._ed_cloud.exec((aclass, nuclide)),
                 self._ed_inh.exec((aclass, nuclide)),
                 self._ed_surf.exec((aclass, nuclide)),
-                1,  # TODO: food dose
+                self._ed_food.exec((aclass, nuclide)),
                 1,  # TODO: nuclide groups
             )
         )

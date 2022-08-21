@@ -152,6 +152,7 @@ def effective_dose_inhalation(
     respiration_rate: float,
 ) -> float:
     """Calculate effective dose due to internal exposure from inhalation
+    SM-134-17: (8)
 
     Args:
         concentration_integral (float): Concentration in surface air time
@@ -164,3 +165,34 @@ def effective_dose_inhalation(
         float: effective dose due to internal exposure from inhalation, Sv
     """
     return concentration_integral * dose_coefficient * respiration_rate
+
+
+def effective_dose_food(
+    dose_coefficient: float,
+    food_specific_activity: Dict[str, float],
+    annual_food_intake: Dict[str, float],
+) -> float:
+    """Calculate effective dose due to internal exposure from food intake
+    SM-134-17: (9)
+
+    Args:
+        dose_coefficient (float): Dose conversion factor for internal exposure
+            from food intake, Sv/Bq
+        food_specific_activity (Dict[float]): Specific activities in food, key
+            is food category, Bq/kg
+        annual_food_intake (Dict[float]): Annual food intake, key is food
+            category, kg
+
+    Returns:
+        float: effective dose due to internal exposure from food intake, Sv
+    """
+    if food_specific_activity.keys() != annual_food_intake.keys():
+        raise ValueError(
+            "inconsistent food categories: "
+            f"'{food_specific_activity.keys()}' and "
+            f"'{annual_food_intake.keys()}'"
+        )
+    summ = 0
+    for food_cat in food_specific_activity:
+        summ += food_specific_activity[food_cat] * annual_food_intake[food_cat]
+    return dose_coefficient * summ

@@ -6,6 +6,7 @@ from codiri.src.model.formulas import (
     effective_dose_surface,
     residence_time_coeff,
     effective_dose_inhalation,
+    effective_dose_food,
 )
 import unittest
 
@@ -141,3 +142,12 @@ class TestFormulas(unittest.TestCase):
         dc = 2
         rr = 3
         self.assertEqual(effective_dose_inhalation(ci, dc, rr), ci * dc * rr)
+
+    def test_effective_dose_food(self):
+        dc = 1
+        fi = {"milk": 2, "meat": 3}
+        sa = {"meat": 4}
+        with self.assertRaises(ValueError):
+            effective_dose_food(dc, sa, fi)
+        sa = {"milk": 5, "meat": 6}
+        self.assertEqual(effective_dose_food(dc, sa, fi), 28)
