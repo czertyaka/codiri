@@ -63,7 +63,7 @@ def total_effective_dose_for_period(
     SM-134-17: (4)
 
     Args:
-        years (int): period, years
+        years (int): time since accident, years
         nuclide (str): nuclide
         cloud_ed (float): effective dose due to radioactive cloud, Sv
         inh_ed (float): effective dose due to nuclide inhalation, Sv
@@ -88,26 +88,26 @@ def total_effective_dose_for_period(
 
 
 def effective_dose_cloud(
-    concentration_integral: float, dose_coefficicent: float
+    concentration_integral: float, dose_coefficient: float
 ) -> float:
     """Calculate effective dose due to external exposure form radioactive cloud
     SM-134-17: (5)
 
     Args:
-        concentration_integral (float): Dose conversion factor for external
+        concentration_integral (float): Concentration in surface air time
+            integral, Bq*s/m^3
+        dose_coefficient (float): Dose conversion factor for external
             exposure from radioactive cloud, (Sv*m^3)/(Bq*s)
-        dose_coefficicent (float): Concentration in surface air time integral,
-            Bq*s/m^3
 
     Returns:
         float: effecive dose due to external exposure form radioactive cloud,
             Sv
     """
-    return concentration_integral * dose_coefficicent
+    return concentration_integral * dose_coefficient
 
 
 def effective_dose_surface(
-    deposition: float, dose_coefficicent: float, residence_time_coeff: float
+    deposition: float, dose_coefficient: float, residence_time_coeff: float
 ) -> float:
     """Calculate effective dose due to external exposure form contaminated soil
     SM-134-17: (6)
@@ -115,7 +115,7 @@ def effective_dose_surface(
     Args:
         deposition (float): Summarized deposition value on ground surface due
             to dry and wet deposition, Bq/m^2
-        dose_coefficicent (float): Dose conversion factor for external exposure
+        dose_coefficient (float): Dose conversion factor for external exposure
             from soil surface, (Sv*m^2)/(Bq*s)
         residence_time_coeff (float): Residence time coefficient, s
 
@@ -123,7 +123,7 @@ def effective_dose_surface(
         float: effective dose due to external exposure form contaminated soil,
             Sv
     """
-    return deposition * dose_coefficicent * residence_time_coeff
+    return deposition * dose_coefficient * residence_time_coeff
 
 
 def residence_time_coeff(
@@ -144,3 +144,23 @@ def residence_time_coeff(
     """
     decay_coeff = dose_rate_decay_coeff + radioactive_decay_coeff
     return (1 - math.exp(-decay_coeff * residence_time)) / decay_coeff
+
+
+def effective_dose_inhalation(
+    concentration_integral: float,
+    dose_coefficient: float,
+    respiration_rate: float,
+) -> float:
+    """Calculate effective dose due to internal exposure from inhalation
+
+    Args:
+        concentration_integral (float): Concentration in surface air time
+            integral, Bq*s/m^3
+        dose_coefficient (float): Dose conversion factor for internal
+            exposure from inhalation, Sv/Bq
+        respiration_rate (float): Respiration rate, m^3/s
+
+    Returns:
+        float: effective dose due to internal exposure from inhalation, Sv
+    """
+    return concentration_integral * dose_coefficient * respiration_rate

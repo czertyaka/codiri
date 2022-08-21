@@ -5,6 +5,7 @@ from codiri.src.model.formulas import (
     effective_dose_cloud,
     effective_dose_surface,
     residence_time_coeff,
+    effective_dose_inhalation,
 )
 import unittest
 
@@ -113,7 +114,7 @@ class TestFormulas(unittest.TestCase):
     def test_effective_dose_cloud(self):
         dc = 3
         ci = 7
-        self.assertEqual(effective_dose_cloud(dc, ci), dc * ci)
+        self.assertEqual(effective_dose_cloud(ci, dc), dc * ci)
 
     def test_effective_dose_surface(self):
         depo = 3
@@ -134,3 +135,9 @@ class TestFormulas(unittest.TestCase):
             0.333,
             3,
         )
+
+    def test_effective_dose_inhalation(self):
+        ci = 1
+        dc = 2
+        rr = 3
+        self.assertEqual(effective_dose_inhalation(ci, dc, rr), ci * dc * rr)

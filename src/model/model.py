@@ -11,6 +11,7 @@ from .formulas import (
     effective_dose_cloud,
     effective_dose_surface,
     residence_time_coeff,
+    effective_dose_inhalation,
 )
 import math
 from scipy import integrate
@@ -71,7 +72,7 @@ class Model:
             raise ValueError("invalid reference instance")
         self._reference = reference
         self._constraints = DefaultConstraints(reference.all_nuclides())
-        self.__results = Results()
+        self._results = Results()
 
     def calculate(self, inp: Input) -> bool:
         """Execute calculations
@@ -89,7 +90,7 @@ class Model:
         self._set_effective_doses_total_levals()
         self._set_effective_doses_levals(inp.specific_activities.keys())
 
-        self.__ed_acute.exec()
+        self._ed_acute.exec()
 
         return True
 
@@ -111,29 +112,36 @@ class Model:
         log(f"invalid input: {inp}")
         return False
 
-    def _set_effective_doses_exposure_sources_levals(self):
-        """Set effective doses for all exposure sources lazy evaluations"""
-        self.__residence_time_coeff = LEval(
+    def _set_effective_doses_exposure_sources_levals(self, inp: Input):
+        """Set effective doses for all exposure sources lazy evaluations
+
+        Args:
+            inp (Input): input data
+        """
+        self._ed_inh = LEval(
+            lambda aclass, nuclide: effective_dose_inhalation(
+                1,  # TODO: concentration integral
+                self._reference.inhalation_dose_coeff(nuclide),
+                self._reference.respiration_rate(inp.age),
+            )
+        )
+        self._residence_time_coeff = LEval(
             lambda nuclide: residence_time_coeff(
                 self._reference.dose_rate_decay_coeff,
                 self._reference.radio_decay_coeff(nuclide),
-                self._reference.residence_time(
-                    0
-                ),  # TODO: get years from input
+                self._reference.residence_time(0),  # TODO
             )
         )
-        # TODO
-        self.__ed_surf = LEval(
+        self._ed_surf = LEval(
             lambda aclass, nuclide: effective_dose_surface(
-                1,
+                1,  # TODO: concentration integral
                 self._reference.surface_dose_coeff(nuclide),
-                self.__residence_time_coeff.exec((nuclide,)),
+                self._residence_time_coeff.exec((nuclide,)),
             )
         )
-        # TODO
-        self.__ed_cloud = LEval(
+        self._ed_cloud = LEval(
             lambda aclass, nuclide: effective_dose_cloud(
-                1,
+                1,  # TODO: concentration integral
                 self._reference.cloud_dose_coeff(nuclide),
             )
         )
@@ -142,23 +150,23 @@ class Model:
         """Set total effective doses for acute phase and a period lazy
         evaluations
         """
-        self.__ed_total_period = LEval(
+        self._ed_total_period = LEval(
             lambda aclass, nuclide: total_effective_dose_for_period(
                 1,  # TODO: take from input
                 nuclide,
-                self.__ed_cloud.exec((aclass, nuclide)),
-                1,  # TODO: inhalation dose
-                self.__ed_surf.exec((aclass, nuclide)),
+                self._ed_cloud.exec((aclass, nuclide)),
+                self._ed_inh.exec((aclass, nuclide)),
+                self._ed_surf.exec((aclass, nuclide)),
                 1,  # TODO: food dose
                 1,  # TODO: nuclide groups
             )
         )
-        self.__ed_total_acute = LEval(
+        self._ed_total_acute = LEval(
             lambda aclass, nuclide: acute_total_effective_dose(
                 nuclide,
-                self.__ed_cloud.exec((aclass, nuclide)),
-                1,  # TODO: inhalation dose
-                self.__ed_surf.exec((aclass, nuclide)),
+                self._ed_cloud.exec((aclass, nuclide)),
+                self._ed_inh.exec((aclass, nuclide)),
+                self._ed_surf.exec((aclass, nuclide)),
                 1,  # TODO: nuclide groups
             )
         )
@@ -179,11 +187,11 @@ class Model:
                 ed_total.append(nuclide_ed_total)
             return ed_total
 
-        self.__ed_acute = LEval(
-            lambda: effective_dose(make_ed_total_list(self.__ed_total_acute))
+        self._ed_acute = LEval(
+            lambda: effective_dose(make_ed_total_list(self._ed_total_acute))
         )
-        self.__ed_for_period = LEval(
-            lambda: effective_dose(make_ed_total_list(self.__ed_total_period))
+        self._ed_for_period = LEval(
+            lambda: effective_dose(make_ed_total_list(self._ed_total_period))
         )
 
     def __calculate_e_max_10(self):
@@ -222,13 +230,13 @@ class Model:
     def __calculate_e_cloud(self, nuclide):
         """РБ-134-17, p. 7, (5)"""
 
-        dose_coefficicent = self.reference.cloud_dose_coeff(nuclide)
+        dose_coefficient = self.reference.cloud_dose_coeff(nuclide)
         concentration_integrals = self.results.concentration_integrals[nuclide]
         values = dict()
 
         for a_class in pasquill_gifford_classes:
             values[a_class] = (
-                dose_coefficicent * concentration_integrals[a_class]
+                dose_coefficient * concentration_integrals[a_class]
             )
 
         self.results.e_cloud.insert(nuclide, values)
@@ -238,13 +246,13 @@ class Model:
 
         respiration_rate = self.reference.respiration_rate(self.input.age)
         concentration_integrals = self.results.concentration_integrals[nuclide]
-        dose_coefficicent = self.reference.inhalation_dose_coeff(nuclide)
+        dose_coefficient = self.reference.inhalation_dose_coeff(nuclide)
         values = dict()
 
         for a_class in pasquill_gifford_classes:
             values[a_class] = (
                 respiration_rate
-                * dose_coefficicent
+                * dose_coefficient
                 * concentration_integrals[a_class]
             )
 
@@ -254,13 +262,13 @@ class Model:
         """РБ-134-17, p. 8, (6)"""
 
         depositions = self.results.depositions[nuclide]
-        dose_coefficicent = self.reference.surface_dose_coeff(nuclide)
-        residence_time_coeff = self.__calculate_residence_time_coeff(nuclide)
+        dose_coefficient = self.reference.surface_dose_coeff(nuclide)
+        residence_time_coeff = self._calculate_residence_time_coeff(nuclide)
         values = dict()
 
         for a_class in pasquill_gifford_classes:
             values[a_class] = (
-                depositions[a_class] * dose_coefficicent * residence_time_coeff
+                depositions[a_class] * dose_coefficient * residence_time_coeff
             )
 
         self.results.e_surface.insert(nuclide, values)
@@ -316,7 +324,7 @@ class Model:
         values = dict()
 
         for a_class in pasquill_gifford_classes:
-            activity = self.__calculate_release(
+            activity = self._calculate_release(
                 specific_activity, windspeeds[a_class]
             )
             values[a_class] = activity * height_deposition_factor[a_class]
@@ -332,7 +340,7 @@ class Model:
         values = dict()
 
         for a_class in pasquill_gifford_classes:
-            activity = self.__calculate_release(
+            activity = self._calculate_release(
                 specific_activity, windspeeds[a_class]
             )
             values[a_class] = activity * dilution_factors[a_class]
@@ -377,7 +385,7 @@ class Model:
             )
 
             def subintegral_func(x):
-                s_y = self.__calculate_dispersion_coefficients(
+                s_y = self._calculate_dispersion_coefficients(
                     diffusion_coefficients, self.input.distance - x
                 )["y"]
                 return math.erf(side_half / (math.sqrt(2) * s_y))
@@ -436,7 +444,7 @@ class Model:
 
                 value = 0
                 for n in range(-2, 3):
-                    sigma_z = self.__calculate_dispersion_coefficients(
+                    sigma_z = self._calculate_dispersion_coefficients(
                         diffusion_coefficients, x
                     )["z"]
                     consequent = 2 * math.pow(sigma_z, 2)
@@ -453,7 +461,7 @@ class Model:
             def subintegral_func(x):
                 diff = self.input.distance - x
                 vert_disp = vertical_dispersion_factor(diff)
-                disp_coeffs = self.__calculate_dispersion_coefficients(
+                disp_coeffs = self._calculate_dispersion_coefficients(
                     diffusion_coefficients, diff
                 )
                 erf = math.erf(side_half / (math.sqrt(2) * disp_coeffs["y"]))
@@ -467,10 +475,10 @@ class Model:
         self.results.dilution_factors.insert(nuclide, values)
 
     def __calculate_depletions(self, nuclide: str) -> None:
-        self.__calculate_rad_depletions(nuclide)
-        self.__calculate_dry_depletions(nuclide)
-        self.__calculate_wet_depletions(nuclide)
-        self.__calculate_full_depletions(nuclide)
+        self._calculate_rad_depletions(nuclide)
+        self._calculate_dry_depletions(nuclide)
+        self._calculate_wet_depletions(nuclide)
+        self._calculate_full_depletions(nuclide)
 
     def __calculate_rad_depletions(self, nuclide: str) -> None:
         """РБ-134-17, p. 28, (14)"""
@@ -505,7 +513,7 @@ class Model:
             )
 
             def subintegral_func(x: float) -> float:
-                sigma_z = self.__calculate_dispersion_coefficients(
+                sigma_z = self._calculate_dispersion_coefficients(
                     diffusion_coefficients, x
                 )["z"]
                 exp_factor = -math.pow((h_rel / sigma_z), 2) / 2
