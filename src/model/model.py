@@ -2,9 +2,29 @@ from .common import pasquill_gifford_classes, log
 from .input import Input
 from .results import Results
 from .reference import IReference
+from .constraints import IConstraints
 import math
 from scipy import integrate
 from ..activity import blowout_activity_flow
+
+
+class DefaultConstraints(IConstraints):
+
+    """Default input constraints class"""
+
+    def __init__(self):
+        """DefaultConstraints constructor"""
+        super(DefaultConstraints, self).__init__()
+        self.add(
+            lambda inp: inp.distance <= 50000,
+            lambda inp: f"the distance '{inp.distance} m' exceeds the maximum "
+            "allowed '50000 m'",
+        )
+        self.add(
+            lambda inp: inp.distance > (inp.square_side / 2),
+            lambda inp: f"the distance '{inp.distance} m' should exceed the "
+            f"half of the square side '{(inp.square_side / 2)} m'",
+        )
 
 
 class Model:
