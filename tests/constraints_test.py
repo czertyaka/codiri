@@ -35,9 +35,9 @@ class IContraintsTest(unittest.TestCase):
 
 class DefaultConstraintsTest(unittest.TestCase):
     def setUp(self):
-        self.__constraints = DefaultConstraints()
+        self.__constraints = DefaultConstraints(("Cs-137", "Sr-90"))
 
-    def test_invalid_input(self):
+    def test_exceeding_distance(self):
         inp = Input()
         inp.distance = 50001
         inp.square_side = 100
@@ -46,11 +46,24 @@ class DefaultConstraintsTest(unittest.TestCase):
             ".*50001([.]0*)? m.*exceeds.*50000([.]0*)? m",
         ):
             self.__constraints.validate(inp)
+
+    def test_exceeding_square_side(self):
+        inp = Input()
         inp.distance = 499
         inp.square_side = 1000
         with self.assertRaisesRegex(
             ConstraintsComplianceError,
             ".*499([.]0*)? m.*should exceed.*500([.]0*)? m",
+        ):
+            self.__constraints.validate(inp)
+
+    def test_unknown_nuclide(self):
+        inp = Input()
+        inp.distance = 1000
+        inp.square_side = 100
+        inp.add_specific_activity("Xe-133", 1)
+        with self.assertRaisesRegex(
+            ConstraintsComplianceError, "unknown nuclide"
         ):
             self.__constraints.validate(inp)
 

@@ -6,14 +6,19 @@ from .constraints import IConstraints
 import math
 from scipy import integrate
 from ..activity import blowout_activity_flow
+from typing import Tuple
 
 
 class DefaultConstraints(IConstraints):
 
     """Default input constraints class"""
 
-    def __init__(self):
-        """DefaultConstraints constructor"""
+    def __init__(self, known_nuclides: Tuple[str]):
+        """DefaultConstraints constructor
+
+        Args:
+            known_nuclides (Tuple[str]): known nuclides
+        """
         super(DefaultConstraints, self).__init__()
         self.add(
             lambda inp: inp.distance <= 50000,
@@ -24,6 +29,17 @@ class DefaultConstraints(IConstraints):
             lambda inp: inp.distance > (inp.square_side / 2),
             lambda inp: f"the distance '{inp.distance} m' should exceed the "
             f"half of the square side '{(inp.square_side / 2)} m'",
+        )
+
+        def known_nuclides_validator(inp: Input) -> bool:
+            for nuclide in inp.specific_activities:
+                if nuclide not in known_nuclides:
+                    return False
+            return True
+
+        self.add(
+            known_nuclides_validator,
+            lambda inp: "found specific activity with unknown nuclide",
         )
 
 
