@@ -3,10 +3,18 @@ from .input import Input
 from .results import Results
 from .reference import IReference
 from .constraints import IConstraints, ConstraintsComplianceError
+from .lazy_eval import LazyEvaluation as LEval
+from .formulas import (
+    effective_dose,
+    acute_total_effective_dose,
+    total_effective_dose_for_period,
+    effective_dose_cloud,
+    effective_dose_surface,
+)
 import math
 from scipy import integrate
 from ..activity import blowout_activity_flow
-from typing import Tuple
+from typing import Tuple, Dict
 
 
 class DefaultConstraints(IConstraints):
@@ -65,8 +73,23 @@ class Model:
         self.__results = Results()
 
     def calculate(self, inp: Input) -> bool:
+        """Execute calculations
+
+        Args:
+            inp (Input): input data
+
+        Returns:
+            bool: execution result
+        """
         if not self.validate_input(inp):
             return False
+
+        self._set_effective_doses_exposure_sources_levals()
+        self._set_effective_doses_total_levals()
+        self._set_effective_doses_levals(inp.specific_activities.keys())
+
+        self.__ed_acute.exec()
+
         return True
 
     def validate_input(self, inp: Input) -> bool:
@@ -86,6 +109,65 @@ class Model:
                 log(f"input failed to comply constraints: {err}")
         log(f"invalid input: {inp}")
         return False
+
+    def _set_effective_doses_exposure_sources_levals(self):
+        """Set effective doses for all exposure sources lazy evaluations"""
+        # TODO
+        self.__ed_surf = LEval(
+            lambda aclass, nuclide: effective_dose_surface(1, 1, 1)
+        )
+        # TODO
+        self.__ed_cloud = LEval(
+            lambda aclass, nuclide: effective_dose_cloud(1, 1)
+        )
+
+    def _set_effective_doses_total_levals(self):
+        """Set total effective doses for acute phase and a period lazy
+        evaluations
+        """
+        self.__ed_total_period = LEval(
+            lambda aclass, nuclide: total_effective_dose_for_period(
+                1,  # TODO: take from input
+                nuclide,
+                self.__ed_cloud.exec((aclass, nuclide)),
+                1,  # TODO: inhalation dose
+                self.__ed_surf.exec((aclass, nuclide)),
+                1,  # TODO: food dose
+                1,  # TODO: nuclide groups
+            )
+        )
+        self.__ed_total_acute = LEval(
+            lambda aclass, nuclide: acute_total_effective_dose(
+                nuclide,
+                self.__ed_cloud.exec((aclass, nuclide)),
+                1,  # TODO: inhalation dose
+                self.__ed_surf.exec((aclass, nuclide)),
+                1,  # TODO: nuclide groups
+            )
+        )
+
+    def _set_effective_doses_levals(self, nuclides: Tuple[str]):
+        """Set effective doses lazy evaluations
+
+        Args:
+            nuclides (Tuple[str]): all the nuclides for current calculation
+        """
+
+        def make_ed_total_list(ed_total: LEval) -> Tuple[Dict[str, float]]:
+            ed_total = list()
+            for nuclide in nuclides:
+                nuclide_ed_total = dict()
+                for aclass in pasquill_gifford_classes:
+                    nuclide_ed_total[aclass] = ed_total.exec((aclass, nuclide))
+                ed_total.append(nuclide_ed_total)
+            return ed_total
+
+        self.__ed_acute = LEval(
+            lambda: effective_dose(make_ed_total_list(self.__ed_total_acute))
+        )
+        self.__ed_for_period = LEval(
+            lambda: effective_dose(make_ed_total_list(self.__ed_total_period))
+        )
 
     def __calculate_e_max_10(self):
         """РБ-134-17, p. 3, (1)"""
