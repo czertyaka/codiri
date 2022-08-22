@@ -13,6 +13,7 @@ from .formulas import (
     residence_time_coeff,
     effective_dose_inhalation,
     effective_dose_food,
+    annual_food_intake,
 )
 import math
 from scipy import integrate
@@ -119,11 +120,18 @@ class Model:
         Args:
             inp (Input): input data
         """
+        self._annual_food_intake = LEval(
+            lambda: annual_food_intake(
+                1,  # TODO: daily metabolic cost
+                1,  # TODO: adults daily metabolic cost
+                1,  # TODO: adults annual food intake
+            )
+        )
         self._ed_food = LEval(
             lambda aclass, nuclide: effective_dose_food(
                 1,  # TODO: food dose conversion coeff
                 dict(),  # TODO: food specific activity
-                dict(),  # TODO: food intake
+                self._annual_food_intake.exec(),
             )
         )
         self._ed_inh = LEval(

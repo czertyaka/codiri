@@ -196,3 +196,29 @@ def effective_dose_food(
     for food_cat in food_specific_activity:
         summ += food_specific_activity[food_cat] * annual_food_intake[food_cat]
     return dose_coefficient * summ
+
+
+def annual_food_intake(
+    daily_metabolic_cost: float,
+    daily_metabolic_cost_adults: float,
+    annual_food_intake_adults: float,
+) -> float:
+    """Calculate annual food intake for specific age group
+    SM-134-17: (10)
+
+    Args:
+        daily_metabolic_cost (float): daily metabolic cost for age group,
+            kcal/day
+        daily_metabolic_cost_adults (float): daily metabolic cost for adults,
+            kcal/day
+        annual_food_intake_adults (float): annual food intake for adults,
+            kg/year
+
+    Returns:
+        float: annual food intake, kg/year
+    """
+    return (
+        daily_metabolic_cost
+        / daily_metabolic_cost_adults
+        * annual_food_intake_adults
+    )

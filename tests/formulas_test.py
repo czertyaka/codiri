@@ -7,6 +7,7 @@ from codiri.src.model.formulas import (
     residence_time_coeff,
     effective_dose_inhalation,
     effective_dose_food,
+    annual_food_intake,
 )
 import unittest
 
@@ -151,3 +152,9 @@ class TestFormulas(unittest.TestCase):
             effective_dose_food(dc, sa, fi)
         sa = {"milk": 5, "meat": 6}
         self.assertEqual(effective_dose_food(dc, sa, fi), 28)
+
+    def test_annual_food_intake(self):
+        dmc = 3
+        dmc_adults = 4
+        afi_adults = 1
+        self.assertEqual(annual_food_intake(dmc, dmc_adults, afi_adults), 0.75)
