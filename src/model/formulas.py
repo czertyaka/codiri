@@ -1,6 +1,7 @@
 from typing import Dict, List
 from .common import pasquill_gifford_classes
 import math
+import numpy as np
 
 
 def effective_dose(nuclide_aclass_doses: List[Dict[str, float]]) -> float:
@@ -222,3 +223,51 @@ def annual_food_intake(
         / daily_metabolic_cost_adults
         * annual_food_intake_adults
     )
+
+
+def food_max_distance(
+    distances: np.array,
+    doses_matrix: np.array,
+    minimal_distance: float = 0,
+) -> float:
+    """Calculate distance with maximum food effective dose (x_max)
+    SM-134-17: (11)
+
+    Args:
+        distances (np.array): set of distances from which x_max shall be
+            picked up, m
+        doses_matrix (np.array): three-dimensional array of effective doses,
+            Sv;
+            first dimension corresponds to distance from source;
+            second dimension corresponds to atmospheric stability class;
+            third dimension corresponds to nuclide.
+        minimal_distance (float, optional): minimal value of x_max, m; it could
+            be distance to buffer area, operating nuclear island, etc.
+
+    Returns:
+        float: x_max, m
+    """
+    if doses_matrix.shape[0] != distances.size:
+        raise ValueError(
+            "first matrix band should correspond to given distances "
+            f"set: {doses_matrix.shape[0]} != {distances.size}"
+        )
+    if doses_matrix.shape[1] != len(pasquill_gifford_classes):
+        raise ValueError(
+            "second matrix band should correspond to atmospheric "
+            f"classes: {doses_matrix.shape[1]} != "
+            f"{len(pasquill_gifford_classes)}"
+        )
+    doses = np.full(distances.size, None)
+    for i in range(distances.size):
+        doses[i] = max(
+            [
+                sum(doses_matrix_for_aclass)
+                for doses_matrix_for_aclass in doses_matrix[i]
+            ]
+        )
+    max_dose_idx = np.where(doses == np.amax(doses))[0][-1]
+    x_max = distances[max_dose_idx]
+    if x_max < minimal_distance:
+        x_max = minimal_distance
+    return x_max

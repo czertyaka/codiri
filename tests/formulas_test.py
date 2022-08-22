@@ -8,11 +8,14 @@ from codiri.src.model.formulas import (
     effective_dose_inhalation,
     effective_dose_food,
     annual_food_intake,
+    food_max_distance,
 )
+from codiri.src.model.common import pasquill_gifford_classes
+import numpy as np
 import unittest
 
 
-class TestFormulas(unittest.TestCase):
+class TestSimpleFormulas(unittest.TestCase):
     def test_effective_dose(self):
         nuclide_aclass_doses = [
             {
@@ -158,3 +161,76 @@ class TestFormulas(unittest.TestCase):
         dmc_adults = 4
         afi_adults = 1
         self.assertEqual(annual_food_intake(dmc, dmc_adults, afi_adults), 0.75)
+
+
+class TestFoodMaxDistanceFormula(unittest.TestCase):
+    def test_invalid_first_band(self):
+        distances = np.array((1, 2, 3))
+        matrix = np.array([[[None]] for i in range(len(distances) - 1)])
+        self.assertRaises(
+            ValueError, lambda: food_max_distance(distances, matrix)
+        )
+        matrix = np.array([[[None]] for i in range(len(distances) + 1)])
+        self.assertRaises(
+            ValueError, lambda: food_max_distance(distances, matrix)
+        )
+
+    def test_invalid_second_band(self):
+        distances = np.array((1, 2, 3))
+        matrix = np.array(
+            [
+                [[None] for j in range(len(pasquill_gifford_classes) - 1)]
+                for i in range(len(distances))
+            ]
+        )
+        self.assertRaises(
+            ValueError, lambda: food_max_distance(distances, matrix)
+        )
+        matrix = np.array(
+            [
+                [[None] for j in range(len(pasquill_gifford_classes) + 1)]
+                for i in range(len(distances))
+            ]
+        )
+        self.assertRaises(
+            ValueError, lambda: food_max_distance(distances, matrix)
+        )
+
+    def test_single_max(self):
+        distances = np.array((3, 4))
+        matrix = np.array(
+            [
+                [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12]],
+                [[1, 2], [3, 4], [5, 6], [7, 8], [9, 50], [11, 12]],
+            ]
+        )
+        self.assertEqual(food_max_distance(distances, matrix), 4)
+        matrix = np.array(
+            [
+                [[1, 2], [3, 4], [1, 2], [3, 4], [1, 50], [3, 4]],
+                [[10, 11], [12, 13], [14, 15], [16, 17], [18, 19], [20, 21]],
+            ]
+        )
+        self.assertEqual(food_max_distance(distances, matrix), 3)
+
+    def test_few_maxs(self):
+        distances = np.array((5, 6, 7, 8))
+        matrix = np.array(
+            [
+                [[3, 4], [5, 6], [3, 4], [5, 6], [3, 4], [5, 6]],
+                [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12]],
+                [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12]],
+                [[1, 2], [3, 4], [1, 2], [3, 4], [1, 2], [3, 4]],
+            ]
+        )
+        self.assertEqual(food_max_distance(distances, matrix), 7)
+
+    def test_minimal_distance(self):
+        distances = np.array((3, 4))
+        matrix = np.array(
+            [
+                [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12]],
+                [[1, 2], [3, 4], [5, 6], [7, 8], [9, 50], [11, 12]],
+            ]
+        )
+        self.assertEqual(food_max_distance(distances, matrix, 5), 5)

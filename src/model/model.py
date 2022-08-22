@@ -14,8 +14,10 @@ from .formulas import (
     effective_dose_inhalation,
     effective_dose_food,
     annual_food_intake,
+    food_max_distance,
 )
 import math
+import numpy as np
 from scipy import integrate
 from ..activity import blowout_activity_flow
 from typing import Tuple, Dict
@@ -88,7 +90,8 @@ class Model:
         if not self.validate_input(inp):
             return False
 
-        self._set_effective_doses_exposure_sources_levals()
+        self._set_xmax_leval(inp.specific_activities.keys())
+        self._set_effective_doses_exposure_sources_levals(inp.age)
         self._set_effective_doses_total_levals()
         self._set_effective_doses_levals(inp.specific_activities.keys())
 
@@ -114,11 +117,47 @@ class Model:
         log(f"invalid input: {inp}")
         return False
 
-    def _set_effective_doses_exposure_sources_levals(self, inp: Input):
+    def _set_xmax_leval(self, nuclides: Tuple[str]):
+        """Set x_max lazy evaluation
+
+        Args:
+            nuclides (Tuple[str]): all the nuclides for current calculation
+        """
+        distances_count = 100
+        distances = np.array(
+            [
+                math.pow(math.sqrt(50000) / (distances_count - 1) * i, 2)
+                for i in range(distances_count)
+            ]
+        )
+
+        def make_dose_matrix():
+            return np.array(
+                [
+                    [
+                        [
+                            self._ed_food.exec(aclass, nuclide, x)
+                            for nuclide in nuclides
+                        ]
+                        for aclass in pasquill_gifford_classes
+                    ]
+                    for x in distances
+                ]
+            )
+
+        self._x_max = LEval(
+            lambda: food_max_distance(
+                distances,
+                make_dose_matrix(),
+                0,  # TODO: add minimal distance
+            )
+        )
+
+    def _set_effective_doses_exposure_sources_levals(self, age: int):
         """Set effective doses for all exposure sources lazy evaluations
 
         Args:
-            inp (Input): input data
+            age (int): population group age
         """
         self._annual_food_intake = LEval(
             lambda: annual_food_intake(
@@ -128,7 +167,7 @@ class Model:
             )
         )
         self._ed_food = LEval(
-            lambda aclass, nuclide: effective_dose_food(
+            lambda aclass, nuclide, x: effective_dose_food(
                 1,  # TODO: food dose conversion coeff
                 dict(),  # TODO: food specific activity
                 self._annual_food_intake.exec(),
@@ -138,7 +177,7 @@ class Model:
             lambda aclass, nuclide: effective_dose_inhalation(
                 1,  # TODO: concentration integral
                 self._reference.inhalation_dose_coeff(nuclide),
-                self._reference.respiration_rate(inp.age),
+                self._reference.respiration_rate(age),
             )
         )
         self._residence_time_coeff = LEval(
@@ -173,7 +212,7 @@ class Model:
                 self._ed_cloud.exec((aclass, nuclide)),
                 self._ed_inh.exec((aclass, nuclide)),
                 self._ed_surf.exec((aclass, nuclide)),
-                self._ed_food.exec((aclass, nuclide)),
+                self._ed_food.exec((aclass, nuclide, self._x_max.exec())),
                 1,  # TODO: nuclide groups
             )
         )
