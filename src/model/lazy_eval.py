@@ -11,7 +11,7 @@ class LazyEvaluation:
         self.__formula = formula
         self.__results = dict()
 
-    def exec(self, params: Tuple = tuple()):
+    def __call__(self, params: Tuple = tuple()):
         """Execute evaluation
         :param params: arguments expected by evaluation's formula
         :return: result of evluation for given arguments

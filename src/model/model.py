@@ -95,7 +95,7 @@ class Model:
         self._set_effective_doses_total_levals()
         self._set_effective_doses_levals(inp.specific_activities.keys())
 
-        self._ed_acute.exec()
+        self._ed_acute()
 
         return True
 
@@ -136,7 +136,7 @@ class Model:
                 [
                     [
                         [
-                            self._ed_food.exec(aclass, nuclide, x)
+                            self._ed_food(aclass, nuclide, x)
                             for nuclide in nuclides
                         ]
                         for aclass in pasquill_gifford_classes
@@ -170,7 +170,7 @@ class Model:
             lambda aclass, nuclide, x: effective_dose_food(
                 1,  # TODO: food dose conversion coeff
                 dict(),  # TODO: food specific activity
-                self._annual_food_intake.exec(),
+                self._annual_food_intake(),
             )
         )
         self._ed_inh = LEval(
@@ -191,7 +191,7 @@ class Model:
             lambda aclass, nuclide: effective_dose_surface(
                 1,  # TODO: concentration integral
                 self._reference.surface_dose_coeff(nuclide),
-                self._residence_time_coeff.exec((nuclide,)),
+                self._residence_time_coeff((nuclide,)),
             )
         )
         self._ed_cloud = LEval(
@@ -209,19 +209,19 @@ class Model:
             lambda aclass, nuclide: total_effective_dose_for_period(
                 1,  # TODO: take from input
                 nuclide,
-                self._ed_cloud.exec((aclass, nuclide)),
-                self._ed_inh.exec((aclass, nuclide)),
-                self._ed_surf.exec((aclass, nuclide)),
-                self._ed_food.exec((aclass, nuclide, self._x_max.exec())),
+                self._ed_cloud((aclass, nuclide)),
+                self._ed_inh((aclass, nuclide)),
+                self._ed_surf((aclass, nuclide)),
+                self._ed_food((aclass, nuclide, self._x_max())),
                 1,  # TODO: nuclide groups
             )
         )
         self._ed_total_acute = LEval(
             lambda aclass, nuclide: acute_total_effective_dose(
                 nuclide,
-                self._ed_cloud.exec((aclass, nuclide)),
-                self._ed_inh.exec((aclass, nuclide)),
-                self._ed_surf.exec((aclass, nuclide)),
+                self._ed_cloud((aclass, nuclide)),
+                self._ed_inh((aclass, nuclide)),
+                self._ed_surf((aclass, nuclide)),
                 1,  # TODO: nuclide groups
             )
         )
@@ -238,7 +238,7 @@ class Model:
             for nuclide in nuclides:
                 nuclide_ed_total = dict()
                 for aclass in pasquill_gifford_classes:
-                    nuclide_ed_total[aclass] = ed_total.exec((aclass, nuclide))
+                    nuclide_ed_total[aclass] = ed_total((aclass, nuclide))
                 ed_total.append(nuclide_ed_total)
             return ed_total
 
