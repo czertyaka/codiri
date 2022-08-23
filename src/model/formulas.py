@@ -1,7 +1,8 @@
-from typing import Dict, List
+from typing import Dict, List, Callable
 from .common import pasquill_gifford_classes
 import math
 import numpy as np
+from scipy import integrate
 
 
 def effective_dose(nuclide_aclass_doses: List[Dict[str, float]]) -> float:
@@ -271,3 +272,156 @@ def food_max_distance(
     if x_max < minimal_distance:
         x_max = minimal_distance
     return x_max
+
+
+def concentration_integral(activity: float, dilution_factor: float) -> float:
+    """Calculate radionuclide timed concentration integral
+    SM-134-17: A1(1)
+
+    Args:
+        activity (float): accidental release radionuclide activity, Bq
+        dilution_factor (float): dilution factor, s/m^3
+
+    Returns:
+        float: radionuclide timed concentration integral, Bq*s/m^3
+    """
+    return activity * dilution_factor
+
+
+def height_dist_concentration_integral(
+    activity: float, dilution_factor: float
+) -> float:
+    """Calculate height distributed radionuclide timed concentration integral
+    SM-134-17: A1(2)
+
+    Args:
+        activity (float): accidental release radionuclide activity, Bq
+        dilution_factor (float): height distributed dilution factor, s/m^2
+
+    Returns:
+        float: height distributed radionuclide timed concentration integral,
+            Bq*s/m^2
+    """
+    return activity * dilution_factor
+
+
+def deposition(
+    sedimentation_rate: float,
+    sediment_detachment_constant: float,
+    concentration_integral: float,
+    height_dist_concentration_integral: float,
+) -> float:
+    """Calculate deposition
+    SM-134-17: A1(5)
+
+    Args:
+        sedimentation_rate (float): nuclide sedimentation rate, m/s
+        sediment_detachment_constant (float): sediment detachment constant,
+            s^-1
+        concentration_integral (float): radionuclide timed concentration
+            integral, Bq*s/m^3
+        height_dist_concentration_integral (float): height distributed
+            radionuclide timed concentration integral, Bq*s/m^2
+
+    Returns:
+        float: deposition, Bq/m^2
+    """
+    return (
+        sedimentation_rate * concentration_integral
+        + sediment_detachment_constant * height_dist_concentration_integral
+    )
+
+
+def food_specific_activity(
+    sedimentation_rate: float,
+    sediment_detachment_constant: float,
+    concentration_integral: float,
+    height_dist_concentration_integral: float,
+    atmosphere_accumulation_factor: float,
+    soil_accumulation_factor: float,
+) -> float:
+    """Calculate food specific activity
+    SM-134-17: A1(6)
+
+    Args:
+        sedimentation_rate (float): nuclide sedimentation rate, m/s
+        sediment_detachment_constant (float): sediment detachment constant,
+            s^-1
+        concentration_integral (float): radionuclide timed concentration
+            integral, Bq*s/m^3
+        height_dist_concentration_integral (float): height distributed
+            radionuclide timed concentration integral, Bq*s/m^2
+        atmosphere_accumulation_factor (float): the accumulation coefficient
+            normalized for productivity "precipitation from the atmosphere -
+            content in food", m^2/kg
+        soil_accumulation_factor (float): the accumulation coefficient
+            normalized for productivity "deposition on the soil - content in
+            food", m^2/kg
+
+    Returns:
+        float: food specific activity, Bq/kg
+    """
+    return (
+        sedimentation_rate * concentration_integral
+        + 0.2
+        * sediment_detachment_constant
+        * height_dist_concentration_integral
+    ) * atmosphere_accumulation_factor + (
+        sedimentation_rate * concentration_integral
+        + sediment_detachment_constant * height_dist_concentration_integral
+    ) * soil_accumulation_factor
+
+
+def dilution_factor(
+    depletion: float,
+    dispersion_coeff_y: Callable[[float], float],
+    dispersion_coeff_z: Callable[[float], float],
+    wind_speed: float,
+    vertical_dispersion: Callable[[float, float], float],
+    half_square_side: float,
+    distance: float,
+    terrain_clearance: float,
+) -> float:
+    """Calculate dilution factor
+    SM-134-17: A2(11)
+
+    Args:
+        depletion (float): depletion function value, unitless
+        dispersion_coeff_y (Callable[[float, ], float, ]): radioactive cloud
+            dispersion coefficient for horizontal direction function, m;
+            argument - distance, m
+        dispersion_coeff_z (Callable[[float, ], float, ]): radioactive cloud
+            dispersion coefficient for vertical direction function, m;
+            argument - distance, m
+        wind_speed (float): wind speed, m/s
+        vertical_dispersion (Callable[[float, float], float]): vertical
+            dispersion factor function, unitless;
+            1st arg - terrain clearance, m;
+            2nd arg - distance, m
+        half_square_side (float): half of square surface source side length, m
+        distance (float): distance to source, m
+        terrain_clearance (float): terrain clearance, m
+
+    Returns:
+        float: dilution factor
+    """
+    factor = depletion / (
+        math.sqrt(2 * math.pi) * wind_speed * 4 * math.pow(half_square_side, 2)
+    )
+
+    def subintegral_function(xi: float):
+        arg = distance - xi
+        return (
+            vertical_dispersion(terrain_clearance, arg)
+            / dispersion_coeff_z(arg)
+            * math.erf(
+                half_square_side / (math.sqrt(2) * dispersion_coeff_y(arg))
+            )
+        )
+
+    return (
+        factor
+        * integrate.quad(
+            subintegral_function, -half_square_side, half_square_side
+        )[0]
+    )

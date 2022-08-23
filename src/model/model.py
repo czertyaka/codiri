@@ -1,4 +1,4 @@
-from .common import pasquill_gifford_classes, log
+from .common import pasquill_gifford_classes, log, ValidatingMap
 from .input import Input
 from .results import Results
 from .reference import IReference
@@ -15,6 +15,11 @@ from .formulas import (
     effective_dose_food,
     annual_food_intake,
     food_max_distance,
+    concentration_integral,
+    height_dist_concentration_integral,
+    deposition,
+    food_specific_activity,
+    dilution_factor,
 )
 import math
 import numpy as np
@@ -90,6 +95,12 @@ class Model:
         if not self.validate_input(inp):
             return False
 
+        self._set_dilution_leval(
+            inp.extreme_windspeeds, inp.square_side, inp.terrain_roughness
+        )
+        self._set_food_specific_activity_leval()
+        self._set_deposition_leval()
+        self._set_concentration_integral_levals(inp.specific_activities)
         self._set_xmax_leval(inp.specific_activities.keys())
         self._set_effective_doses_exposure_sources_levals(inp.age)
         self._set_effective_doses_total_levals()
@@ -116,6 +127,82 @@ class Model:
                 log(f"input failed to comply constraints: {err}")
         log(f"invalid input: {inp}")
         return False
+
+    def _set_dilution_leval(
+        self,
+        wind_speeds: Dict[str, float],
+        square_side: float,
+        terrain_clearance: float,
+    ):
+        """Set dilution lazy evaluation
+
+        Args:
+            wind_speeds (Dict[str, float]): extreme wind speed per atmospheric
+                class
+            square_side (float): square source side length
+            terrain_clearance (float): terrain clearance
+        """
+        self._dilution = LEval(
+            lambda aclass, nuclide, x: dilution_factor(
+                1,  # TODO: add depletion
+                lambda x: 2,  # TODO: add sigma_y
+                lambda x: 3,  # TODO: add sigma_z
+                wind_speeds[aclass],
+                lambda z, x: 5,  # TODO: add G(z, xi - x)
+                square_side / 2,
+                x,
+                terrain_clearance,
+            )
+        )
+
+    def _set_food_specific_activity_leval(self):
+        """Set food specific activity lazy evaluation"""
+        self._food_sa = LEval(
+            lambda aclass, nuclide, x: food_specific_activity(
+                self._reference.deposition_rate(nuclide),
+                2,  # TODO: add sediment detachment constant
+                self._ci((aclass, nuclide, x)),
+                self._hdci((aclass, nuclide, x)),
+                5,  # TODO: add atmosphere accumulation factor
+                6,  # TODO: add soil accumulation factor
+            )
+        )
+
+    def _set_deposition_leval(self, distance: float):
+        """Set deposition lazy evaluation
+
+        Args:
+            distance (float): distance
+        """
+        self._deposition = LEval(
+            lambda aclass, nuclide: deposition(
+                self._reference.deposition_rate(nuclide),
+                2,  # TODO: add sediment detachment constant
+                self._ci((aclass, nuclide, distance)),
+                self._hdci((aclass, nuclide, distance)),
+            )
+        )
+
+    def _set_concentration_integral_levals(
+        self, specific_activities: ValidatingMap
+    ):
+        """Set concentration integrals lazy evaluations
+
+        Args:
+            specific_activities (ValidatingMap): specific activities dictionary
+        """
+        self._ci = LEval(
+            lambda aclass, nuclide, x: concentration_integral(
+                specific_activities[nuclide],
+                2,  # TODO: add dilution factor
+            )
+        )
+        self._hdci = LEval(
+            lambda aclass, nuclide, x: height_dist_concentration_integral(
+                specific_activities[nuclide],
+                2,  # TODO: add sedimentation factor
+            )
+        )
 
     def _set_xmax_leval(self, nuclides: Tuple[str]):
         """Set x_max lazy evaluation
@@ -153,11 +240,14 @@ class Model:
             )
         )
 
-    def _set_effective_doses_exposure_sources_levals(self, age: int):
+    def _set_effective_doses_exposure_sources_levals(
+        self, age: int, distance: float
+    ):
         """Set effective doses for all exposure sources lazy evaluations
 
         Args:
             age (int): population group age
+            distance (float): distance
         """
         self._annual_food_intake = LEval(
             lambda: annual_food_intake(
@@ -169,13 +259,13 @@ class Model:
         self._ed_food = LEval(
             lambda aclass, nuclide, x: effective_dose_food(
                 1,  # TODO: food dose conversion coeff
-                dict(),  # TODO: food specific activity
+                self._food_sa((aclass, nuclide, x)),
                 self._annual_food_intake(),
             )
         )
         self._ed_inh = LEval(
             lambda aclass, nuclide: effective_dose_inhalation(
-                1,  # TODO: concentration integral
+                self._ci((aclass, nuclide, distance)),
                 self._reference.inhalation_dose_coeff(nuclide),
                 self._reference.respiration_rate(age),
             )
@@ -189,14 +279,14 @@ class Model:
         )
         self._ed_surf = LEval(
             lambda aclass, nuclide: effective_dose_surface(
-                1,  # TODO: concentration integral
+                self._deposition((aclass, nuclide)),
                 self._reference.surface_dose_coeff(nuclide),
                 self._residence_time_coeff((nuclide,)),
             )
         )
         self._ed_cloud = LEval(
             lambda aclass, nuclide: effective_dose_cloud(
-                1,  # TODO: concentration integral
+                self._ci((aclass, nuclide, distance)),
                 self._reference.cloud_dose_coeff(nuclide),
             )
         )
@@ -249,25 +339,7 @@ class Model:
             lambda: effective_dose(make_ed_total_list(self._ed_total_period))
         )
 
-    def __calculate_depositions(self, nuclide):
-        """РБ-134-17, p. 17, (5)"""
-
-        depositon_rate = self.reference.deposition_rate(nuclide)
-        sediment_detachment = self.results.sediment_detachments[nuclide]
-        concentration_integrals = self.results.concentration_integrals[nuclide]
-        height_concentration_integrals = (
-            self.results.height_concentration_integrals[nuclide]
-        )
-        values = dict()
-
-        for a_class in pasquill_gifford_classes:
-            values[a_class] = (
-                depositon_rate * concentration_integrals[a_class]
-                + sediment_detachment * height_concentration_integrals[a_class]
-            )
-
-        self.results.depositions.insert(nuclide, values)
-
+    # TODO: consider!!!
     def __calculate_release(
         self, specific_activity: float, windspeed: float
     ) -> float:
@@ -276,40 +348,6 @@ class Model:
             * self.input.blowout_time
             * math.pow(self.input.square_side, 2)
         )
-
-    def __calculate_height_concentration_integrals(self, nuclide):
-        """РБ-134-17, p. 15, (2)"""
-
-        height_deposition_factor = self.results.height_deposition_factors[
-            nuclide
-        ]
-        windspeeds = self.input.extreme_windspeeds
-        specific_activity = self.input.specific_activities[nuclide]
-        values = dict()
-
-        for a_class in pasquill_gifford_classes:
-            activity = self._calculate_release(
-                specific_activity, windspeeds[a_class]
-            )
-            values[a_class] = activity * height_deposition_factor[a_class]
-
-        self.results.height_concentration_integrals.insert(nuclide, values)
-
-    def __calculate_concentration_integrals(self, nuclide):
-        """РБ-134-17, p. 14, (1)"""
-
-        dilution_factors = self.results.dilution_factors[nuclide]
-        windspeeds = self.input.extreme_windspeeds
-        specific_activity = self.input.specific_activities[nuclide]
-        values = dict()
-
-        for a_class in pasquill_gifford_classes:
-            activity = self._calculate_release(
-                specific_activity, windspeeds[a_class]
-            )
-            values[a_class] = activity * dilution_factors[a_class]
-
-        self.results.concentration_integrals.insert(nuclide, values)
 
     def __calculate_sediment_detachments(self, nuclide):
         """РБ-134-17, p. 29, (17)"""
@@ -379,64 +417,6 @@ class Model:
         )
 
         return dict(z=z, y=y)
-
-    def __caclculate_dilution_factors(self, nuclide: str) -> None:
-        """РБ-134-17, p. 27, (11)"""
-
-        windspeeds = self.input.extreme_windspeeds
-        side_half = self.input.square_side / 2
-        depletions = self.results.full_depletions[nuclide]
-        z = self.reference.terrain_clearance
-        h_mix = self.reference.mixing_layer_height
-        h_rel = self.reference.terrain_roughness(self.input.terrain_type)
-        values = dict()
-
-        for a_class in pasquill_gifford_classes:
-            factor = depletions[a_class] / (
-                math.sqrt(2 * math.pi)
-                * windspeeds[a_class]
-                * 4
-                * math.pow(side_half, 2)
-            )
-
-            diffusion_coefficients = self.reference.diffusion_coefficients(
-                a_class
-            )
-
-            def vertical_dispersion_factor(x: float) -> float:
-                """РБ-134-17, p. 27, (12)"""
-
-                value = 0
-                for n in range(-2, 3):
-                    sigma_z = self._calculate_dispersion_coefficients(
-                        diffusion_coefficients, x
-                    )["z"]
-                    consequent = 2 * math.pow(sigma_z, 2)
-                    exp1 = (
-                        -math.pow((2 * n * h_mix + h_rel - z), 2) / consequent
-                    )
-                    exp2 = (
-                        -math.pow((2 * n * h_mix - h_rel - z), 2) / consequent
-                    )
-                    value += math.exp(exp1) + math.exp(exp2)
-
-                return value
-
-            def subintegral_func(x):
-                diff = self.input.distance - x
-                vert_disp = vertical_dispersion_factor(diff)
-                disp_coeffs = self._calculate_dispersion_coefficients(
-                    diffusion_coefficients, diff
-                )
-                erf = math.erf(side_half / (math.sqrt(2) * disp_coeffs["y"]))
-                return vert_disp * erf / disp_coeffs["z"]
-
-            values[a_class] = (
-                factor
-                * integrate.quad(subintegral_func, -side_half, side_half)[0]
-            )
-
-        self.results.dilution_factors.insert(nuclide, values)
 
     def __calculate_depletions(self, nuclide: str) -> None:
         self._calculate_rad_depletions(nuclide)

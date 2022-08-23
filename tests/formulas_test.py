@@ -9,6 +9,11 @@ from codiri.src.model.formulas import (
     effective_dose_food,
     annual_food_intake,
     food_max_distance,
+    concentration_integral,
+    height_dist_concentration_integral,
+    deposition,
+    food_specific_activity,
+    dilution_factor,
 )
 from codiri.src.model.common import pasquill_gifford_classes
 import numpy as np
@@ -162,6 +167,22 @@ class TestSimpleFormulas(unittest.TestCase):
         afi_adults = 1
         self.assertEqual(annual_food_intake(dmc, dmc_adults, afi_adults), 0.75)
 
+    def test_concentration_integral(self):
+        self.assertEqual(concentration_integral(3, 4), 12)
+        self.assertEqual(concentration_integral(4, 3), 12)
+
+    def test_height_dist_concentration_integral(self):
+        self.assertEqual(height_dist_concentration_integral(3, 4), 12)
+        self.assertEqual(height_dist_concentration_integral(4, 3), 12)
+
+    def test_deposition(self):
+        self.assertEqual(deposition(1, 2, 3, 4), 11)
+        self.assertEqual(deposition(8, 7, 6, 5), 83)
+
+    def test_food_specific_activity(self):
+        self.assertEqual(food_specific_activity(1, 2, 3, 4, 5, 6), 89)
+        self.assertEqual(food_specific_activity(6, 5, 4, 3, 2, 1), 93)
+
 
 class TestFoodMaxDistanceFormula(unittest.TestCase):
     def test_invalid_first_band(self):
@@ -234,3 +255,47 @@ class TestFoodMaxDistanceFormula(unittest.TestCase):
             ]
         )
         self.assertEqual(food_max_distance(distances, matrix, 5), 5)
+
+
+class TestDilutionFormula(unittest.TestCase):
+    def test_wrong_args(self):
+        with self.assertRaises(TypeError):
+            dilution_factor(
+                1, lambda: 2, lambda x: 3, 4, lambda z, x: 5, 6, 7, 8
+            )
+        with self.assertRaises(TypeError):
+            dilution_factor(
+                1, lambda x, y: 2, lambda x: 3, 4, lambda z, x: 5, 6, 7, 8
+            )
+        with self.assertRaises(TypeError):
+            dilution_factor(
+                1, lambda x: 2, lambda: 3, 4, lambda z, x: 5, 6, 7, 8
+            )
+        with self.assertRaises(TypeError):
+            dilution_factor(
+                1, lambda x: 2, lambda x, y: 3, 4, lambda z, x: 5, 6, 7, 8
+            )
+        with self.assertRaises(TypeError):
+            dilution_factor(
+                1, lambda x: 2, lambda x: 3, 4, lambda x: 5, 6, 7, 8
+            )
+        with self.assertRaises(TypeError):
+            dilution_factor(
+                1, lambda x: 2, lambda x: 3, 4, lambda z, x, y: 5, 6, 7, 8
+            )
+
+    def test_calculation(self):
+        self.assertAlmostEqual(
+            dilution_factor(
+                1, lambda x: 2, lambda x: 3, 4, lambda z, x: 5, 6, 7, 8
+            ),
+            0.01381476,
+            8,
+        )
+        self.assertAlmostEqual(
+            dilution_factor(
+                8, lambda x: 7, lambda x: 6, 5, lambda z, x: 4, 3, 2, 1
+            ),
+            0.02352978,
+            8,
+        )
