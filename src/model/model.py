@@ -20,6 +20,8 @@ from .formulas import (
     deposition,
     food_specific_activity,
     dilution_factor,
+    vertical_dispersion,
+    sedimentation_factor,
 )
 import math
 import numpy as np
@@ -95,6 +97,10 @@ class Model:
         if not self.validate_input(inp):
             return False
 
+        self._set_sedimentation_factor(
+            inp.extreme_windspeeds, inp.square_side, inp.terrain_roughness
+        )
+        self._set_vertical_dispersion()
         self._set_dilution_leval(
             inp.extreme_windspeeds, inp.square_side, inp.terrain_roughness
         )
@@ -128,6 +134,41 @@ class Model:
         log(f"invalid input: {inp}")
         return False
 
+    def _set_sedimentation_factor(
+        self,
+        wind_speeds: Dict[str, float],
+        square_side: float,
+        terrain_clearance: float,
+    ):
+        """Set sedimentation factor lazy evaluation
+
+        Args:
+            wind_speeds (Dict[str, float]): extreme wind speed per atmospheric
+                class
+            square_side (float): square source side length
+            terrain_clearance (float): terrain clearance
+        """
+        self._sedimentation_factor = LEval(
+            lambda aclass, nuclide, x: sedimentation_factor(
+                1,  # TODO: add depletion
+                wind_speeds[aclass],
+                square_side / 2,
+                4,  # TODO: add sigma_y
+                x,
+            )
+        )
+
+    def _set_vertical_dispersion(self):
+        """Set vertical dispersion factor lazy evaluation"""
+        self._vert_dispersion = LEval(
+            lambda aclass, x: vertical_dispersion(
+                self._reference.mixing_layer_height,
+                2,  # TODO: add release height
+                3,  # TODO: add sigma_z
+                self._reference.terrain_roughness,
+            )
+        )
+
     def _set_dilution_leval(
         self,
         wind_speeds: Dict[str, float],
@@ -148,7 +189,7 @@ class Model:
                 lambda x: 2,  # TODO: add sigma_y
                 lambda x: 3,  # TODO: add sigma_z
                 wind_speeds[aclass],
-                lambda z, x: 5,  # TODO: add G(z, xi - x)
+                lambda x, z: self._vert_dispersion(aclass, x),
                 square_side / 2,
                 x,
                 terrain_clearance,
@@ -194,13 +235,13 @@ class Model:
         self._ci = LEval(
             lambda aclass, nuclide, x: concentration_integral(
                 specific_activities[nuclide],
-                2,  # TODO: add dilution factor
+                self._dilution((aclass, nuclide, x)),
             )
         )
         self._hdci = LEval(
             lambda aclass, nuclide, x: height_dist_concentration_integral(
                 specific_activities[nuclide],
-                2,  # TODO: add sedimentation factor
+                self._sedimentation_factor((aclass, nuclide, x)),
             )
         )
 

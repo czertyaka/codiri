@@ -387,10 +387,10 @@ def dilution_factor(
 
     Args:
         depletion (float): depletion function value, unitless
-        dispersion_coeff_y (Callable[[float, ], float, ]): radioactive cloud
+        dispersion_coeff_y (Callable[[float], float]): radioactive cloud
             dispersion coefficient for horizontal direction function, m;
             argument - distance, m
-        dispersion_coeff_z (Callable[[float, ], float, ]): radioactive cloud
+        dispersion_coeff_z (Callable[[float], float]): radioactive cloud
             dispersion coefficient for vertical direction function, m;
             argument - distance, m
         wind_speed (float): wind speed, m/s
@@ -417,6 +417,78 @@ def dilution_factor(
             * math.erf(
                 half_square_side / (math.sqrt(2) * dispersion_coeff_y(arg))
             )
+        )
+
+    return (
+        factor
+        * integrate.quad(
+            subintegral_function, -half_square_side, half_square_side
+        )[0]
+    )
+
+
+def vertical_dispersion(
+    mixed_layer_height: int,
+    release_effective_height: float,
+    dispersion_coeff_z: float,
+    terrain_clearance: float,
+) -> float:
+    """Calculate vertical dispersion
+    SM-134-17: A2(12)
+
+    Args:
+        mixed_layer_height (int): mixed layer height, m
+        release_effective_height (float): release effective height, m
+        dispersion_coeff_z (float): vertical dispersion factor, unitless;
+        terrain_clearance (float): terrain clearance, m
+
+    Returns:
+        float: vertical dispersion, unitless
+    """
+    summ = float(0)
+    expr1 = 2 * math.pow(dispersion_coeff_z, 2)
+    for n in range(-2, 3):
+        expr2 = 2 * n * mixed_layer_height
+        summ += math.exp(
+            -math.pow(expr2 + release_effective_height - terrain_clearance, 2)
+            / expr1
+        ) + math.exp(
+            -math.pow(expr2 - release_effective_height - terrain_clearance, 2)
+            / expr1
+        )
+    return summ
+
+
+def sedimentation_factor(
+    depletion: float,
+    wind_speed: float,
+    half_square_side: float,
+    dispersion_coeff_y: Callable[[float], float],
+    distance: float,
+) -> float:
+    """Calculate sedimentation factor
+    SM-134-17: A2(13)
+
+    Args:
+        depletion (float): depletion function, unitless
+        wind_speed (float): wind speed, m/s
+        half_square_side (float): half of square surface source side length, m
+        dispersion_coeff_y (Callable[[float], float]): radioactive cloud
+            dispersion coefficient for horizontal direction function, m;
+            argument - distance, m
+        distance (float): distance, m
+
+    Returns:
+        float: sedimentation factor, s/m^2
+    """
+    factor = depletion / (
+        math.sqrt(math.pi) * wind_speed * 4 * math.pow(half_square_side, 2)
+    )
+
+    def subintegral_function(xi: float):
+        return math.erf(
+            half_square_side
+            / (math.sqrt(2) * dispersion_coeff_y(distance - xi))
         )
 
     return (

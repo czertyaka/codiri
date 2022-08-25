@@ -14,6 +14,8 @@ from codiri.src.model.formulas import (
     deposition,
     food_specific_activity,
     dilution_factor,
+    vertical_dispersion,
+    sedimentation_factor,
 )
 from codiri.src.model.common import pasquill_gifford_classes
 import numpy as np
@@ -23,22 +25,8 @@ import unittest
 class TestSimpleFormulas(unittest.TestCase):
     def test_effective_dose(self):
         nuclide_aclass_doses = [
-            {
-                "A": 1,
-                "B": 2,
-                "C": 3,
-                "D": 2,
-                "E": 1,
-                "F": 0,
-            },
-            {
-                "A": 1,
-                "B": 4,
-                "C": 9,
-                "D": 16,
-                "E": 9,
-                "F": 4,
-            },
+            {"A": 1, "B": 2, "C": 3, "D": 2, "E": 1, "F": 0},
+            {"A": 1, "B": 4, "C": 9, "D": 16, "E": 9, "F": 4},
         ]
         self.assertEqual(effective_dose(nuclide_aclass_doses), 18)
 
@@ -183,6 +171,10 @@ class TestSimpleFormulas(unittest.TestCase):
         self.assertEqual(food_specific_activity(1, 2, 3, 4, 5, 6), 89)
         self.assertEqual(food_specific_activity(6, 5, 4, 3, 2, 1), 93)
 
+    def test_vertical_dispersion(self):
+        self.assertAlmostEqual(vertical_dispersion(1, 2, 3, 4), 4.52753878, 8)
+        self.assertAlmostEqual(vertical_dispersion(4, 3, 2, 1), 0.88831398, 8)
+
 
 class TestFoodMaxDistanceFormula(unittest.TestCase):
     def test_invalid_first_band(self):
@@ -297,5 +289,25 @@ class TestDilutionFormula(unittest.TestCase):
                 8, lambda x: 7, lambda x: 6, 5, lambda z, x: 4, 3, 2, 1
             ),
             0.02352978,
+            8,
+        )
+
+
+class TestSedimentationFactor(unittest.TestCase):
+    def test_wrong_args(self):
+        with self.assertRaises(TypeError):
+            sedimentation_factor(1, 2, 3, lambda: 4, 5)
+        with self.assertRaises(TypeError):
+            sedimentation_factor(1, 2, 3, lambda x, y: 4, 5)
+
+    def test_calculation(self):
+        self.assertAlmostEqual(
+            sedimentation_factor(1, 2, 3, lambda x: 4, 5),
+            0.02570567,
+            8,
+        )
+        self.assertAlmostEqual(
+            sedimentation_factor(5, 4, 3, lambda x: 2, 1),
+            0.10183453,
             8,
         )
