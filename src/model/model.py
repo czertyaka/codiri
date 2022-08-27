@@ -409,13 +409,13 @@ class Model:
         """
         self._ed_total_period = LEval(
             lambda aclass, nuclide: total_effective_dose_for_period(
-                1,  # TODO: take from input
+                1,  # TODO: add years
                 nuclide,
                 self._ed_cloud((aclass, nuclide)),
                 self._ed_inh((aclass, nuclide)),
                 self._ed_surf((aclass, nuclide)),
                 self._ed_food((aclass, nuclide, self._x_max())),
-                1,  # TODO: nuclide groups
+                1,  # TODO: add nuclide groups
             )
         )
         self._ed_total_acute = LEval(
@@ -424,7 +424,7 @@ class Model:
                 self._ed_cloud((aclass, nuclide)),
                 self._ed_inh((aclass, nuclide)),
                 self._ed_surf((aclass, nuclide)),
-                1,  # TODO: nuclide groups
+                1,  # TODO: add nuclide groups
             )
         )
 
