@@ -16,6 +16,13 @@ from codiri.src.model.formulas import (
     dilution_factor,
     vertical_dispersion,
     sedimentation_factor,
+    depletion_radiation,
+    depletion_dry,
+    depletion_wet,
+    sediment_detachment_constant,
+    depletion,
+    dispersion_coeff_z,
+    dispersion_coeff_y,
 )
 from codiri.src.model.common import pasquill_gifford_classes
 import numpy as np
@@ -175,6 +182,27 @@ class TestSimpleFormulas(unittest.TestCase):
         self.assertAlmostEqual(vertical_dispersion(1, 2, 3, 4), 4.52753878, 8)
         self.assertAlmostEqual(vertical_dispersion(4, 3, 2, 1), 0.88831398, 8)
 
+    def test_depletion_radiation(self):
+        self.assertAlmostEqual(depletion_radiation(1, 2, 3), 0.51341712, 8)
+        self.assertAlmostEqual(depletion_radiation(3, 2, 1), 0.00247875, 8)
+
+    def test_depletion_wet(self):
+        self.assertAlmostEqual(depletion_wet(1, 2, 3), 0.51341712, 8)
+        self.assertAlmostEqual(depletion_wet(3, 2, 1), 0.00247875, 8)
+
+    def test_sediment_detachment_constant(self):
+        self.assertEqual(sediment_detachment_constant(1, 2, 3), 6)
+        self.assertEqual(sediment_detachment_constant(3, 2, 1), 6)
+
+    def test_depletion(self):
+        self.assertEqual(depletion(1, 2, 3), 6)
+        self.assertEqual(depletion(3, 2, 1), 6)
+
+    def test_dispersion_coeff_z(self):
+        self.assertEqual(dispersion_coeff_z(1, 2, 3), 9)
+        self.assertEqual(dispersion_coeff_z(3, 1, 2), 6)
+        self.assertEqual(dispersion_coeff_z(2, 3, 1), 2)
+
 
 class TestFoodMaxDistanceFormula(unittest.TestCase):
     def test_invalid_first_band(self):
@@ -311,3 +339,47 @@ class TestSedimentationFactor(unittest.TestCase):
             0.10183453,
             8,
         )
+
+
+class TestDepletionDry(unittest.TestCase):
+    def test_wrong_args(self):
+        with self.assertRaises(TypeError):
+            depletion_dry(1, 2, lambda: 3, 4, 5)
+        with self.assertRaises(TypeError):
+            depletion_dry(1, 2, lambda x, y: 3, 4, 5)
+
+    def test_calculation(self):
+        self.assertAlmostEqual(
+            depletion_dry(1, 2, lambda x: 3, 4, 5), 0.76082636, 8
+        )
+        self.assertAlmostEqual(
+            depletion_dry(5, 4, lambda x: 3, 2, 1), 0.76628074, 8
+        )
+
+
+class TestDispersionCoeffY(unittest.TestCase):
+    def test_negative_distance(self):
+        with self.assertRaises(ValueError):
+            dispersion_coeff_y(1, 2, -1)
+        with self.assertRaises(ValueError):
+            dispersion_coeff_y(1, 2, -10)
+
+    def test_too_large_distance(self):
+        with self.assertRaises(ValueError):
+            dispersion_coeff_y(1, 2, 50000)
+        with self.assertRaises(ValueError):
+            dispersion_coeff_y(1, 2, 50001)
+
+    def test_small_distance(self):
+        self.assertEqual(dispersion_coeff_y(3, 4, 5), 1875)
+        self.assertEqual(dispersion_coeff_y(5, 3, 4), 320)
+        self.assertEqual(dispersion_coeff_y(4, 5, 3), 972)
+        self.assertEqual(dispersion_coeff_y(1, 100000, 0), 0)
+        self.assertEqual(dispersion_coeff_y(13, 100000, 1), 13)
+        self.assertEqual(dispersion_coeff_y(13, 0, 10000), 13)
+
+    def test_large_distance(self):
+        self.assertAlmostEqual(dispersion_coeff_y(1, 2, 10001), 100004999.9, 1)
+        self.assertAlmostEqual(dispersion_coeff_y(1, 2, 49999), 223604561.7, 1)
+        self.assertAlmostEqual(dispersion_coeff_y(2, 1, 10001), 20001.0, 1)
+        self.assertAlmostEqual(dispersion_coeff_y(2, 1, 49999), 44720.9, 1)

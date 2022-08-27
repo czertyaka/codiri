@@ -497,3 +497,163 @@ def sedimentation_factor(
             subintegral_function, -half_square_side, half_square_side
         )[0]
     )
+
+
+def depletion_radiation(
+    radioactive_decay_coeff: float, distance: float, wind_speed: float
+) -> float:
+    """Calculate radioactive cloud depletion due to radioactive decay
+    SM-134-17: A2(14)
+
+    Args:
+        radioactive_decay_coeff (float): radioactive decay coeff, s^-1
+        distance (float): distance, m
+        wind_speed (float): wind speed, m/s
+
+    Returns:
+        float: radioactive cloud depletion due to radioactive decay, unitless
+    """
+    return math.exp(-(radioactive_decay_coeff * distance) / wind_speed)
+
+
+def depletion_dry(
+    sedimentation_rate: float,
+    wind_speed: float,
+    dispersion_coeff_z: Callable[[float], float],
+    release_effective_height: float,
+    distance: float,
+) -> float:
+    """Calculate radioactive cloud depletion due to dry deposition
+    SM-134-17: A2(15)
+
+    Args:
+        sedimentation_rate (float): nuclide sedimentation rate, m/s
+        wind_speed (float): wind speed, m/s
+        dispersion_coeff_z (Callable[[float], float]): radioactive cloud
+            dispersion coefficient for vertical direction function, m;
+            argument - distance, m
+        release_effective_height (float): release effective height, m
+        distance (float): distance, m
+
+    Returns:
+        float: radioactive cloud depletion due to dry deposition, unitless
+    """
+    factor = -math.sqrt(2 / math.pi) * sedimentation_rate / wind_speed
+
+    def subintegral_function(x: float) -> float:
+        sigma_z = dispersion_coeff_z(x)
+        return (
+            math.exp(
+                -math.pow(release_effective_height, 2)
+                / (2 * math.pow(sigma_z, 2))
+            )
+            / sigma_z
+        )
+
+    return math.exp(
+        factor * integrate.quad(subintegral_function, 0, distance)[0]
+    )
+
+
+def depletion_wet(
+    sediment_detachment_constant: float, distance: float, wind_speed: float
+) -> float:
+    """Calculate radioactive cloud depletion due to washing out
+    SM-134-17: A2(16)
+
+    Args:
+        sediment_detachment_constant (float): sediment detachment constant,
+            s^-1
+        distance (float): distance, m
+        wind_speed (float): wind speed, m/s
+
+    Returns:
+        float: radioactive cloud depletion due to washing out, untiless
+    """
+    return math.exp(-sediment_detachment_constant * distance / wind_speed)
+
+
+def sediment_detachment_constant(
+    unitless_washing_capacity: float,
+    precipitation_rate: float,
+    standard_washing_capacity: float,
+) -> float:
+    """Calculate sediment detachment constant
+    SM-134-17: A2(17)
+
+    Args:
+        unitless_washing_capacity (float): unitless washing capacity, unitless
+        precipitation_rate (float): precipitation rate, mm/h
+        standard_washing_capacity (float): standard washing capacity, h/(mm*s)
+
+    Returns:
+        float: sediment detachment constant s^-1
+    """
+    return (
+        unitless_washing_capacity
+        * precipitation_rate
+        * standard_washing_capacity
+    )
+
+
+def depletion(
+    depletion_rad: float, depletion_dry: float, depletion_wet: float
+) -> float:
+    """Calculate radioactive cloud depletion
+    SM-134-17: A2(18)
+
+    Args:
+        depletion_rad (float): depletion due to radioactive decay, unitless
+        depletion_dry (float): depletion due to dry deposition, unitless
+        depletion_wet (float): depletion due to washing out, untiless
+
+    Returns:
+        float: radioactive cloud depletion, unitless
+    """
+    return depletion_rad * depletion_dry * depletion_wet
+
+
+def dispersion_coeff_z(p_z: float, q_z: float, distance: float) -> float:
+    """Calculate radioactive cloud dispersion coefficient for vertical
+    direction
+    SM-134-17: A2(19)
+
+    Args:
+        p_z (float): unnamed anecdotal parameter, dimension unknown
+        q_z (float): unnamed anecdotal parameter, dimension unknown
+        distance (float): distance, m
+
+    Returns:
+        float: radioactive cloud dispersion coefficient for vertical direction,
+        m
+    """
+    return p_z * math.pow(distance, q_z)
+
+
+def dispersion_coeff_y(p_y: float, q_y: float, distance: float) -> float:
+    """Calculate radioactive cloud dispersion coefficient for horizontal
+    direction
+    SM-134-17: A2(20)
+
+    Args:
+        p_y (float): unnamed anecdotal parameter, dimension unknown
+        q_y (float): unnamed anecdotal parameter, dimension unknown
+        distance (float): distance, m
+
+    Returns:
+        float: radioactive cloud dispersion coefficient for horizontal
+        direction, m
+
+    Raises:
+        ValueError: if distance not in [0 m, 50000 m)
+    """
+    if distance < 0:
+        raise ValueError(f"distance could not be negative: '{distance} m'")
+    elif distance < 10000:
+        return p_y * math.pow(distance, q_y)
+    elif distance < 50000:
+        return p_y * math.pow(10000, q_y - 0.5) * math.sqrt(distance)
+    else:
+        raise ValueError(
+            "distance could not be larger than 50000 m: " "f'{distance} m'"
+        )
