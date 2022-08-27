@@ -21,6 +21,13 @@ from .formulas import (
     dilution_factor,
     vertical_dispersion,
     sedimentation_factor,
+    depletion_radiation,
+    depletion_dry,
+    depletion_wet,
+    sediment_detachment_constant,
+    depletion,
+    dispersion_coeff_z,
+    dispersion_coeff_y,
 )
 import math
 import numpy as np
@@ -94,6 +101,8 @@ class Model:
         if not self.validate_input(inp):
             return False
 
+        self._set_dispersion_coeffs()
+        self._set_depletions(inp.extreme_windspeeds, inp.precipitation_rate)
         self._set_sedimentation_factor(
             inp.extreme_windspeeds, inp.square_side, inp.terrain_roughness
         )
@@ -131,6 +140,71 @@ class Model:
         log(f"invalid input: {inp}")
         return False
 
+    def _set_dispersion_coeffs(self):
+        """Set dispersion coefficients lazy evaluation"""
+        self._sigma_z = LEval(
+            lambda aclass, x: dispersion_coeff_z(
+                self._reference.diffusion_coefficients(aclass)["p_z"],
+                self._reference.diffusion_coefficients(aclass)["q_z"],
+                x,
+            )
+        )
+        self._sigma_y = LEval(
+            lambda aclass, x: dispersion_coeff_y(
+                self._reference.diffusion_coefficients(aclass)["p_y"],
+                self._reference.diffusion_coefficients(aclass)["q_y"],
+                x,
+            )
+        )
+
+    def _set_depletions(
+        self, wind_speeds: Dict[str, float], precipitation_rate: float
+    ):
+        """Set depletion and depletion-related lazy evaluations
+
+        Args:
+            wind_speeds (Dict[str, float]): extreme wind speed per atmospheric
+                class
+            precipitation_rate (float): precipitation rate
+        """
+        self._depletion_rad = LEval(
+            lambda aclass, nuclide, x: depletion_radiation(
+                self._reference.radio_decay_coeffs(nuclide),
+                x,
+                wind_speeds[aclass],
+            )
+        )
+        self._depletion_dry = LEval(
+            lambda aclass, nuclide, x: depletion_dry(
+                self._reference.deposition_rate(nuclide),
+                wind_speeds[aclass],
+                lambda xx: self._sigma_z((aclass, xx)),
+                4,  # TODO: add release height
+                x,
+            )
+        )
+        self._depletion_wet = LEval(
+            lambda aclass, nuclide, x: depletion_wet(
+                self._sediment_detachment_constant((nuclide)),
+                x,
+                wind_speeds[nuclide],
+            )
+        )
+        self._sediment_detachment_constant = LEval(
+            lambda nuclide: sediment_detachment_constant(
+                self._reference.unitless_washing_capacity,
+                precipitation_rate,
+                self._reference.standard_washing_capacity(nuclide),
+            )
+        )
+        self._depletion = LEval(
+            lambda aclass, nuclide, x: depletion(
+                self._depletion_rad((aclass, nuclide, x)),
+                self._depletion_dry((aclass, nuclide, x)),
+                self._depletion_wet((aclass, nuclide, x)),
+            )
+        )
+
     def _set_sedimentation_factor(
         self,
         wind_speeds: Dict[str, float],
@@ -147,10 +221,10 @@ class Model:
         """
         self._sedimentation_factor = LEval(
             lambda aclass, nuclide, x: sedimentation_factor(
-                1,  # TODO: add depletion
+                self._depletion((aclass, nuclide, x)),
                 wind_speeds[aclass],
                 square_side / 2,
-                4,  # TODO: add sigma_y
+                lambda xx: self._sigma_y((nuclide, xx)),
                 x,
             )
         )
@@ -161,7 +235,7 @@ class Model:
             lambda aclass, x: vertical_dispersion(
                 self._reference.mixing_layer_height,
                 2,  # TODO: add release height
-                3,  # TODO: add sigma_z
+                self._sigma_z((aclass, x)),
                 self._reference.terrain_roughness,
             )
         )
@@ -183,10 +257,10 @@ class Model:
         self._dilution = LEval(
             lambda aclass, nuclide, x: dilution_factor(
                 1,  # TODO: add depletion
-                lambda x: 2,  # TODO: add sigma_y
-                lambda x: 3,  # TODO: add sigma_z
+                lambda xx: self._sigma_y((aclass, xx)),
+                lambda xx: self._sigma_z((aclass, xx)),
                 wind_speeds[aclass],
-                lambda x, z: self._vert_dispersion(aclass, x),
+                lambda xx, z: self._vert_dispersion((aclass, xx)),
                 square_side / 2,
                 x,
                 terrain_clearance,
@@ -198,7 +272,7 @@ class Model:
         self._food_sa = LEval(
             lambda aclass, nuclide, x: food_specific_activity(
                 self._reference.deposition_rate(nuclide),
-                2,  # TODO: add sediment detachment constant
+                self._sediment_detachment_constant((nuclide)),
                 self._ci((aclass, nuclide, x)),
                 self._hdci((aclass, nuclide, x)),
                 5,  # TODO: add atmosphere accumulation factor
@@ -215,7 +289,7 @@ class Model:
         self._deposition = LEval(
             lambda aclass, nuclide: deposition(
                 self._reference.deposition_rate(nuclide),
-                2,  # TODO: add sediment detachment constant
+                self._sediment_detachment_constant((nuclide)),
                 self._ci((aclass, nuclide, distance)),
                 self._hdci((aclass, nuclide, distance)),
             )
