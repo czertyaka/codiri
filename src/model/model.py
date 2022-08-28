@@ -72,7 +72,8 @@ class Model:
             if nuclide not in self.reference.all_nuclides():
                 log(
                     f"unknown nuclide '{nuclide}'"
-                    f" (list of known nuclides '{self.reference.all_nuclides()}')"
+                    " (list of known nuclides "
+                    f"'{self.reference.all_nuclides()}')"
                 )
                 return False
         return True
