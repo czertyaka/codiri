@@ -71,8 +71,7 @@ class Model:
         for nuclide in self.input.specific_activities:
             if nuclide not in self.reference.nuclides():
                 log(
-                    f"unknown nuclide '{nuclide}'"
-                    " (list of known nuclides "
+                    f"unknown nuclide '{nuclide}' (list of known nuclides "
                     f"'{self.reference.nuclides()}')"
                 )
                 return False
