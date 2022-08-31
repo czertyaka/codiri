@@ -32,6 +32,9 @@ class MapImpl:
     def __str__(self) -> str:
         return str(self.__values)
 
+    def __repr__(self) -> str:
+        return self.__values.__repr__()
+
     def __len__(self) -> int:
         return len(self.__values)
 
@@ -75,6 +78,9 @@ class FixedMap:
 
     def __str__(self) -> str:
         return self.__values.__str__()
+
+    def __repr__(self) -> str:
+        return self.__values.__repr__()
 
     def __len__(self) -> int:
         return len(self.__values)
@@ -129,6 +135,9 @@ class ValidatingMap:
 
     def __str__(self) -> str:
         return self.__values.__str__()
+
+    def __repr__(self) -> str:
+        return self.__values.__repr__()
 
     def __len__(self) -> int:
         return len(self.__values)
