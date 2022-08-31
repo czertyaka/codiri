@@ -1,4 +1,4 @@
-from .common import log, pasquill_gifford_classes
+from .common import pasquill_gifford_classes
 from typing import Tuple, Callable
 
 

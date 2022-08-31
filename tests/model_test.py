@@ -1,7 +1,6 @@
 from codiri.src.model.model import Model
 from codiri.src.model.results import Results
 from codiri.src.model.reference import IReference
-from codiri.src.database import InMemoryDatabase
 from codiri.src.model.input import BaseInput, Input
 import math
 from unittest.mock import MagicMock, patch
@@ -121,53 +120,45 @@ class TestInput(unittest.TestCase):
 
 
 class ReferenceTest(IReference):
-    def __init__(self):
-        super(ReferenceTest, self).__init__()
-        self.__db = InMemoryDatabase()
+    def _initialize_data(self):
+        self._dose_rate_decay_coeff = 0.5
+        self._residence_time = -math.log(2)
+        self._unitless_washing_capacity = 2
+        self._terrain_clearance = 1
+        self._mixing_layer_height = 1
+        self._nuclides = {
+            "Cs-137": {"standard_washing_capacity": 3},
+            "Sr-90": {"standard_washing_capacity": 3},
+        }
+        self._roughness = {
+            "greenland": {"roughness": 1},
+            "agricultural": {"roughness": 1},
+            "forest": {"roughness": 1},
+            "settlement": {"roughness": 1},
+        }
 
     @property
-    def db(self):
-        return self.__db
+    def nuclides_dict(self):
+        return self._nuclides
 
     @property
-    def dose_rate_decay_coeff(self) -> float:
-        return 0.5
+    def age_groups_dict(self):
+        return self._age_groups
 
     @property
-    def residence_time(self) -> float:
-        return -math.log(2)
-
-    @property
-    def unitless_washing_capacity(self) -> float:
-        return 2
-
-    def standard_washing_capacity(self, nuclide: str) -> float:
-        return 3
-
-    @property
-    def terrain_clearance(self) -> float:
-        return 1
-
-    @property
-    def mixing_layer_height(self) -> float:
-        return 1
-
-    def terrain_roughness(self, terrain_type: str) -> float:
-        return 1
-
-    def all_nuclides(self) -> list:
-        return ["Cs-137", "Sr-90"]
+    def diffusion_coefficients_dict(self):
+        return self._diffusion_coefficients
 
 
 class ModelTest(Model):
     def __init__(self):
         self._Model__results = Results()
         self.__reference = ReferenceTest()
-        validInput = Input()
-        validInput.distance = 1
-        validInput.square_side = 1
-        validInput.precipitation_rate = 1
-        validInput.extreme_windspeeds = {
+        valid_input = Input()
+        valid_input.distance = 1
+        valid_input.square_side = 1
+        valid_input.precipitation_rate = 1
+        valid_input.extreme_windspeeds = {
             "A": 1,
             "B": 1,
             "C": 1,
@@ -175,11 +166,11 @@ class ModelTest(Model):
             "E": 1,
             "F": 1,
         }
-        validInput.age = 1
-        validInput.terrain_type = "greenland"
-        validInput.blowout_time = 1
-        validInput.add_specific_activity("Cs-137", 1)
-        self.input = validInput
+        valid_input.age = 1
+        valid_input.terrain_type = "greenland"
+        valid_input.blowout_time = 1
+        valid_input.add_specific_activity("Cs-137", 1)
+        self.input = valid_input
 
     @property
     def reference(self):
@@ -246,12 +237,12 @@ def test_calculate_e_total_10():
     e_inh_table = model.results.e_inhalation
     e_surface_table = model.results.e_surface
 
-    model.reference.db["nuclides"].insert(dict(name="A-0", group="aerosol"))
+    model.reference.nuclides_dict["A-0"] = {"group": "aerosol"}
     e_cloud_table.insert("A-0", dict(A=0, B=6, C=2, D=8, E=4, F=10))
     e_inh_table.insert("A-0", dict(A=1, B=7, C=3, D=9, E=5, F=11))
     e_surface_table.insert("A-0", dict(A=2, B=8, C=4, D=10, E=6, F=12))
 
-    model.reference.db["nuclides"].insert(dict(name="B-1", group="IRG"))
+    model.reference.nuclides_dict["B-1"] = {"group": "IRG"}
     e_cloud_table.insert("B-1", dict(A=0, B=6, C=2, D=8, E=4, F=10))
     e_inh_table.insert("B-1", dict(A=1, B=7, C=3, D=9, E=5, F=11))
     e_surface_table.insert("B-1", dict(A=2, B=8, C=4, D=10, E=6, F=12))
@@ -267,7 +258,7 @@ def test_calculate_e_total_10():
 def test_calculate_e_cloud():
     model = ModelTest()
 
-    model.reference.db["nuclides"].insert(dict(name="A-0", R_cloud=1.5))
+    model.reference.nuclides_dict["A-0"] = {"R_cloud": 1.5}
     model.results.concentration_integrals.insert(
         "A-0", dict(A=0, B=6, C=2, D=8, E=4, F=10)
     )
@@ -280,13 +271,17 @@ def test_calculate_e_cloud():
 def test_calculate_e_inh():
     model = ModelTest()
 
-    model.reference.db["nuclides"].insert(dict(name="A-0", R_inh=1.5))
-    model.reference.db["age_groups"].insert(
-        dict(id=0, lower_age=0, upper_age=10, respiration_rate=1)
-    )
-    model.reference.db["age_groups"].insert(
-        dict(id=1, lower_age=10, upper_age=20, respiration_rate=2)
-    )
+    model.reference.nuclides_dict["A-0"] = {"R_inh": 1.5}
+    model.reference.age_groups_dict[0] = {
+        "lower_age": 0,
+        "upper_age": 10,
+        "respiration_rate": 1,
+    }
+    model.reference.age_groups_dict[1] = {
+        "lower_age": 10,
+        "upper_age": 20,
+        "respiration_rate": 2,
+    }
 
     model.results.concentration_integrals.insert(
         "A-0", dict(A=0, B=6, C=2, D=8, E=4, F=10)
@@ -313,7 +308,7 @@ def test_calculate_e_inh():
 def test_calculate_residence_time_coeff():
     model = ModelTest()
 
-    model.reference.db["nuclides"].insert(dict(name="A-0", decay_coeff=0.5))
+    model.reference.nuclides_dict["A-0"] = {"decay_coeff": 0.5}
 
     assert model._Model__calculate_residence_time_coeff("A-0") == -1
 
@@ -322,7 +317,7 @@ def test_calculate_e_surface():
     model = ModelTest()
 
     model._Model__calculate_residence_time_coeff = MagicMock(return_value=1)
-    model.reference.db["nuclides"].insert(dict(name="A-0", R_surface=2))
+    model.reference.nuclides_dict["A-0"] = {"R_surface": 2}
     model.results.depositions.insert(
         "A-0", dict(A=0, B=6, C=2, D=8, E=4, F=10)
     )
@@ -337,7 +332,7 @@ def test_calculate_e_surface():
 def test_calculate_depositions():
     model = ModelTest()
 
-    model.reference.db["nuclides"].insert(dict(name="A-0", deposition_rate=1))
+    model.reference.nuclides_dict["A-0"] = {"deposition_rate": 1}
     model.results.sediment_detachments.insert("A-0", 2)
     model.results.concentration_integrals.insert(
         "A-0", dict(A=0, B=6, C=2, D=8, E=4, F=10)
@@ -408,6 +403,8 @@ def test_calculate_sediment_detachments():
     input.precipitation_rate = 1
     model.input = input
 
+    model.reference.nuclides_dict["A-0"] = {"standard_washing_capacity": 3}
+
     model._Model__calculate_sediment_detachments("A-0")
 
     assert model.results.sediment_detachments["A-0"] == 6
@@ -438,24 +435,42 @@ def test_calculate_height_deposition_factors():
     input.distance = 1
     model.input = input
 
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="A", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="B", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="C", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="D", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="E", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="F", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
+    model.reference.diffusion_coefficients_dict["A"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["B"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["C"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["D"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["E"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["F"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
 
     model.results.full_depletions.insert(
         "A-0", dict(A=1, B=1, C=1, D=1, E=1, F=1)
@@ -492,26 +507,45 @@ def test_caclculate_dilution_factors():
     input.square_side = 2
     input.extreme_windspeeds = dict(A=1, B=1, C=1, D=1, E=1, F=1)
     input.distance = 1.01
+    input.terrain_type = "greenland"
     model.input = input
 
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="A", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="B", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="C", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="D", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="E", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="F", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
+    model.reference.diffusion_coefficients_dict["A"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["B"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["C"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["D"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["E"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["F"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
 
     model.results.full_depletions.insert(
         "A-0", dict(A=1, B=1, C=1, D=1, E=1, F=1)
@@ -551,7 +585,7 @@ def test_calculate_rad_depletions():
     )
     model.input = inp
 
-    model.reference.db["nuclides"].insert(dict(name="A-0", decay_coeff=1))
+    model.reference.nuclides_dict["A-0"] = {"decay_coeff": 1}
 
     model._Model__calculate_rad_depletions("A-0")
 
@@ -574,27 +608,46 @@ def test_calculate_dry_depletions():
     inp = Input()
     inp.distance = 1
     inp.extreme_windspeeds = dict(A=1, B=1, C=1, D=1, E=1, F=1)
+    inp.terrain_type = "greenland"
     model.input = inp
 
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="A", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="B", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="C", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="D", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="E", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["diffusion_coefficients"].insert(
-        dict(a_class="F", p_z=1, q_z=1, p_y=1, q_y=1)
-    )
-    model.reference.db["nuclides"].insert(dict(name="A-0", deposition_rate=1))
+    model.reference.diffusion_coefficients_dict["A"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["B"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["C"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["D"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["E"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.diffusion_coefficients_dict["F"] = {
+        "p_z": 1,
+        "q_z": 1,
+        "p_y": 1,
+        "q_y": 1,
+    }
+    model.reference.nuclides_dict["A-0"] = {"deposition_rate": 1}
 
     model._Model__calculate_dry_depletions("A-0")
 

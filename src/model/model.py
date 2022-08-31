@@ -69,10 +69,10 @@ class Model:
             log(f"input is not ready '{self.input}'")
             return False
         for nuclide in self.input.specific_activities:
-            if nuclide not in self.reference.all_nuclides():
+            if nuclide not in self.reference.nuclides():
                 log(
-                    f"unknown nuclide '{nuclide}'"
-                    f" (list of known nuclides '{self.reference.all_nuclides()}')"
+                    f"unknown nuclide '{nuclide}' (list of known nuclides "
+                    f"'{self.reference.nuclides()}')"
                 )
                 return False
         return True
@@ -160,7 +160,7 @@ class Model:
         """РБ-134-17, p. 8, (7)"""
 
         decay_coeff_sum = (
-            self.reference.radio_decay_coeff(nuclide)
+            self.reference.nuclide_decay_coeff(nuclide)
             + self.reference.dose_rate_decay_coeff
         )
 
@@ -366,7 +366,7 @@ class Model:
     def __calculate_rad_depletions(self, nuclide: str) -> None:
         """РБ-134-17, p. 28, (14)"""
 
-        decay_coeff = self.reference.radio_decay_coeff(nuclide)
+        decay_coeff = self.reference.nuclide_decay_coeff(nuclide)
         windspeeds = self.input.extreme_windspeeds
         dist = self.input.distance
         values = dict()
