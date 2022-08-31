@@ -1,155 +1,317 @@
-from ..database import IDatabase, Database
-from .common import log
+from ..database import Database
+from dataset import Table
+from typing import Dict, Tuple
 
 
 class IReference:
-    """Interface for reference data stored in database, handles all work
-    related with its tables. The derivatives of that class should implement
-    database attribute which is expected to have same API as
-    :class:`.IDatabase`
+
+    """Reference abstract interface class, provides access to a set of values
+    and tables which serves as reference data and must be initialized by the
+    inherit
     """
 
     def __init__(self):
-        pass
+        """IReference constructor"""
+        self._dose_rate_decay_coeff = None
+        self._residence_time = None
+        self._unitless_washing_capacity = None
+        self._terrain_clearance = None
+        self._mixing_layer_height = None
+        self._age_groups = {}
+        self._diffusion_coefficients = {}
+        self._nuclides = {}
+        self._roughness = {}
+        self._initialize_data()
 
-    @property
-    def db(self) -> IDatabase:
-        """Pure virtual method of database access
-        :raises NotImplementedError: always
+    def _initialize_data(self):
+        """Initialize data
+
+        Raises:
+            NotImplementedError: always
         """
         raise NotImplementedError
 
-    def all_nuclides(self) -> list:
-        """List of all radionuclides in reference data"""
-        nuclides = list()
-        for row in self.db["nuclides"]:
-            nuclides.append(row["name"])
-        return nuclides
-
-    def radio_decay_coeff(self, nuclide: str) -> float:
-        """Radioactivity decay coefficient, sec^-1"""
-        return float(self.__find_nuclide(nuclide)["decay_coeff"])
-
     @property
     def dose_rate_decay_coeff(self) -> float:
-        """Dose rate decay coefficient due to all processes except
-        radioactivity decay, sec^-1
+        """Get dose rate decay coefficient due to all processes except
+        radioactivity decay
+
+        Returns:
+            float: dose rate decay coefficient, s^-1
         """
-        return 1.27e-9
+        return self._dose_rate_decay_coeff
 
     @property
-    def residence_time(self, time: int) -> float:
-        """Population residence time in contaminated region for acute phase of
-        a radiation accident
-
-        Args:
-            time (int): years since accident
+    def residence_time(self) -> float:
+        """Get population residence time in contaminated region for acute phase
+        of a radiation accident
 
         Returns:
             float: residence time, s
         """
-        if time == 0:
-            return 8.64e5
-        elif time == 1:
-            return 3.15e7
-        else:
-            raise ValueError(
-                f"residence time for '{time} years' from accident"
-                " had been requested"
-            )
-
-    def nuclide_group(self, nuclide: str) -> str:
-        """Nuclide group, e.g. aerosol, IRG etc."""
-        return str(self.__find_nuclide(nuclide)["group"])
-
-    def cloud_dose_coeff(self, nuclide: str) -> float:
-        """Dose conversion factor for external exposure from radioactive cloud,
-        (Sv*m^3)/(Bq*s)
-        """
-        return float(self.__find_nuclide(nuclide)["R_cloud"])
-
-    def inhalation_dose_coeff(self, nuclide: str) -> float:
-        """Dose conversion factor for nuclide intake with air, Sv/Bq"""
-        return float(self.__find_nuclide(nuclide)["R_inh"])
-
-    def surface_dose_coeff(self, nuclide: str) -> float:
-        """Dose conversion factor for external exposure from soil surface,
-        (Sv*m^2)/(Bq*s)
-        """
-        return float(self.__find_nuclide(nuclide)["R_surface"])
-
-    def respiration_rate(self, age: int) -> float:
-        """Respiration rate, m^3/sec"""
-        rate = self.db["age_groups"].find_one(id=self.__get_age_group_id(age))[
-            "respiration_rate"
-        ]
-        return float(rate)
-
-    def deposition_rate(self, nuclide: str) -> float:
-        """Deposition rate, m/s"""
-        return float(self.__find_nuclide(nuclide)["deposition_rate"])
-
-    def standard_washing_capacity(self, nuclide: str) -> float:
-        """Standard washing capacity, hr/(mm*sec)"""
-        return 0 if self.__find_nuclide(nuclide)["group"] == "IRG" else 1e-5
+        return self._residence_time
 
     @property
     def unitless_washing_capacity(self) -> float:
-        """Unitless washing capacity for other precipitation types, 1"""
-        return 5.0
+        """Get unitless washing capacity for other precipitation types
 
-    def terrain_roughness(self, terrain_type: str) -> float:
-        """Underlying terrain roughness, m"""
-        return self.db.load_table("roughness").find_one(terrain=terrain_type)[
-            "roughness"
-        ]
-
-    def diffusion_coefficients(self, atmospheric_class: str) -> dict:
-        """Diffusion coefficients p_z, q_z, p_y and q_y for release
-        height < 50 m
-        :return: dict with keys 'p_z', 'q_z', 'p_y' and 'q_y'
+        Returns:
+            float: unitless washing capacity, unitless
         """
-        coeffs = dict(
-            self.db.load_table("diffusion_coefficients").find_one(
-                a_class=atmospheric_class
-            )
-        )
-        coeffs.pop("a_class")
-        return coeffs
+        return self._unitless_washing_capacity
 
     @property
     def terrain_clearance(self) -> float:
-        """Terrain clearance, m"""
-        return 1
+        """Get terrain clearance
+
+        Returns:
+            float: terrain clearance, m
+        """
+        return self._terrain_clearance
 
     @property
     def mixing_layer_height(self) -> float:
-        """Mixing layer height, m"""
-        return 100
+        """Get mixing layer height
 
-    def __find_nuclide(self, nuclide_name):
-        return self.db.load_table("nuclides").find_one(name=nuclide_name)
+        Returns:
+            float: mixing layer height, m
+        """
+        return self._mixing_layer_height
 
-    def __get_age_group_id(self, age):
-        for age_group in self.db.load_table("age_groups"):
-            if age >= age_group["lower_age"] and age < age_group["upper_age"]:
-                return age_group["id"]
-        raise ValueError(f"invalid provided age {age}")
+    def nuclides(self) -> Tuple[str]:
+        """Get set of all nuclides known by reference data
 
-    def __getitem__(self, key):
-        return self.db[key]
+        Returns:
+            Tuple[str]: set if nuclides
+        """
+        return tuple(self._nuclides.keys())
+
+    def nuclide_decay_coeff(self, nuclide: str) -> float:
+        """Get radioactivity decay coefficient
+
+        Args:
+            nuclide (str): nuclide name
+
+        Returns:
+            float: radioactivity decay coefficient, s^-1
+        """
+        return self._nuclides[nuclide]["decay_coeff"]
+
+    def nuclide_group(self, nuclide: str) -> str:
+        """Get nuclide group, e.g. aerosol, IRG etc.
+
+        Args:
+            nuclide (str): nuclide name
+
+        Returns:
+            str: nuclide group
+        """
+        return self._nuclides[nuclide]["group"]
+
+    def cloud_dose_coeff(self, nuclide: str) -> float:
+        """Get dose conversion factor for external exposure from radioactive
+        cloud
+
+        Args:
+            nuclide (str): nuclide name
+
+        Returns:
+            float: dose conversion factor, (Sv*m^3)/(Bq*s)
+        """
+        return self._nuclides[nuclide]["R_cloud"]
+
+    def inhalation_dose_coeff(self, nuclide: str) -> float:
+        """Get dose conversion factor for nuclide intake with air
+
+        Args:
+            nuclide (str): nuclide name
+
+        Returns:
+            float: dose conversion factor, Sv/Bq
+        """
+        return self._nuclides[nuclide]["R_inh"]
+
+    def surface_dose_coeff(self, nuclide: str) -> float:
+        """Get dose conversion factor for external exposure from soil surface
+
+        Args:
+            nuclide (str): nuclide name
+
+        Returns:
+            float: dose conversion factor ,(Sv*m^2)/(Bq*s)
+        """
+        return self._nuclides[nuclide]["R_surface"]
+
+    def respiration_rate(self, age: int) -> float:
+        """Get respiration rate
+
+        Args:
+            age (int): age
+
+        Returns:
+            float: respiration rate, m^3/s
+        """
+        return self._age_groups[self._group_id(age)]["respiration_rate"]
+
+    def deposition_rate(self, nuclide: str) -> float:
+        """Get deposition rate
+
+        Args:
+            nuclide (str): nuclide name
+
+        Returns:
+            float: deposition rate, m/s
+        """
+        return self._nuclides[nuclide]["deposition_rate"]
+
+    def standard_washing_capacity(self, nuclide: str) -> float:
+        """Get standard washing capacity
+
+        Args:
+            nuclide (str): nuclide name
+
+        Returns:
+            float: standard washing capacity, hr/(mm*s)
+        """
+        return self._nuclides[nuclide]["standard_washing_capacity"]
+
+    def terrain_roughness(self, terrain_type: str) -> float:
+        """Get underlying terrain roughness, m
+
+        Args:
+            terrain_type (str): terrain type
+
+        Returns:
+            float: terrain roughness, m
+        """
+        return self._roughness[terrain_type]["roughness"]
+
+    def diffusion_coefficients(self, a_class: str) -> Dict[str, float]:
+        """Diffusion coefficients p_z, q_z, p_y and q_y for release
+        height < 50 m
+
+        Args:
+            a_class (str): atmospheric stability class
+
+        Returns:
+            Dict[str, float]: diffusion coefficients, dimension unknown
+                keys: 'p_z', 'q_z', 'p_y' and 'q_y'
+        """
+        return self._diffusion_coefficients[a_class]
+
+    def _group_id(self, age: int) -> int:
+        """Get age group if by age
+
+        Args:
+            age (int): age
+
+        Returns:
+            int: age group id
+
+        Raises:
+            ValueError: age fits no known age group
+        """
+        for group_id in self._age_groups:
+            if (
+                age >= self._age_groups[group_id]["lower_age"]
+                and age < self._age_groups[group_id]["upper_age"]
+            ):
+                return group_id
+        raise ValueError(f"invalid age '{age}'")
 
 
 class Reference(IReference):
-    """ORM class for reference data stored in file and represented with
-    :class:`dataset.Database`
-    """
 
-    def __init__(self, dbname):
+    """Concrete reference class which initializes all the values and tables"""
+
+    def __init__(self, db: Database):
+        """Reference constructor
+
+        Args:
+            db (Database): database to load tables from
+        """
         super(Reference, self).__init__()
-        self.__db = Database(dbname)
-        log(f"connection with {dbname} established")
+        self._db = db
 
-    @property
-    def db(self) -> Database:
-        return self.__db
+    def _initialize_data(self):
+        """Initialize data"""
+        self._init_constant_values()
+        self._init_tables(self._db)
+        self._db = None
+
+    def _init_constant_values(self):
+        """Initialize constant values"""
+        self._dose_rate_decay_coeff = 1.27e-9
+        self._residence_time = 3.15e7
+        self._unitless_washing_capacity = 5.0
+        self._terrain_clearance = 1.0
+        self._mixing_layer_height = 100.0
+
+    def _init_tables(self, db: Database):
+        """Initialize tables
+
+        Args:
+            db (Database): database to load tables from
+        """
+        self._load_age_groups(db)
+        self._load_diffusion_coefficients(db)
+        self._load_nuclides(db)
+        self._load_roughness(db)
+
+    def _load_table_to_dict(
+        self, table: Table, table_primary_key: str, out_dict: Dict
+    ):
+        """Load database table to a dictionary
+
+        Args:
+            table (Table): database table
+            table_primary_key (str): table's primary key (also a key for output
+                dict)
+            out_dict (Dict): output dictionary
+        """
+        for record in table:
+            out_dict[record[table_primary_key]] = {
+                key: record[key] for key in record if key != table_primary_key
+            }
+
+    def _load_age_groups(self, db: Database):
+        """Load age groups table
+
+        Args:
+            db (Database): database to load table from
+        """
+        self._load_table_to_dict(
+            db.load_table("age_groups"), "id", self._age_groups
+        )
+
+    def _load_diffusion_coefficients(self, db: Database):
+        """Load diffusion coefficients table
+
+        Args:
+            db (Database): database to load table from
+        """
+        self._load_table_to_dict(
+            db.load_table("diffusion_coefficients"),
+            "a_class",
+            self._diffusion_coefficients,
+        )
+
+    def _load_nuclides(self, db: Database):
+        """Load nuclides table
+
+        Args:
+            db (Database): database to load tables from
+        """
+        self._load_table_to_dict(
+            db.load_table("nuclides"), "name", self._nuclides
+        )
+
+    def _load_roughness(self, db: Database):
+        """Load roughness table
+
+        Args:
+            db (Database): database to load tables from
+        """
+        self._load_table_to_dict(
+            db.load_table("roughness"), "terrain", self._roughness
+        )

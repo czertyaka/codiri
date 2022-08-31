@@ -7,42 +7,44 @@ import unittest
 
 
 class FakeReference(IReference):
-    def __init__(self):
-        super(FakeReference, self).__init__()
-        # self.__db = InMemoryDatabase()
+    def _initialize_data(self):
+        pass
 
-    # @property
-    # def db(self):
-    #     return self.__db
 
-    def all_nuclides(self) -> list:
-        return ["Cs-137", "Sr-90"]
+# self.__db = InMemoryDatabase()
 
-    # @property
-    # def dose_rate_decay_coeff(self) -> float:
-    #     return 0.5
+# @property
+# def db(self):
+#     return self.__db
 
-    # @property
-    # def residence_time(self) -> float:
-    #     return -math.log(2)
+# def all_nuclides(self) -> list:
+#     return ["Cs-137", "Sr-90"]
 
-    # @property
-    # def unitless_washing_capacity(self) -> float:
-    #     return 2
+# @property
+# def dose_rate_decay_coeff(self) -> float:
+#     return 0.5
 
-    # def standard_washing_capacity(self, nuclide: str) -> float:
-    #     return 3
+# @property
+# def residence_time(self) -> float:
+#     return -math.log(2)
 
-    # @property
-    # def terrain_clearance(self) -> float:
-    #     return 1
+# @property
+# def unitless_washing_capacity(self) -> float:
+#     return 2
 
-    # @property
-    # def mixing_layer_height(self) -> float:
-    #     return 1
+# def standard_washing_capacity(self, nuclide: str) -> float:
+#     return 3
 
-    # def terrain_roughness(self, terrain_type: str) -> float:
-    #     return 1
+# @property
+# def terrain_clearance(self) -> float:
+#     return 1
+
+# @property
+# def mixing_layer_height(self) -> float:
+#     return 1
+
+# def terrain_roughness(self, terrain_type: str) -> float:
+#     return 1
 
 
 # class ModelTest(Model):
@@ -138,6 +140,7 @@ class TestModelValidateInput(unittest.TestCase):
         self.assertFalse(self.model.validate_input(InputTest()))
 
     def test_positive(self):
+        self.model.constraints.validate = MagicMock(return_value=None)
         self.assertTrue(self.model.validate_input(InputTest()))
 
 
@@ -345,11 +348,11 @@ class TestModelValidateInput(unittest.TestCase):
 # def test_calculate_height_deposition_factors():
 #     model = ModelTest()
 
-#     input = Input()
-#     input.square_side = 2
-#     input.extreme_windspeeds = dict(A=1, B=1, C=1, D=1, E=1, F=1)
-#     input.distance = 1
-#     model.input = input
+# input = Input()
+# input.square_side = 2
+# input.extreme_windspeeds = dict(A=1, B=1, C=1, D=1, E=1, F=1)
+# input.distance = 1
+# model.input = input
 
 #     model.reference.db["diffusion_coefficients"].insert(
 #         dict(a_class="A", p_z=1, q_z=1, p_y=1, q_y=1)
@@ -464,7 +467,7 @@ class TestModelValidateInput(unittest.TestCase):
 #     )
 #     model.input = inp
 
-#     model.reference.db["nuclides"].insert(dict(name="A-0", decay_coeff=1))
+# #     model.reference.db["nuclides"].insert(dict(name="A-0", decay_coeff=1))
 
 #     model._Model__calculate_rad_depletions("A-0")
 
@@ -509,19 +512,19 @@ class TestModelValidateInput(unittest.TestCase):
 #     )
 #    model.reference.db["nuclides"].insert(dict(name="A-0", deposition_rate=1))
 
-#     model._Model__calculate_dry_depletions("A-0")
+# model._Model__calculate_dry_depletions("A-0")
 
-#     assert model.results.dry_depletions["A-0"] == pytest.approx(
-#         dict(
-#             A=0.799861,
-#             B=0.799861,
-#             C=0.799861,
-#             D=0.799861,
-#             E=0.799861,
-#             F=0.799861,
-#         ),
-#         0.01,
-#     )
+# assert model.results.dry_depletions["A-0"] == pytest.approx(
+#     dict(
+#         A=0.799861,
+#         B=0.799861,
+#         C=0.799861,
+#         D=0.799861,
+#         E=0.799861,
+#         F=0.799861,
+#     ),
+#     0.01,
+# )
 
 
 # def test_calculate_wet_depletions():
