@@ -11,9 +11,9 @@ class FakeReference(IReference):
         pass
 
 
-class InputTest(Input):
+class FakeInput(Input):
     def __init__(self):
-        super(InputTest, self).__init__()
+        super(FakeInput, self).__init__()
         self.distance = 1
         self.square_side = 1
         self.precipitation_rate = 1
@@ -70,8 +70,8 @@ class TestModelValidateInput(unittest.TestCase):
         self.model.constraints.validate = MagicMock(
             side_effect=ConstraintsComplianceError()
         )
-        self.assertFalse(self.model.validate_input(InputTest()))
+        self.assertFalse(self.model.validate_input(FakeInput()))
 
     def test_positive(self):
         self.model.constraints.validate = MagicMock(return_value=None)
-        self.assertTrue(self.model.validate_input(InputTest()))
+        self.assertTrue(self.model.validate_input(FakeInput()))
