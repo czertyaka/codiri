@@ -87,7 +87,7 @@ class Model:
         if reference is None:
             raise ValueError("invalid reference instance")
         self._reference = reference
-        self._constraints = DefaultConstraints(reference.nuclides())
+        self._constraints = DefaultConstraints(reference.nuclides)
 
     def calculate(self, inp: Input) -> bool:
         """Execute calculations

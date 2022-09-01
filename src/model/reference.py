@@ -78,6 +78,7 @@ class IReference:
         """
         return self._mixing_layer_height
 
+    @property
     def nuclides(self) -> Tuple[str]:
         """Get set of all nuclides known by reference data
 
