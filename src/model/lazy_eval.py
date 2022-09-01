@@ -6,15 +6,22 @@ class LazyEvaluation:
 
     def __init__(self, formula: Callable):
         """Constructor
-        :param formula: expression itself of callable type
+
+        Args:
+            formula (Callable): expression itself
         """
         self.__formula = formula
         self.__results = dict()
 
     def __call__(self, params: Tuple = tuple()):
         """Execute evaluation
-        :param params: arguments expected by evaluation's formula
-        :return: result of evluation for given arguments
+
+        Args:
+            params (Tuple, optional): arguments expected by evaluation's
+                formula
+
+        Returns:
+            TYPE: result of evaluation execution for given arguments
         """
         if params not in self.__results.keys():
             self.__results[params] = self.__formula(*params)
@@ -24,5 +31,8 @@ class LazyEvaluation:
     def results(self):
         """Get results of evaluation for each arguments set this instance were
         executed with
+
+        Returns:
+            TYPE: results of evaluation for each arguments set
         """
         return self.__results
