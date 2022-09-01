@@ -21,6 +21,9 @@ class IReference:
         self._diffusion_coefficients = {}
         self._nuclides = {}
         self._roughness = {}
+        self._food = {}
+        self._atmosphere_accumulation_factors = {}
+        self._soil_accumulation_factors = {}
         self._initialize_data()
 
     def _initialize_data(self):
@@ -77,6 +80,15 @@ class IReference:
             float: mixing layer height, m
         """
         return self._mixing_layer_height
+
+    @property
+    def food_categories(self) -> Tuple[str]:
+        """Get set of all food categories known by reference data
+
+        Returns:
+            Tuple[str]: Description
+        """
+        return tuple(self._food.keys())
 
     @property
     def nuclides(self) -> Tuple[str]:
@@ -200,6 +212,67 @@ class IReference:
         """
         return self._diffusion_coefficients[a_class]
 
+    def food_critical_age_group(self, nuclide: str) -> int:
+        """Get critical age group for nuclide's food intake
+
+        Args:
+            nuclide (str): nuclide
+
+        Returns:
+            int: age group
+        """
+        return self._nuclides[nuclide]["food_critical_age_group"]
+
+    def daily_metabolic_cost(self, group_id: int) -> float:
+        """Get daily metabolic cost for age group
+
+        Args:
+            group_id (int): age group id
+
+        Returns:
+            float: daily metabolic cost, kcal/day
+        """
+        return self._age_groups[group_id]["daily_metabolic_cost"]
+
+    def food_category(self, food_id: int) -> str:
+        """Get food category name by it's id
+
+        Args:
+            food_id (int): food category id
+
+        Returns:
+            str: food category
+        """
+        return self._food[food_id]["cathegory"]
+
+    def atmosphere_accumulation_factor(
+        self, nuclide: str, food_id: int
+    ) -> float:
+        """Get atmosphere accumulation factor
+
+        Args:
+            nuclide (str): nuclide
+            food_id (int): food id
+
+        Returns:
+            float: atmosphere accumulation factor, m^2/litre for liquid food
+                and m^2/kg for solid food
+        """
+        return self._atmosphere_accumulation_factors[nuclide][food_id]
+
+    def soil_accumulation_factor(self, nuclide: str, food_id: int) -> float:
+        """Get soil accumulation factor
+
+        Args:
+            nuclide (str): nuclide
+            food_id (int): food id
+
+        Returns:
+            float: soil accumulation factor, m^2/litre for liquid food and
+                m^2/kg for solid food
+        """
+        return self._soil_accumulation_factors[nuclide][food_id]
+
     def _group_id(self, age: int) -> int:
         """Get age group if by age
 
@@ -231,8 +304,8 @@ class Reference(IReference):
         Args:
             db (Database): database to load tables from
         """
-        super(Reference, self).__init__()
         self._db = db
+        super(Reference, self).__init__()
 
     def _initialize_data(self):
         """Initialize data"""
@@ -258,6 +331,8 @@ class Reference(IReference):
         self._load_diffusion_coefficients(db)
         self._load_nuclides(db)
         self._load_roughness(db)
+        self._load_food(db)
+        self._load_accumulation_factors(db)
 
     def _load_table_to_dict(
         self, table: Table, table_primary_key: str, out_dict: Dict
@@ -316,3 +391,36 @@ class Reference(IReference):
         self._load_table_to_dict(
             db.load_table("roughness"), "terrain", self._roughness
         )
+
+    def _load_food(self, db: Database):
+        """Load food table
+
+        Args:
+            db (Database): database to load tables from
+        """
+        self._load_table_to_dict(db.load_table("food"), "id", self._food)
+
+    def _load_accumulation_factors(self, db: Database):
+        """Load accumulation factors tables
+
+        Args:
+            db (Database): database to load tables from
+        """
+        table = db.load_table("accumulation_factors")
+        for record in table:
+            nuclide = record["nuclide"]
+            src = record["accumulation_source"]
+            food_id = record["food_id"]
+            value = record["accumulation_factor"]
+            if src == "atmosphere":
+                if nuclide not in self._atmosphere_accumulation_factors.keys():
+                    self._atmosphere_accumulation_factors[nuclide] = {}
+                nuclide_dict = self._atmosphere_accumulation_factors[nuclide]
+                nuclide_dict[food_id] = value
+            elif src == "soil":
+                if nuclide not in self._soil_accumulation_factors.keys():
+                    self._soil_accumulation_factors[nuclide] = {}
+                nuclide_dict = self._soil_accumulation_factors[nuclide]
+                nuclide_dict[food_id] = value
+            else:
+                raise ValueError(f"unknown accumulation factor source '{src}'")
