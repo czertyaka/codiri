@@ -171,8 +171,8 @@ def effective_dose_inhalation(
 
 def effective_dose_food(
     dose_coefficient: float,
-    food_specific_activity: Dict[str, float],
-    annual_food_intake: Dict[str, float],
+    food_specific_activity: Dict[int, float],
+    annual_food_intake: Dict[int, float],
 ) -> float:
     """Calculate effective dose due to internal exposure from food intake
     SM-134-17: (9)
@@ -181,9 +181,9 @@ def effective_dose_food(
         dose_coefficient (float): Dose conversion factor for internal exposure
             from food intake, Sv/Bq
         food_specific_activity (Dict[float]): Specific activities in food, key
-            is food category, Bq/kg
+            is food category id, Bq/kg
         annual_food_intake (Dict[float]): Annual food intake, key is food
-            category, kg
+            category id, kg
 
     Returns:
         float: effective dose due to internal exposure from food intake, Sv

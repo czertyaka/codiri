@@ -149,11 +149,11 @@ class TestSimpleFormulas(unittest.TestCase):
 
     def test_effective_dose_food(self):
         dc = 1
-        fi = {"milk": 2, "meat": 3}
-        sa = {"meat": 4}
+        fi = {2: 2.0, 1: 3.0}
+        sa = {1: 4.0}
         with self.assertRaises(ValueError):
             effective_dose_food(dc, sa, fi)
-        sa = {"milk": 5, "meat": 6}
+        sa = {2: 5.0, 1: 6.0}
         self.assertEqual(effective_dose_food(dc, sa, fi), 28)
 
     def test_annual_food_intake(self):
