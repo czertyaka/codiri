@@ -11,6 +11,23 @@ def _log(msg):
     print("activity: " + msg)
 
 
+def calculate_release_activity(
+    specific_activity: float, windspeed: float, time: float, area: float
+) -> float:
+    """Calculate activity in release due to wind uplift
+
+    Args:
+        specific_activity (float): specific activity, Bq/kg
+        windspeed (float): wind speed, m/s
+        time (float): time, s
+        area (float): m^2
+
+    Returns:
+        float: release activity, Bq
+    """
+    return blowout_activity_flow(specific_activity, windspeed) * time * area
+
+
 def blowout_activity_flow(specific_activity: float, windspeed: float) -> float:
     """Blowout activity flow due to wind uplift, Bq/(m^s*sec)
     [specific_activity] = Bq/kg

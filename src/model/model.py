@@ -31,7 +31,7 @@ from .formulas import (
 )
 import math
 import numpy as np
-from ..activity import blowout_activity_flow
+from ..activity import calculate_release_activity
 from typing import Tuple, Dict
 
 
@@ -302,22 +302,41 @@ class Model:
         )
 
     def _set_concentration_integral_levals(
-        self, specific_activities: ValidatingMap
+        self,
+        specific_activities: ValidatingMap,
+        wind_speeds: Dict[str, float],
+        blowout_time: float,
+        square_side: float,
     ):
         """Set concentration integrals lazy evaluations
 
         Args:
             specific_activities (ValidatingMap): specific activities dictionary
+            wind_speeds (Dict[str, float]): extreme wind speed per atmospheric
+                class
+            blowout_time (float): blowout time
+            square_side (float): square source side length
         """
         self._ci = LEval(
             lambda aclass, nuclide, x: concentration_integral(
                 specific_activities[nuclide],
+                calculate_release_activity(
+                    specific_activities[nuclide],
+                    wind_speeds[aclass],
+                    blowout_time,
+                    math.pow(square_side, 2),
+                ),
                 self._dilution((aclass, nuclide, x)),
             )
         )
         self._hdci = LEval(
             lambda aclass, nuclide, x: height_dist_concentration_integral(
-                specific_activities[nuclide],
+                calculate_release_activity(
+                    specific_activities[nuclide],
+                    wind_speeds[aclass],
+                    blowout_time,
+                    math.pow(square_side, 2),
+                ),
                 self._sedimentation_factor((aclass, nuclide, x)),
             )
         )
@@ -472,14 +491,4 @@ class Model:
         )
         self._ed_for_period = LEval(
             lambda: effective_dose(make_ed_total_list(self._ed_total_period))
-        )
-
-    # TODO: consider!!!
-    def __calculate_release(
-        self, specific_activity: float, windspeed: float
-    ) -> float:
-        return (
-            blowout_activity_flow(specific_activity, windspeed)
-            * self.input.blowout_time
-            * math.pow(self.input.square_side, 2)
         )
