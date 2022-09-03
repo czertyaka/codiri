@@ -155,6 +155,17 @@ class IReference:
         """
         return self._nuclides[nuclide]["R_surface"]
 
+    def food_dose_coeff(self, nuclide: str) -> float:
+        """Get dose conversion factor for nuclide intake with food
+
+        Args:
+            nuclide (str): nuclide name
+
+        Returns:
+            float: dose conversion factor, Sv/Bq
+        """
+        return self._nuclides[nuclide]["R_food"]
+
     def respiration_rate(self, age: int) -> float:
         """Get respiration rate
 
