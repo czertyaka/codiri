@@ -73,7 +73,7 @@ class FixedMap:
 
     def __setitem__(self, key, item):
         if key not in self.__values:
-            raise KeyError(f"input has no '{key}'' field")
+            raise KeyError(f"input has no '{key}' field")
         self.__values[key] = item
 
     def __str__(self) -> str:
