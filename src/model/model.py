@@ -281,10 +281,8 @@ class Model:
                 self._sediment_detachment_constant((nuclide)),
                 self._ci((aclass, nuclide, x)),
                 self._hdci((aclass, nuclide, x)),
-                self._reference.atmosphere_accumulation_factor(
-                    nuclide, food_id
-                ),
-                self._reference.soil_accumulation_factor(nuclide, food_id),
+                self._reference.atmosphere_accum_factor(nuclide, food_id),
+                self._reference.soil_accum_factor(nuclide, food_id),
             )
         )
 

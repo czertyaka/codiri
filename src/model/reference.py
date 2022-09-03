@@ -22,8 +22,8 @@ class IReference:
         self._nuclides = {}
         self._roughness = {}
         self._food = {}
-        self._atmosphere_accumulation_factors = {}
-        self._soil_accumulation_factors = {}
+        self._atmosphere_accum_factors = {}
+        self._soil_accum_factors = {}
         self._initialize_data()
 
     def _initialize_data(self):
@@ -256,9 +256,7 @@ class IReference:
         """
         return self._food[food_id]["category"]
 
-    def atmosphere_accumulation_factor(
-        self, nuclide: str, food_id: int
-    ) -> float:
+    def atmosphere_accum_factor(self, nuclide: str, food_id: int) -> float:
         """Get atmosphere accumulation factor
 
         Args:
@@ -269,9 +267,9 @@ class IReference:
             float: atmosphere accumulation factor, m^2/litre for liquid food
                 and m^2/kg for solid food
         """
-        return self._atmosphere_accumulation_factors[nuclide][food_id]
+        return self._atmosphere_accum_factors[nuclide][food_id]
 
-    def soil_accumulation_factor(self, nuclide: str, food_id: int) -> float:
+    def soil_accum_factor(self, nuclide: str, food_id: int) -> float:
         """Get soil accumulation factor
 
         Args:
@@ -282,7 +280,7 @@ class IReference:
             float: soil accumulation factor, m^2/litre for liquid food and
                 m^2/kg for solid food
         """
-        return self._soil_accumulation_factors[nuclide][food_id]
+        return self._soil_accum_factors[nuclide][food_id]
 
     def age_group_id(self, age: int) -> int:
         """Get age group id by age
@@ -424,14 +422,14 @@ class Reference(IReference):
             food_id = record["food_id"]
             value = record["accumulation_factor"]
             if src == "atmosphere":
-                if nuclide not in self._atmosphere_accumulation_factors.keys():
-                    self._atmosphere_accumulation_factors[nuclide] = {}
-                nuclide_dict = self._atmosphere_accumulation_factors[nuclide]
+                if nuclide not in self._atmosphere_accum_factors.keys():
+                    self._atmosphere_accum_factors[nuclide] = {}
+                nuclide_dict = self._atmosphere_accum_factors[nuclide]
                 nuclide_dict[food_id] = value
             elif src == "soil":
-                if nuclide not in self._soil_accumulation_factors.keys():
-                    self._soil_accumulation_factors[nuclide] = {}
-                nuclide_dict = self._soil_accumulation_factors[nuclide]
+                if nuclide not in self._soil_accum_factors.keys():
+                    self._soil_accum_factors[nuclide] = {}
+                nuclide_dict = self._soil_accum_factors[nuclide]
                 nuclide_dict[food_id] = value
             else:
                 raise ValueError(f"unknown accumulation factor source '{src}'")

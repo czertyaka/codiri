@@ -337,8 +337,8 @@ def food_specific_activity(
     sediment_detachment_constant: float,
     concentration_integral: float,
     height_dist_concentration_integral: float,
-    atmosphere_accumulation_factor: float,
-    soil_accumulation_factor: float,
+    atmosphere_accum_factor: float,
+    soil_accum_factor: float,
 ) -> float:
     """Calculate food specific activity
     SM-134-17: A1(6)
@@ -351,10 +351,10 @@ def food_specific_activity(
             integral, Bq*s/m^3
         height_dist_concentration_integral (float): height distributed
             radionuclide timed concentration integral, Bq*s/m^2
-        atmosphere_accumulation_factor (float): the accumulation coefficient
+        atmosphere_accum_factor (float): the accumulation coefficient
             normalized for productivity "precipitation from the atmosphere -
             content in food", m^2/kg
-        soil_accumulation_factor (float): the accumulation coefficient
+        soil_accum_factor (float): the accumulation coefficient
             normalized for productivity "deposition on the soil - content in
             food", m^2/kg
 
@@ -366,10 +366,10 @@ def food_specific_activity(
         + 0.2
         * sediment_detachment_constant
         * height_dist_concentration_integral
-    ) * atmosphere_accumulation_factor + (
+    ) * atmosphere_accum_factor + (
         sedimentation_rate * concentration_integral
         + sediment_detachment_constant * height_dist_concentration_integral
-    ) * soil_accumulation_factor
+    ) * soil_accum_factor
 
 
 def dilution_factor(
