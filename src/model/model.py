@@ -102,13 +102,13 @@ class Model:
             return False
 
         self._set_dispersion_coeffs()
-        self._set_depletions(inp.extreme_windspeeds, inp.precipitation_rate)
-        self._set_sedimentation_factor(
-            inp.extreme_windspeeds, inp.square_side, inp.terrain_roughness
+        self._set_depletions(
+            inp.extreme_windspeeds, inp.precipitation_rate, inp.terrain_type
         )
-        self._set_vertical_dispersion()
+        self._set_sedimentation_factor(inp.extreme_windspeeds, inp.square_side)
+        self._set_vertical_dispersion(inp.terrain_type)
         self._set_dilution_leval(
-            inp.extreme_windspeeds, inp.square_side, inp.terrain_roughness
+            inp.extreme_windspeeds, inp.square_side, inp.terrain_type
         )
         self._set_food_specific_activity_leval()
         self._set_deposition_leval()
@@ -158,7 +158,10 @@ class Model:
         )
 
     def _set_depletions(
-        self, wind_speeds: Dict[str, float], precipitation_rate: float
+        self,
+        wind_speeds: Dict[str, float],
+        precipitation_rate: float,
+        terrain_type: str,
     ):
         """Set depletion and depletion-related lazy evaluations
 
@@ -166,6 +169,7 @@ class Model:
             wind_speeds (Dict[str, float]): extreme wind speed per atmospheric
                 class
             precipitation_rate (float): precipitation rate
+            terrain_type (str): terrain type
         """
         self._depletion_rad = LEval(
             lambda aclass, nuclide, x: depletion_radiation(
@@ -179,7 +183,7 @@ class Model:
                 self._reference.deposition_rate(nuclide),
                 wind_speeds[aclass],
                 lambda xx: self._sigma_z((aclass, xx)),
-                4,  # TODO: add release height
+                self._reference.terrain_roughness(terrain_type),
                 x,
             )
         )
@@ -209,7 +213,6 @@ class Model:
         self,
         wind_speeds: Dict[str, float],
         square_side: float,
-        terrain_clearance: float,
     ):
         """Set sedimentation factor lazy evaluation
 
@@ -217,7 +220,6 @@ class Model:
             wind_speeds (Dict[str, float]): extreme wind speed per atmospheric
                 class
             square_side (float): square source side length
-            terrain_clearance (float): terrain clearance
         """
         self._sedimentation_factor = LEval(
             lambda aclass, nuclide, x: sedimentation_factor(
@@ -229,14 +231,18 @@ class Model:
             )
         )
 
-    def _set_vertical_dispersion(self):
-        """Set vertical dispersion factor lazy evaluation"""
+    def _set_vertical_dispersion(self, terrain_type: str):
+        """Set vertical dispersion factor lazy evaluation
+
+        Args:
+            terrain_type (str): terrain type
+        """
         self._vert_dispersion = LEval(
             lambda aclass, x: vertical_dispersion(
                 self._reference.mixing_layer_height,
-                2,  # TODO: add release height
+                self._reference.terrain_roughness(terrain_type),
                 self._sigma_z((aclass, x)),
-                self._reference.terrain_roughness,
+                self._reference.terrain_roughness(terrain_type),
             )
         )
 
@@ -244,7 +250,7 @@ class Model:
         self,
         wind_speeds: Dict[str, float],
         square_side: float,
-        terrain_clearance: float,
+        terrain_type: str,
     ):
         """Set dilution lazy evaluation
 
@@ -252,31 +258,33 @@ class Model:
             wind_speeds (Dict[str, float]): extreme wind speed per atmospheric
                 class
             square_side (float): square source side length
-            terrain_clearance (float): terrain clearance
+            terrain_type (str): terrain type
         """
         self._dilution = LEval(
             lambda aclass, nuclide, x: dilution_factor(
-                1,  # TODO: add depletion
+                self._depletion((aclass, nuclide, x)),
                 lambda xx: self._sigma_y((aclass, xx)),
                 lambda xx: self._sigma_z((aclass, xx)),
                 wind_speeds[aclass],
                 lambda xx, z: self._vert_dispersion((aclass, xx)),
                 square_side / 2,
                 x,
-                terrain_clearance,
+                self._reference.terrain_roughness(terrain_type),
             )
         )
 
     def _set_food_specific_activity_leval(self):
         """Set food specific activity lazy evaluation"""
         self._food_sa = LEval(
-            lambda aclass, nuclide, x: food_specific_activity(
+            lambda aclass, nuclide, x, food_id: food_specific_activity(
                 self._reference.deposition_rate(nuclide),
                 self._sediment_detachment_constant((nuclide)),
                 self._ci((aclass, nuclide, x)),
                 self._hdci((aclass, nuclide, x)),
-                5,  # TODO: add atmosphere accumulation factor
-                6,  # TODO: add soil accumulation factor
+                self._reference.atmosphere_accumulation_factor(
+                    nuclide, food_id
+                ),
+                self._reference.soil_accumulation_factor(nuclide, food_id),
             )
         )
 
@@ -362,17 +370,28 @@ class Model:
             distance (float): distance
         """
         self._annual_food_intake = LEval(
-            lambda: annual_food_intake(
-                1,  # TODO: daily metabolic cost
-                1,  # TODO: adults daily metabolic cost
+            lambda nuclide, food_id: annual_food_intake(
+                self._reference.daily_metabolic_cost(
+                    self._reference.food_critical_age_group(nuclide)
+                ),
+                self._reference.daily_metabolic_cost(
+                    self._reference.age_group_id(100)
+                ),
                 1,  # TODO: adults annual food intake
             )
         )
         self._ed_food = LEval(
             lambda aclass, nuclide, x: effective_dose_food(
-                1,  # TODO: food dose conversion coeff
+                self._reference.food_dose_coeff(nuclide),
                 self._food_sa((aclass, nuclide, x)),
-                self._annual_food_intake(),
+                {
+                    food_id: self._food_sa((aclass, nuclide, x, food_id))
+                    for food_id in self._reference.food_categories
+                },
+                {
+                    food_id: self._annual_food_intake((nuclide, food_id))
+                    for food_id in self._reference.food_categories
+                },
             )
         )
         self._ed_inh = LEval(
@@ -386,7 +405,7 @@ class Model:
             lambda nuclide: residence_time_coeff(
                 self._reference.dose_rate_decay_coeff,
                 self._reference.radio_decay_coeff(nuclide),
-                self._reference.residence_time(0),  # TODO
+                self._reference.residence_time,
             )
         )
         self._ed_surf = LEval(
@@ -409,13 +428,16 @@ class Model:
         """
         self._ed_total_period = LEval(
             lambda aclass, nuclide: total_effective_dose_for_period(
-                1,  # TODO: add years
+                1,
                 nuclide,
                 self._ed_cloud((aclass, nuclide)),
                 self._ed_inh((aclass, nuclide)),
                 self._ed_surf((aclass, nuclide)),
                 self._ed_food((aclass, nuclide, self._x_max())),
-                1,  # TODO: add nuclide groups
+                {
+                    nuclide: self._reference.nuclide_group(nuclide)
+                    for nuclide in self._reference.nuclides
+                },
             )
         )
         self._ed_total_acute = LEval(
@@ -424,7 +446,10 @@ class Model:
                 self._ed_cloud((aclass, nuclide)),
                 self._ed_inh((aclass, nuclide)),
                 self._ed_surf((aclass, nuclide)),
-                1,  # TODO: add nuclide groups
+                {
+                    nuclide: self._reference.nuclide_group(nuclide)
+                    for nuclide in self._reference.nuclides
+                },
             )
         )
 
