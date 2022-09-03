@@ -243,7 +243,7 @@ class IReference:
         Returns:
             str: food category
         """
-        return self._food[food_id]["cathegory"]
+        return self._food[food_id]["category"]
 
     def atmosphere_accumulation_factor(
         self, nuclide: str, food_id: int
