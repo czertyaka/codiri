@@ -164,7 +164,7 @@ class IReference:
         Returns:
             float: respiration rate, m^3/s
         """
-        return self._age_groups[self._group_id(age)]["respiration_rate"]
+        return self._age_groups[self.age_group_id(age)]["respiration_rate"]
 
     def deposition_rate(self, nuclide: str) -> float:
         """Get deposition rate
@@ -273,8 +273,8 @@ class IReference:
         """
         return self._soil_accumulation_factors[nuclide][food_id]
 
-    def _group_id(self, age: int) -> int:
-        """Get age group if by age
+    def age_group_id(self, age: int) -> int:
+        """Get age group id by age
 
         Args:
             age (int): age
