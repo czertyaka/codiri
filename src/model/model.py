@@ -116,7 +116,9 @@ class Model:
         self._set_xmax_leval(
             inp.specific_activities.keys(), inp.buffer_area_distance
         )
-        self._set_effective_doses_exposure_sources_levals(inp.age)
+        self._set_effective_doses_exposure_sources_levals(
+            inp.age, inp.adults_annual_food_intake
+        )
         self._set_effective_doses_total_levals()
         self._set_effective_doses_levals(inp.specific_activities.keys())
 
@@ -381,13 +383,18 @@ class Model:
         )
 
     def _set_effective_doses_exposure_sources_levals(
-        self, age: int, distance: float
+        self,
+        age: int,
+        distance: float,
+        adults_annual_food_intake: Dict[str, float],
     ):
         """Set effective doses for all exposure sources lazy evaluations
 
         Args:
             age (int): population group age
             distance (float): distance
+            adults_annual_food_intake (Dict[str, float]): adults annual food
+                intake
         """
         self._annual_food_intake = LEval(
             lambda nuclide, food_id: annual_food_intake(
@@ -397,7 +404,9 @@ class Model:
                 self._reference.daily_metabolic_cost(
                     self._reference.age_group_id(100)
                 ),
-                1,  # TODO: adults annual food intake
+                adults_annual_food_intake(
+                    self._reference.food_category(food_id)
+                ),
             )
         )
         self._ed_food = LEval(

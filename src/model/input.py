@@ -18,6 +18,7 @@ class Input:
                 "terrain_type",
                 "blowout_time",
                 "buffer_area_radius",
+                "adults_annual_food_intake",
             )
         )
         self.__values["specific_activities"] = (
@@ -248,4 +249,30 @@ class Input:
             value,
             lambda x: x >= 0,
             f"invalid buffer area radius '{value} m'",
+        )
+
+    @property
+    def adults_annual_food_intake(self) -> Dict[str, float]:
+        """Get annual food intake for adults per food category
+
+        Returns:
+            Dict[str, float]: adults annual food intake, kg(l)/year
+        """
+        return self.__values["adults_annual_food_intake"]
+
+    @adults_annual_food_intake.setter
+    def adults_annual_food_intake(self, value: Dict[str, float]):
+        """Set annual food intake for adults per food category
+
+        Args:
+            value (Dict[str, float]): adults annual food intake, kg(l)/year
+        """
+        categories = sorted(
+            ("meat", "milk", "wheat", "cucumbers", "cabbage", "potato")
+        )
+        self.__values["adults_annual_food_intake"] = (
+            value,
+            lambda x: sorted(x.keys()) == categories,
+            f"invalid food categories '{value.keys()}', should be "
+            f"{categories}",
         )

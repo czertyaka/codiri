@@ -29,6 +29,14 @@ class FakeInput(Input):
         self.terrain_type = "greenland"
         self.blowout_time = 1
         self.buffer_area_radius = 0
+        self.adults_annual_food_intake = {
+            "meat": 1,
+            "milk": 2,
+            "wheat": 3,
+            "cucumbers": 4,
+            "cabbage": 5,
+            "potato": 6,
+        }
         self.add_specific_activity("Cs-137", 1)
 
 

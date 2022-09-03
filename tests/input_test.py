@@ -13,6 +13,7 @@ class TestInput(unittest.TestCase):
         self.assertEqual(values["terrain_type"], None)
         self.assertEqual(values["blowout_time"], None)
         self.assertEqual(values["buffer_area_radius"], None)
+        self.assertEqual(values["adults_annual_food_intake"], None)
 
         self.assertEqual(str(values["specific_activities"]), "{}")
 
@@ -57,6 +58,43 @@ class TestInput(unittest.TestCase):
         with self.assertRaises(ValueError):
             inp.terrain_type = "invalid"
 
+    def test_input_adults_annual_food_intake(self):
+        inp = Input()
+        inp.adults_annual_food_intake = {
+            "meat": 1,
+            "milk": 2,
+            "wheat": 3,
+            "cucumbers": 4,
+            "cabbage": 5,
+            "potato": 6,
+        }
+        inp.adults_annual_food_intake = {
+            "milk": 1,
+            "meat": 2,
+            "wheat": 3,
+            "cucumbers": 4,
+            "cabbage": 5,
+            "potato": 6,
+        }
+        with self.assertRaises(ValueError):
+            inp.adults_annual_food_intake = {
+                "milk": 1,
+                "meat": 2,
+                "wheat": 3,
+                "cucumbers": 4,
+                "cabbage": 5,
+                "potato": 6,
+                "carrot": 7,
+            }
+        with self.assertRaises(ValueError):
+            inp.adults_annual_food_intake = {
+                "milk": 1,
+                "meat": 2,
+                "wheat": 3,
+                "cucumbers": 4,
+                "cabbage": 5,
+            }
+
     def test_input_initalized(self):
         inp = Input()
         self.assertFalse(inp.initialized())
@@ -75,6 +113,14 @@ class TestInput(unittest.TestCase):
         inp.terrain_type = "greenland"
         inp.buffer_area_radius = 0
         inp.blowout_time = 1
+        inp.adults_annual_food_intake = {
+            "meat": 1,
+            "milk": 2,
+            "wheat": 3,
+            "cucumbers": 4,
+            "cabbage": 5,
+            "potato": 6,
+        }
         self.assertFalse(inp.initialized())
         inp.add_specific_activity("Cs-137", 1)
         self.assertTrue(inp.initialized())
