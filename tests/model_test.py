@@ -28,6 +28,7 @@ class FakeInput(Input):
         self.age = 1
         self.terrain_type = "greenland"
         self.blowout_time = 1
+        self.buffer_area_radius = 0
         self.add_specific_activity("Cs-137", 1)
 
 

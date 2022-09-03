@@ -12,6 +12,7 @@ class TestInput(unittest.TestCase):
         self.assertEqual(values["age"], None)
         self.assertEqual(values["terrain_type"], None)
         self.assertEqual(values["blowout_time"], None)
+        self.assertEqual(values["buffer_area_radius"], None)
 
         self.assertEqual(str(values["specific_activities"]), "{}")
 
@@ -29,6 +30,8 @@ class TestInput(unittest.TestCase):
             inp.blowout_time = -1
         with self.assertRaises(ValueError):
             inp.blowout_time = 0
+        with self.assertRaises(ValueError):
+            inp.buffer_area_radius = -1
 
     def test_input_extreme_windspeeds(self):
         inp = Input()
@@ -70,7 +73,7 @@ class TestInput(unittest.TestCase):
         }
         inp.age = 1
         inp.terrain_type = "greenland"
-        self.assertFalse(inp.initialized())
+        inp.buffer_area_radius = 0
         inp.blowout_time = 1
         self.assertFalse(inp.initialized())
         inp.add_specific_activity("Cs-137", 1)

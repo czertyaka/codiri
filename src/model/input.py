@@ -17,6 +17,7 @@ class Input:
                 "age",
                 "terrain_type",
                 "blowout_time",
+                "buffer_area_radius",
             )
         )
         self.__values["specific_activities"] = (
@@ -225,4 +226,26 @@ class Input:
             value,
             lambda x: x > 0,
             f"invalid wind operation '{value} sec'",
+        )
+
+    @property
+    def buffer_area_radius(self) -> float:
+        """Get buffer area radius
+
+        Returns:
+            float: buffer area radius, m
+        """
+        return self.__values["buffer_area_radius"]
+
+    @buffer_area_radius.setter
+    def buffer_area_radius(self, value: float) -> float:
+        """Set buffer area radius
+
+        Args:
+            value (float): buffer area radius, m
+        """
+        self.__values["buffer_area_radius"] = (
+            value,
+            lambda x: x >= 0,
+            f"invalid buffer area radius '{value} m'",
         )

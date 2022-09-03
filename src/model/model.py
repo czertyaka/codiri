@@ -113,7 +113,9 @@ class Model:
         self._set_food_specific_activity_leval()
         self._set_deposition_leval()
         self._set_concentration_integral_levals(inp.specific_activities)
-        self._set_xmax_leval(inp.specific_activities.keys())
+        self._set_xmax_leval(
+            inp.specific_activities.keys(), inp.buffer_area_distance
+        )
         self._set_effective_doses_exposure_sources_levals(inp.age)
         self._set_effective_doses_total_levals()
         self._set_effective_doses_levals(inp.specific_activities.keys())
@@ -341,11 +343,14 @@ class Model:
             )
         )
 
-    def _set_xmax_leval(self, nuclides: Tuple[str]):
+    def _set_xmax_leval(
+        self, nuclides: Tuple[str], buffer_area_distance: float
+    ):
         """Set x_max lazy evaluation
 
         Args:
             nuclides (Tuple[str]): all the nuclides for current calculation
+            buffer_area_distance (float): buffer area distance
         """
         distances_count = 100
         distances = np.array(
@@ -371,9 +376,7 @@ class Model:
 
         self._x_max = LEval(
             lambda: food_max_distance(
-                distances,
-                make_dose_matrix(),
-                0,  # TODO: add minimal distance
+                distances, make_dose_matrix(), buffer_area_distance
             )
         )
 
