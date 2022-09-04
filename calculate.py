@@ -147,10 +147,15 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
     inp.terrain_type = _model_input["terrain_type"]
     inp.blowout_time = _model_input["blowout_time"]
     inp.age = _model_input["age"]
+    inp.buffer_area_radius = _model_input["buffer_area_radius"]
     ws = dict()
     for ws_data in _model_input["wind_speed"]:
         ws[ws_data["a_class"]] = ws_data["value"]
     inp.extreme_windspeeds = ws
+    afi = dict()
+    for afi_data in _model_input["annual_food_intake"]:
+        afi[afi_data["food_category"]] = afi_data["intake"]
+    inp.adults_annual_food_intake = afi
 
     soil_density = _model_input["soil_density"]
 
