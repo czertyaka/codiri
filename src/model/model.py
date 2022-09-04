@@ -180,7 +180,7 @@ class Model:
         """
         self._depletion_rad = LEval(
             lambda aclass, nuclide, x: depletion_radiation(
-                self._reference.radio_decay_coeffs(nuclide),
+                self._reference.dose_rate_decay_coeff(nuclide),
                 x,
                 wind_speeds[aclass],
             )
@@ -493,13 +493,13 @@ class Model:
         """
 
         def make_ed_total_list(ed_total: LEval) -> Tuple[Dict[str, float]]:
-            ed_total = list()
+            ed_total_results = list()
             for nuclide in nuclides:
                 nuclide_ed_total = dict()
                 for aclass in pasquill_gifford_classes:
                     nuclide_ed_total[aclass] = ed_total((aclass, nuclide))
-                ed_total.append(nuclide_ed_total)
-            return ed_total
+                ed_total_results.append(nuclide_ed_total)
+            return ed_total_results
 
         self._ed_acute = LEval(
             lambda: effective_dose(make_ed_total_list(self._ed_total_acute))
