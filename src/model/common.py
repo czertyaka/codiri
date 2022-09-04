@@ -38,6 +38,9 @@ class MapImpl:
     def __len__(self) -> int:
         return len(self.__values)
 
+    def keys(self):
+        return self.__values.keys()
+
     def initialized(self) -> bool:
         """Check if all fields have values
 
@@ -84,6 +87,9 @@ class FixedMap:
 
     def __len__(self) -> int:
         return len(self.__values)
+
+    def keys(self):
+        return self.__values.keys()
 
     def initialized(self) -> bool:
         """Check if all fields have values
@@ -141,6 +147,9 @@ class ValidatingMap:
 
     def __len__(self) -> int:
         return len(self.__values)
+
+    def keys(self):
+        return self.__values.keys()
 
     def initialized(self) -> bool:
         """Check if all fields have values

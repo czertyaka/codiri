@@ -1,5 +1,5 @@
 from .common import pasquill_gifford_classes, ValidatingFixedMap, ValidatingMap
-from typing import Dict
+from typing import Dict, Tuple
 
 
 class Input:
@@ -99,6 +99,15 @@ class Input:
                 nuclide name and value is Bq/kg
         """
         return self.__values["specific_activities"]
+
+    @property
+    def nuclides(self) -> Tuple[str]:
+        """Get nuclides list
+
+        Returns:
+            Tuple[str]: nuclides list
+        """
+        return tuple(self.__values["specific_activities"].keys())
 
     def add_specific_activity(self, nuclide: str, specific_activity: float):
         """Add specific activity for a nuclide
