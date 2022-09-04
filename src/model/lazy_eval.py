@@ -1,4 +1,4 @@
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Dict
 
 
 class LazyEvaluation:
@@ -28,11 +28,11 @@ class LazyEvaluation:
         return self.__results[params]
 
     @property
-    def results(self):
+    def results(self) -> Dict:
         """Get results of evaluation for each arguments set this instance were
         executed with
 
         Returns:
-            TYPE: results of evaluation for each arguments set
+            Dict: results of evaluation for each arguments set
         """
         return self.__results
