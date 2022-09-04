@@ -111,16 +111,19 @@ class Model:
             inp.extreme_windspeeds, inp.square_side, inp.terrain_type
         )
         self._set_food_specific_activity_leval()
-        self._set_deposition_leval()
-        self._set_concentration_integral_levals(inp.specific_activities)
-        self._set_xmax_leval(
-            inp.specific_activities.keys(), inp.buffer_area_distance
+        self._set_deposition_leval(inp.distance)
+        self._set_concentration_integral_levals(
+            inp.specific_activities,
+            inp.extreme_windspeeds,
+            inp.blowout_time,
+            inp.square_side,
         )
+        self._set_xmax_leval(inp.nuclides, inp.buffer_area_radius)
         self._set_effective_doses_exposure_sources_levals(
-            inp.age, inp.adults_annual_food_intake
+            inp.age, inp.distance, inp.adults_annual_food_intake
         )
         self._set_effective_doses_total_levals()
-        self._set_effective_doses_levals(inp.specific_activities.keys())
+        self._set_effective_doses_levals(inp.nuclides)
 
         self._ed_acute()
 

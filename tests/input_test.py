@@ -123,4 +123,5 @@ class TestInput(unittest.TestCase):
         }
         self.assertFalse(inp.initialized())
         inp.add_specific_activity("Cs-137", 1)
+        self.assertEqual(inp.nuclides, ("Cs-137",))
         self.assertTrue(inp.initialized())
