@@ -8,7 +8,6 @@ from datetime import datetime
 from shutil import copy
 from rasterio.coords import BoundingBox
 import numpy as np
-from collections import Counter
 from copy import deepcopy
 from tempfile import TemporaryDirectory
 import rasterio
@@ -32,6 +31,11 @@ _start = datetime.now()
 _output_directory = TemporaryDirectory()
 _output_directory_name = _output_directory.name
 _model_input = dict()
+
+
+def sum_dicts(rhs, lhs):
+    assert sorted(rhs.keys()) == sorted(lhs.keys())
+    return {key: rhs[key] + lhs[key] for key in rhs}
 
 
 def init_parser(parser: argparse.ArgumentParser) -> None:
@@ -166,17 +170,18 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
     activities = actmap.img.read(1) / actmap.raster_factor
     square_area = pow(inp.square_side, 2)
 
-    e_max_acute = 0
-    e_total_10_acute = dict()
-    e_max_period = 0
-    e_total_10_period = dict()
-    e_inh = dict()
-    e_surface = dict()
-    e_cloud = dict()
-    e_food = dict()
-    concentration_integrals = dict()
-    depositions = dict()
-    depletions = dict()
+    results = model.results
+    e_max_10_acute = results.e_max_10_acute
+    e_total_10_acute = results.e_total_10_acute
+    e_max_10_period = results.e_max_10_period
+    e_total_10_period = results.e_total_10_period
+    e_inh = results.e_inhalation
+    e_surface = results.e_surface
+    e_cloud = results.e_cloud
+    e_food = results.e_food
+    concentration_integrals = results.concentration_integrals
+    depositions = results.depositions
+    depletions = results.full_depletions
 
     for i in range(actmap.img.width):
         for j in range(actmap.img.height):
@@ -202,47 +207,25 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
             )
 
             if model.calculate(full_inp):
-                with model.results as results:
-                    e_max_acute += results.e_max_10_acute
-                    e_total_10_acute = dict(
-                        Counter(results.e_total_10_acute[actmap.nuclide])
-                        + Counter(e_total_10_acute)
-                    )
-                    e_max_period += results.e_max_10_period
-                    e_total_10_period = dict(
-                        Counter(results.e_total_10_period[actmap.nuclide])
-                        + Counter(e_total_10_period)
-                    )
-                    e_inh = dict(
-                        Counter(results.e_inhalation[actmap.nuclide])
-                        + Counter(e_inh)
-                    )
-                    e_surface = dict(
-                        Counter(results.e_surface[actmap.nuclide])
-                        + Counter(e_surface)
-                    )
-                    e_cloud = dict(
-                        Counter(results.e_cloud[actmap.nuclide])
-                        + Counter(e_cloud)
-                    )
-                    e_food = dict(
-                        Counter(results.e_food[actmap.nuclide])
-                        + Counter(e_food)
-                    )
-                    concentration_integrals = dict(
-                        Counter(
-                            results.concentration_integrals[actmap.nuclide]
-                        )
-                        + Counter(concentration_integrals)
-                    )
-                    depositions = dict(
-                        Counter(results.depositions[actmap.nuclide])
-                        + Counter(depositions)
-                    )
-                    depletions = dict(
-                        Counter(results.full_depletions[actmap.nuclide])
-                        + Counter(depletions)
-                    )
+                results = model.results
+                e_max_10_acute += results.e_max_10_acute
+                e_max_10_period += results.e_max_10_period
+
+                e_total_10_acute = sum_dicts(
+                    results.e_total_10_acute, e_total_10_acute
+                )
+                e_total_10_period = sum_dicts(
+                    results.e_total_10_period, e_total_10_period
+                )
+                e_inh = sum_dicts(results.e_inhalation, e_inh)
+                e_surface = sum_dicts(results.e_surface, e_surface)
+                e_cloud = sum_dicts(results.e_cloud, e_cloud)
+                e_food = sum_dicts(results.e_food, e_food)
+                concentration_integrals = sum_dicts(
+                    results.concentration_integrals, concentration_integrals
+                )
+                depositions = sum_dicts(results.depositions, depositions)
+                depletions = sum_dicts(results.full_depletions, depletions)
 
     for a_class in depletions:
         depletions[a_class] = depletions[a_class] / np.count_nonzero(
@@ -250,9 +233,9 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
         )
 
     return (
-        e_max_acute,  # 0
+        e_max_10_acute,  # 0
         e_total_10_acute,  # 1
-        e_max_period,  # 2
+        e_max_10_period,  # 2
         e_total_10_period,  # 3
         e_inh,  # 4
         e_surface,  # 5
@@ -276,8 +259,8 @@ def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
     with open(path.join(report_bin_dir_name(), "coords.npy"), "wb") as f:
         np.savez(f, x=x, y=y)
 
-    e_max_acute = np.zeros((len(y), len(x)))
-    e_max_period = np.zeros((len(y), len(x)))
+    e_max_10_acute = np.zeros((len(y), len(x)))
+    e_max_10_period = np.zeros((len(y), len(x)))
     e_total_10_acute = dict_of_atm_class_arrays(len(y), len(x))
     e_total_10_period = dict_of_atm_class_arrays(len(y), len(x))
     e_inh = dict_of_atm_class_arrays(len(y), len(x))
@@ -294,8 +277,8 @@ def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
             for i in range(len(y)):
                 coo = Coordinate(lon=x[j], lat=y[i])
                 results = calculate_dose(act_map, coo)
-                e_max_acute[i][j] = results[0]
-                e_max_period[i][j] = results[2]
+                e_max_10_acute[i][j] = results[0]
+                e_max_10_period[i][j] = results[2]
                 for a_class in pasquill_gifford_classes:
                     e_total_10_acute[a_class][i][j] = results[1][a_class]
                     e_total_10_period[a_class][i][j] = results[3][a_class]
@@ -311,14 +294,19 @@ def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
                 print(
                     f"ts: {datetime.now().strftime('%H:%M:%S')};"
                     f" j = {j}/{len(x)}; i = {i}/{len(y)}; coo: {coo}; "
-                    f"nuclide: {nuclide}; acute dose: {e_max_acute[i][j]:.2e} "
-                    f"Sv; period dose: {e_max_period[i][j]:.2e}"
+                    f"nuclide: {nuclide}; acute dose: "
+                    f"{e_max_10_acute[i][j]:.2e} "
+                    f"Sv; period dose: {e_max_10_period[i][j]:.2e}"
                 )
 
-        with open(make_bin_data_name(nuclide, "e_max_acute.npy"), "wb") as f:
-            np.save(f, e_max_acute)
-        with open(make_bin_data_name(nuclide, "e_max_period.npy"), "wb") as f:
-            np.save(f, e_max_period)
+        with open(
+            make_bin_data_name(nuclide, "e_max_10_acute.npy"), "wb"
+        ) as f:
+            np.save(f, e_max_10_acute)
+        with open(
+            make_bin_data_name(nuclide, "e_max_10_period.npy"), "wb"
+        ) as f:
+            np.save(f, e_max_10_period)
         with open(
             make_bin_data_name(nuclide, "e_total_10_acute.npz"), "wb"
         ) as f:
@@ -390,11 +378,11 @@ def calculate_doses_in_special_points(
         row = point_data["name"]
         for act_map in activity_maps:
             results = calculate_dose(act_map, coo)
-            e_max_acute = results[0]
-            e_max_period = results[2]
+            e_max_10_acute = results[0]
+            e_max_10_period = results[2]
             row += (
-                f"; {act_map.nuclide}: acute {e_max_acute:.2e};"
-                f" period {e_max_period:.2e}"
+                f"; {act_map.nuclide}: acute {e_max_10_acute:.2e};"
+                f" period {e_max_10_period:.2e}"
             )
             writer.writerow(
                 [
@@ -402,8 +390,8 @@ def calculate_doses_in_special_points(
                     point_data["lon"],
                     point_data["lat"],
                     act_map.nuclide,
-                    e_max_acute,
-                    e_max_period,
+                    e_max_10_acute,
+                    e_max_10_period,
                     *dict_of_atm_class_to_list(results[1]),
                     *dict_of_atm_class_to_list(results[3]),
                     *dict_of_atm_class_to_list(results[4]),

@@ -69,6 +69,20 @@ class DefaultConstraints(IConstraints):
         )
 
 
+class Results:
+    e_max_10_acute = 0
+    e_total_10_acute = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_max_10_period = 0
+    e_total_10_period = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_inhalation = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_surface = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_cloud = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_food = dict.fromkeys(pasquill_gifford_classes, 0)
+    concentration_integrals = dict.fromkeys(pasquill_gifford_classes, 0)
+    depositions = dict.fromkeys(pasquill_gifford_classes, 0)
+    full_depletions = dict.fromkeys(pasquill_gifford_classes, 0)
+
+
 class Model:
     """Doses & dilution factor calculator based on 2 scenario in Руководство
     по безопасности при использовании атомной энергии «Рекомендуемые методы
@@ -88,6 +102,15 @@ class Model:
             raise ValueError("invalid reference instance")
         self._reference = reference
         self._constraints = DefaultConstraints(reference.nuclides)
+
+    @property
+    def results(self) -> Results:
+        """Get calculation results
+
+        Returns:
+            Results: calculation results
+        """
+        return Results()
 
     def calculate(self, inp: Input) -> bool:
         """Execute calculations
