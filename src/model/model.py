@@ -180,7 +180,7 @@ class Model:
         """
         self._depletion_rad = LEval(
             lambda aclass, nuclide, x: depletion_radiation(
-                self._reference.dose_rate_decay_coeff(nuclide),
+                self._reference.nuclide_decay_coeff(nuclide),
                 x,
                 wind_speeds[aclass],
             )
