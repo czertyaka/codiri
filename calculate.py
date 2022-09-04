@@ -166,11 +166,14 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
     activities = actmap.img.read(1) / actmap.raster_factor
     square_area = pow(inp.square_side, 2)
 
-    e_max = 0
-    e_total_10 = dict()
+    e_max_acute = 0
+    e_total_10_acute = dict()
+    e_max_period = 0
+    e_total_10_period = dict()
     e_inh = dict()
     e_surface = dict()
     e_cloud = dict()
+    e_food = dict()
     concentration_integrals = dict()
     depositions = dict()
     depletions = dict()
@@ -199,37 +202,47 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
             )
 
             if model.calculate(full_inp):
-                e_max += model.results.e_max_10
-                e_total_10 = dict(
-                    Counter(model.results.e_total_10[actmap.nuclide])
-                    + Counter(e_total_10)
-                )
-                e_inh = dict(
-                    Counter(model.results.e_inhalation[actmap.nuclide])
-                    + Counter(e_inh)
-                )
-                e_surface = dict(
-                    Counter(model.results.e_surface[actmap.nuclide])
-                    + Counter(e_surface)
-                )
-                e_cloud = dict(
-                    Counter(model.results.e_cloud[actmap.nuclide])
-                    + Counter(e_cloud)
-                )
-                concentration_integrals = dict(
-                    Counter(
-                        model.results.concentration_integrals[actmap.nuclide]
+                with model.results as results:
+                    e_max_acute += results.e_max_10_acute
+                    e_total_10_acute = dict(
+                        Counter(results.e_total_10_acute[actmap.nuclide])
+                        + Counter(e_total_10_acute)
                     )
-                    + Counter(concentration_integrals)
-                )
-                depositions = dict(
-                    Counter(model.results.depositions[actmap.nuclide])
-                    + Counter(depositions)
-                )
-                depletions = dict(
-                    Counter(model.results.full_depletions[actmap.nuclide])
-                    + Counter(depletions)
-                )
+                    e_max_period += results.e_max_10_period
+                    e_total_10_period = dict(
+                        Counter(results.e_total_10_period[actmap.nuclide])
+                        + Counter(e_total_10_period)
+                    )
+                    e_inh = dict(
+                        Counter(results.e_inhalation[actmap.nuclide])
+                        + Counter(e_inh)
+                    )
+                    e_surface = dict(
+                        Counter(results.e_surface[actmap.nuclide])
+                        + Counter(e_surface)
+                    )
+                    e_cloud = dict(
+                        Counter(results.e_cloud[actmap.nuclide])
+                        + Counter(e_cloud)
+                    )
+                    e_food = dict(
+                        Counter(results.e_food[actmap.nuclide])
+                        + Counter(e_food)
+                    )
+                    concentration_integrals = dict(
+                        Counter(
+                            results.concentration_integrals[actmap.nuclide]
+                        )
+                        + Counter(concentration_integrals)
+                    )
+                    depositions = dict(
+                        Counter(results.depositions[actmap.nuclide])
+                        + Counter(depositions)
+                    )
+                    depletions = dict(
+                        Counter(results.full_depletions[actmap.nuclide])
+                        + Counter(depletions)
+                    )
 
     for a_class in depletions:
         depletions[a_class] = depletions[a_class] / np.count_nonzero(
@@ -237,11 +250,14 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
         )
 
     return (
-        e_max,
-        e_total_10,
+        e_max_acute,
+        e_total_10_acute,
+        e_max_period,
+        e_total_10_period,
         e_inh,
         e_surface,
         e_cloud,
+        e_food,
         concentration_integrals,
         depositions,
         depletions,
