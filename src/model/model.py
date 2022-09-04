@@ -110,7 +110,8 @@ class Model:
         Returns:
             Results: calculation results
         """
-        return Results()
+        results = Results()
+        return results
 
     def calculate(self, inp: Input) -> bool:
         """Execute calculations
@@ -141,7 +142,9 @@ class Model:
             inp.blowout_time,
             inp.square_side,
         )
-        self._set_xmax_leval(inp.nuclides, inp.buffer_area_radius)
+        self._set_xmax_leval(
+            inp.nuclides, inp.buffer_area_radius, inp.square_side
+        )
         self._set_effective_doses_exposure_sources_levals(
             inp.age, inp.distance, inp.adults_annual_food_intake
         )
@@ -149,6 +152,7 @@ class Model:
         self._set_effective_doses_levals(inp.nuclides)
 
         self._ed_acute()
+        self._ed_for_period()
 
         return True
 
@@ -308,7 +312,7 @@ class Model:
         self._food_sa = LEval(
             lambda aclass, nuclide, x, food_id: food_specific_activity(
                 self._reference.deposition_rate(nuclide),
-                self._sediment_detachment_constant((nuclide)),
+                self._sediment_detachment_constant((nuclide,)),
                 self._ci((aclass, nuclide, x)),
                 self._hdci((aclass, nuclide, x)),
                 self._reference.atmosphere_accum_factor(nuclide, food_id),
@@ -371,20 +375,22 @@ class Model:
         )
 
     def _set_xmax_leval(
-        self, nuclides: Tuple[str], buffer_area_distance: float
+        self,
+        nuclides: Tuple[str],
+        buffer_area_distance: float,
+        square_side: float,
     ):
         """Set x_max lazy evaluation
 
         Args:
             nuclides (Tuple[str]): all the nuclides for current calculation
             buffer_area_distance (float): buffer area distance
+            square_side (float): square side length
         """
-        distances_count = 100
-        distances = np.array(
-            [
-                math.pow(math.sqrt(50000) / (distances_count - 1) * i, 2)
-                for i in range(distances_count)
-            ]
+        distances = np.logspace(
+            math.log10(square_side / 2),
+            math.log10(50000 - square_side / 2),
+            10,
         )
 
         def make_dose_matrix():
@@ -392,7 +398,7 @@ class Model:
                 [
                     [
                         [
-                            self._ed_food(aclass, nuclide, x)
+                            self._ed_food((aclass, nuclide, x))
                             for nuclide in nuclides
                         ]
                         for aclass in pasquill_gifford_classes
@@ -429,15 +435,14 @@ class Model:
                 self._reference.daily_metabolic_cost(
                     self._reference.age_group_id(100)
                 ),
-                adults_annual_food_intake(
+                adults_annual_food_intake[
                     self._reference.food_category(food_id)
-                ),
+                ],
             )
         )
         self._ed_food = LEval(
             lambda aclass, nuclide, x: effective_dose_food(
                 self._reference.food_dose_coeff(nuclide),
-                self._food_sa((aclass, nuclide, x)),
                 {
                     food_id: self._food_sa((aclass, nuclide, x, food_id))
                     for food_id in self._reference.food_categories

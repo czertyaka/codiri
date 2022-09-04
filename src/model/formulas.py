@@ -655,5 +655,5 @@ def dispersion_coeff_y(p_y: float, q_y: float, distance: float) -> float:
         return p_y * math.pow(10000, q_y - 0.5) * math.sqrt(distance)
     else:
         raise ValueError(
-            "distance could not be larger than 50000 m: " "f'{distance} m'"
+            f"distance could not be larger than 50000 m: '{distance} m'"
         )
