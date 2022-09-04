@@ -25,6 +25,7 @@ from src.model.input import Input
 from src.model.model import Model
 from plot import make_plots
 from utils import find_basins, parse_input
+from src.database import Database
 
 _reference = None
 _start = datetime.now()
@@ -196,9 +197,8 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
             full_inp.add_specific_activity(
                 nuclide=actmap.nuclide, specific_activity=specific_activity
             )
-            model.input = full_inp
 
-            if model.calculate():
+            if model.calculate(full_inp):
                 e_max += model.results.e_max_10
                 e_total_10 = dict(
                     Counter(model.results.e_total_10[actmap.nuclide])
@@ -380,7 +380,7 @@ if __name__ == "__main__":
     args = parse_arguments()
     inp = parse_input(args.input)
     _model_input = inp["model"]
-    _reference = Reference(inp["database_name"])
+    _reference = Reference(Database(inp["database_name"]))
     save_plots = False
     if args.output is not None:
         _output_directory_name = args.output
