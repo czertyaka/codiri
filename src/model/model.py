@@ -196,9 +196,9 @@ class Model:
         )
         self._depletion_wet = LEval(
             lambda aclass, nuclide, x: depletion_wet(
-                self._sediment_detachment_constant((nuclide)),
+                self._sediment_detachment_constant((nuclide,)),
                 x,
-                wind_speeds[nuclide],
+                wind_speeds[aclass],
             )
         )
         self._sediment_detachment_constant = LEval(
@@ -233,7 +233,7 @@ class Model:
                 self._depletion((aclass, nuclide, x)),
                 wind_speeds[aclass],
                 square_side / 2,
-                lambda xx: self._sigma_y((nuclide, xx)),
+                lambda xx: self._sigma_y((aclass, xx)),
                 x,
             )
         )
@@ -302,7 +302,7 @@ class Model:
         self._deposition = LEval(
             lambda aclass, nuclide: deposition(
                 self._reference.deposition_rate(nuclide),
-                self._sediment_detachment_constant((nuclide)),
+                self._sediment_detachment_constant((nuclide,)),
                 self._ci((aclass, nuclide, distance)),
                 self._hdci((aclass, nuclide, distance)),
             )
@@ -326,7 +326,6 @@ class Model:
         """
         self._ci = LEval(
             lambda aclass, nuclide, x: concentration_integral(
-                specific_activities[nuclide],
                 calculate_release_activity(
                     specific_activities[nuclide],
                     wind_speeds[aclass],
@@ -436,7 +435,7 @@ class Model:
         self._residence_time_coeff = LEval(
             lambda nuclide: residence_time_coeff(
                 self._reference.dose_rate_decay_coeff,
-                self._reference.radio_decay_coeff(nuclide),
+                self._reference.nuclide_decay_coeff(nuclide),
                 self._reference.residence_time,
             )
         )
