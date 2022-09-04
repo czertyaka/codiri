@@ -24,7 +24,7 @@
             { "food_category": "wheat", "intake": 93.6 },
             { "food_category": "cucumbers", "intake": 32.2 },
             { "food_category": "cabbage", "intake": 32.2 },
-            { "food_category": "potato", "intake": 59.0 },
+            { "food_category": "potato", "intake": 59.0 }
         ]
     },
     "basins": [
