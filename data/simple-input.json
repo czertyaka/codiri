@@ -8,6 +8,7 @@
         "blowout_time": 3600,
         "soil_density": 1400,
         "square_side": 500,
+        "buffer_area_radius": 5000,
         "wind_speed": [
             { "a_class": "A", "value": 3 },
             { "a_class": "B", "value": 5 },
@@ -15,6 +16,15 @@
             { "a_class": "D", "value": 18 },
             { "a_class": "E", "value": 18 },
             { "a_class": "F", "value": 3 }
+        ],
+        "annual_food_intake":
+        [
+            { "food_category": "meat", "intake": 16.4 },
+            { "food_category": "milk", "intake": 19.3 },
+            { "food_category": "wheat", "intake": 93.6 },
+            { "food_category": "cucumbers", "intake": 32.2 },
+            { "food_category": "cabbage", "intake": 32.2 },
+            { "food_category": "potato", "intake": 59.0 },
         ]
     },
     "basins": [
