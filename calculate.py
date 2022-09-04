@@ -250,17 +250,17 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
         )
 
     return (
-        e_max_acute,
-        e_total_10_acute,
-        e_max_period,
-        e_total_10_period,
-        e_inh,
-        e_surface,
-        e_cloud,
-        e_food,
-        concentration_integrals,
-        depositions,
-        depletions,
+        e_max_acute,  # 0
+        e_total_10_acute,  # 1
+        e_max_period,  # 2
+        e_total_10_period,  # 3
+        e_inh,  # 4
+        e_surface,  # 5
+        e_cloud,  # 6
+        e_food,  # 7
+        concentration_integrals,  # 8
+        depositions,  # 9
+        depletions,  # 10
     )
 
 
@@ -276,11 +276,14 @@ def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
     with open(path.join(report_bin_dir_name(), "coords.npy"), "wb") as f:
         np.savez(f, x=x, y=y)
 
-    e_max = np.zeros((len(y), len(x)))
-    e_total_10 = dict_of_atm_class_arrays(len(y), len(x))
+    e_max_acute = np.zeros((len(y), len(x)))
+    e_max_period = np.zeros((len(y), len(x)))
+    e_total_10_acute = dict_of_atm_class_arrays(len(y), len(x))
+    e_total_10_period = dict_of_atm_class_arrays(len(y), len(x))
     e_inh = dict_of_atm_class_arrays(len(y), len(x))
     e_surface = dict_of_atm_class_arrays(len(y), len(x))
     e_cloud = dict_of_atm_class_arrays(len(y), len(x))
+    e_food = dict_of_atm_class_arrays(len(y), len(x))
     concentration_integrals = dict_of_atm_class_arrays(len(y), len(x))
     depositions = dict_of_atm_class_arrays(len(y), len(x))
     depletions = dict_of_atm_class_arrays(len(y), len(x))
@@ -291,34 +294,47 @@ def calculate_doses_map(activity_maps: List[ActivityMap], inp: Dict) -> None:
             for i in range(len(y)):
                 coo = Coordinate(lon=x[j], lat=y[i])
                 results = calculate_dose(act_map, coo)
-                e_max[i][j] = results[0]
+                e_max_acute[i][j] = results[0]
+                e_max_period[i][j] = results[2]
                 for a_class in pasquill_gifford_classes:
-                    e_total_10[a_class][i][j] = results[1][a_class]
-                    e_inh[a_class][i][j] = results[2][a_class]
-                    e_surface[a_class][i][j] = results[3][a_class]
-                    e_cloud[a_class][i][j] = results[4][a_class]
-                    concentration_integrals[a_class][i][j] = results[5][
+                    e_total_10_acute[a_class][i][j] = results[1][a_class]
+                    e_total_10_period[a_class][i][j] = results[3][a_class]
+                    e_inh[a_class][i][j] = results[4][a_class]
+                    e_surface[a_class][i][j] = results[5][a_class]
+                    e_cloud[a_class][i][j] = results[6][a_class]
+                    e_food[a_class][i][j] = results[7][a_class]
+                    concentration_integrals[a_class][i][j] = results[8][
                         a_class
                     ]
-                    depositions[a_class][i][j] = results[6][a_class]
-                    depletions[a_class][i][j] = results[7][a_class]
+                    depositions[a_class][i][j] = results[9][a_class]
+                    depletions[a_class][i][j] = results[10][a_class]
                 print(
                     f"ts: {datetime.now().strftime('%H:%M:%S')};"
                     f" j = {j}/{len(x)}; i = {i}/{len(y)}; coo: {coo}; "
-                    f"nuclide: {nuclide}; dose: {e_max[i][j]:.2e} "
-                    "Sv"
+                    f"nuclide: {nuclide}; acute dose: {e_max_acute[i][j]:.2e} "
+                    f"Sv; period dose: {e_max_period[i][j]:.2e}"
                 )
 
-        with open(make_bin_data_name(nuclide, "e_max.npy"), "wb") as f:
-            np.save(f, e_max)
-        with open(make_bin_data_name(nuclide, "e_total_10.npz"), "wb") as f:
-            np.savez(f, **e_total_10)
+        with open(make_bin_data_name(nuclide, "e_max_acute.npy"), "wb") as f:
+            np.save(f, e_max_acute)
+        with open(make_bin_data_name(nuclide, "e_max_period.npy"), "wb") as f:
+            np.save(f, e_max_period)
+        with open(
+            make_bin_data_name(nuclide, "e_total_10_acute.npz"), "wb"
+        ) as f:
+            np.savez(f, **e_total_10_acute)
+        with open(
+            make_bin_data_name(nuclide, "e_total_10_period.npz"), "wb"
+        ) as f:
+            np.savez(f, **e_total_10_period)
         with open(make_bin_data_name(nuclide, "e_inh.npz"), "wb") as f:
             np.savez(f, **e_inh)
         with open(make_bin_data_name(nuclide, "e_surface.npz"), "wb") as f:
             np.savez(f, **e_surface)
         with open(make_bin_data_name(nuclide, "e_cloud.npz"), "wb") as f:
             np.savez(f, **e_cloud)
+        with open(make_bin_data_name(nuclide, "e_food.npz"), "wb") as f:
+            np.savez(f, **e_food)
         with open(
             make_bin_data_name(nuclide, "concentration_integrals.npz"),
             "wb",
@@ -337,10 +353,12 @@ def calculate_doses_in_special_points(
     writer = csv.writer(
         f, delimiter=";", quotechar="'", quoting=csv.QUOTE_MINIMAL
     )
-    e_total_hdr = list_of_atm_classes_names("e_total_10")
+    e_total_acute_hdr = list_of_atm_classes_names("e_total_10_acute")
+    e_total_period_hdr = list_of_atm_classes_names("e_total_10_period")
     e_inh_hdr = list_of_atm_classes_names("e_inh")
     e_surface_hdr = list_of_atm_classes_names("e_surface")
     e_cloud_hdr = list_of_atm_classes_names("e_cloud")
+    e_food_hdr = list_of_atm_classes_names("e_food")
     concentration_integral_hdr = list_of_atm_classes_names(
         "concentration_integral"
     )
@@ -353,11 +371,14 @@ def calculate_doses_in_special_points(
             "x",
             "y",
             "nuclide",
-            "E_max",
-            *e_total_hdr,
+            "E_max_acute",
+            "E_max_period",
+            *e_total_acute_hdr,
+            *e_total_period_hdr,
             *e_inh_hdr,
             *e_surface_hdr,
             *e_cloud_hdr,
+            *e_food_hdr,
             *concentration_integral_hdr,
             *deposition_hdr,
             *depletion_hdr,
@@ -369,22 +390,29 @@ def calculate_doses_in_special_points(
         row = point_data["name"]
         for act_map in activity_maps:
             results = calculate_dose(act_map, coo)
-            dose = results[0]
-            row += f"; {act_map.nuclide}: {dose:.2e}"
+            e_max_acute = results[0]
+            e_max_period = results[2]
+            row += (
+                f"; {act_map.nuclide}: acute {e_max_acute:.2e};"
+                f" period {e_max_period:.2e}"
+            )
             writer.writerow(
                 [
                     point_data["name"],
                     point_data["lon"],
                     point_data["lat"],
                     act_map.nuclide,
-                    dose,
+                    e_max_acute,
+                    e_max_period,
                     *dict_of_atm_class_to_list(results[1]),
-                    *dict_of_atm_class_to_list(results[2]),
                     *dict_of_atm_class_to_list(results[3]),
                     *dict_of_atm_class_to_list(results[4]),
                     *dict_of_atm_class_to_list(results[5]),
                     *dict_of_atm_class_to_list(results[6]),
                     *dict_of_atm_class_to_list(results[7]),
+                    *dict_of_atm_class_to_list(results[8]),
+                    *dict_of_atm_class_to_list(results[9]),
+                    *dict_of_atm_class_to_list(results[10]),
                 ]
             )
         print(row)
