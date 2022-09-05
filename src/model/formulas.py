@@ -3,6 +3,24 @@ from .common import pasquill_gifford_classes
 import math
 import numpy as np
 from scipy import integrate
+import warnings
+
+
+def _integrate(
+    function: Callable[[float], float], lower_limit: float, upper_limit: float
+) -> float:
+    """integrate.quad wrapper with warnings suppressing
+
+    Args:
+        function (Callable[[float], float]): subintegral function
+        lower_limit (float): lower integration limit
+        upper_limit (float): upper integration limit
+    """
+    with warnings.catch_warnings():
+        warnings.filterwarnings(
+            "ignore", category=integrate.IntegrationWarning
+        )
+        return integrate.quad(function, lower_limit, upper_limit)[0]
 
 
 def effective_dose(nuclide_aclass_doses: List[Dict[str, float]]) -> float:
@@ -419,11 +437,8 @@ def dilution_factor(
             )
         )
 
-    return (
-        factor
-        * integrate.quad(
-            subintegral_function, -half_square_side, half_square_side
-        )[0]
+    return factor * _integrate(
+        subintegral_function, -half_square_side, half_square_side
     )
 
 
@@ -491,11 +506,8 @@ def sedimentation_factor(
             / (math.sqrt(2) * dispersion_coeff_y(distance - xi))
         )
 
-    return (
-        factor
-        * integrate.quad(
-            subintegral_function, -half_square_side, half_square_side
-        )[0]
+    return factor * _integrate(
+        subintegral_function, -half_square_side, half_square_side
     )
 
 
@@ -550,9 +562,7 @@ def depletion_dry(
             / sigma_z
         )
 
-    return math.exp(
-        factor * integrate.quad(subintegral_function, 0, distance)[0]
-    )
+    return math.exp(factor * _integrate(subintegral_function, 0, distance))
 
 
 def depletion_wet(
