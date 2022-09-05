@@ -102,6 +102,7 @@ class Model:
             raise ValueError("invalid reference instance")
         self._reference = reference
         self._constraints = DefaultConstraints(reference.nuclides)
+        self._results = Results()
 
     @property
     def results(self) -> Results:
@@ -110,8 +111,7 @@ class Model:
         Returns:
             Results: calculation results
         """
-        results = Results()
-        return results
+        return self._results
 
     def calculate(self, inp: Input) -> bool:
         """Execute calculations
