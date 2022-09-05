@@ -154,6 +154,8 @@ class Model:
         self._ed_acute()
         self._ed_for_period()
 
+        self._update_results()
+
         return True
 
     def validate_input(self, inp: Input) -> bool:
@@ -173,6 +175,12 @@ class Model:
                 log(f"input failed to comply constraints: {err}")
         log(f"invalid input: {inp}")
         return False
+
+    def _update_results(self):
+        """Update results attribute"""
+        self._results.e_max_10_acute = self._ed_acute.result()
+        self._results.e_max_10_period = self._ed_for_period.result()
+        pass
 
     def _set_dispersion_coeffs(self):
         """Set dispersion coefficients lazy evaluation"""
