@@ -31,10 +31,16 @@ class TestLazyEvaluation(unittest.TestCase):
         evalution = LazyEvaluation(lambda x: x**2)
         self.assertEqual(evalution((1,)), 1)
         self.assertEqual(evalution.results, {(1,): 1})
+        self.assertEqual(evalution.result((1,)), 1)
         self.assertEqual(evalution((2,)), 4)
         self.assertEqual(evalution.results, {(1,): 1, (2,): 4})
+        self.assertEqual(evalution.result((1,)), 1)
+        self.assertEqual(evalution.result((2,)), 4)
         self.assertEqual(evalution((3,)), 9)
         self.assertEqual(evalution.results, {(1,): 1, (2,): 4, (3,): 9})
+        self.assertEqual(evalution.result((1,)), 1)
+        self.assertEqual(evalution.result((2,)), 4)
+        self.assertEqual(evalution.result((3,)), 9)
 
     def test_exec_with_same_args(self):
         mock = MagicMock(return_value=None)

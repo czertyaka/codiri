@@ -27,10 +27,19 @@ class LazyEvaluation:
             self.__results[params] = self.__formula(*params)
         return self.__results[params]
 
+    def result(self, params: Tuple = tuple()):
+        """Get result of evaluation for specific arguments set this instance
+        were executed with
+
+        Args:
+            params (Tuple, optional): arguments evaluation were executed with
+        """
+        return self.__results[params]
+
     @property
     def results(self) -> Dict:
         """Get results of evaluation for each arguments set this instance were
-        executed with
+            executed with
 
         Returns:
             Dict: results of evaluation for each arguments set
