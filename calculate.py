@@ -15,6 +15,7 @@ import rasterio
 import csv
 
 from src.model.reference import Reference
+from src.database import Database
 from src.geo import Map
 from src.basins import Basin
 from src.geo import Coordinate, distance
@@ -375,7 +376,8 @@ if __name__ == "__main__":
     args = parse_arguments()
     inp = parse_input(args.input)
     _model_input = inp["model"]
-    _reference = Reference(inp["database_name"])
+
+    _reference = Reference(Database(inp["database_name"]))
     save_plots = False
     if args.output is not None:
         _output_directory_name = args.output

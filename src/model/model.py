@@ -63,7 +63,7 @@ class Model:
         if (
             self.input is None
             or not self.input.initialized()
-            or self.input.distance > 5000
+            or self.input.distance > 50000
             or self.input.distance <= self.input.square_side / 2
         ):
             log(f"input is not ready '{self.input}'")

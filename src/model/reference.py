@@ -230,8 +230,8 @@ class Reference(IReference):
         Args:
             db (Database): database to load tables from
         """
-        super(Reference, self).__init__()
         self._db = db
+        super(Reference, self).__init__()
 
     def _initialize_data(self):
         """Initialize data"""
