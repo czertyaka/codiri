@@ -170,18 +170,17 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
     activities = actmap.img.read(1) / actmap.raster_factor
     square_area = pow(inp.square_side, 2)
 
-    results = model.results
-    e_max_10_acute = results.e_max_10_acute
-    e_total_10_acute = results.e_total_10_acute
-    e_max_10_period = results.e_max_10_period
-    e_total_10_period = results.e_total_10_period
-    e_inh = results.e_inhalation
-    e_surface = results.e_surface
-    e_cloud = results.e_cloud
-    e_food = results.e_food
-    concentration_integrals = results.concentration_integrals
-    depositions = results.depositions
-    depletions = results.full_depletions
+    e_max_10_acute = 0
+    e_total_10_acute = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_max_10_period = 0
+    e_total_10_period = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_inh = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_surface = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_cloud = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_food = dict.fromkeys(pasquill_gifford_classes, 0)
+    concentration_integrals = dict.fromkeys(pasquill_gifford_classes, 0)
+    depositions = dict.fromkeys(pasquill_gifford_classes, 0)
+    depletions = dict.fromkeys(pasquill_gifford_classes, 0)
 
     for i in range(actmap.img.width):
         for j in range(actmap.img.height):
@@ -202,8 +201,9 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
             )
             specific_activity = activity / (contaminated_volume * soil_density)
 
+            nuclide = actmap.nuclide
             full_inp.add_specific_activity(
-                nuclide=actmap.nuclide, specific_activity=specific_activity
+                nuclide=nuclide, specific_activity=specific_activity
             )
 
             if model.calculate(full_inp):
@@ -212,20 +212,25 @@ def calculate_dose(actmap: ActivityMap, point: Coordinate) -> float:
                 e_max_10_period += results.e_max_10_period
 
                 e_total_10_acute = sum_dicts(
-                    results.e_total_10_acute, e_total_10_acute
+                    results.e_total_10_acute[nuclide], e_total_10_acute
                 )
                 e_total_10_period = sum_dicts(
-                    results.e_total_10_period, e_total_10_period
+                    results.e_total_10_period[nuclide], e_total_10_period
                 )
-                e_inh = sum_dicts(results.e_inhalation, e_inh)
-                e_surface = sum_dicts(results.e_surface, e_surface)
-                e_cloud = sum_dicts(results.e_cloud, e_cloud)
-                e_food = sum_dicts(results.e_food, e_food)
+                e_inh = sum_dicts(results.e_inhalation[nuclide], e_inh)
+                e_surface = sum_dicts(results.e_surface[nuclide], e_surface)
+                e_cloud = sum_dicts(results.e_cloud[nuclide], e_cloud)
+                e_food = sum_dicts(results.e_food[nuclide], e_food)
                 concentration_integrals = sum_dicts(
-                    results.concentration_integrals, concentration_integrals
+                    results.concentration_integrals[nuclide],
+                    concentration_integrals,
                 )
-                depositions = sum_dicts(results.depositions, depositions)
-                depletions = sum_dicts(results.full_depletions, depletions)
+                depositions = sum_dicts(
+                    results.depositions[nuclide], depositions
+                )
+                depletions = sum_dicts(
+                    results.full_depletions[nuclide], depletions
+                )
 
     for a_class in depletions:
         depletions[a_class] = depletions[a_class] / np.count_nonzero(

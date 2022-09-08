@@ -70,17 +70,29 @@ class DefaultConstraints(IConstraints):
 
 
 class Results:
+    def __init__(self, nuclides: Tuple[str] = tuple()):
+        for nuclide in nuclides:
+            self.e_total_10_acute[nuclide] = {}
+            self.e_total_10_period[nuclide] = {}
+            self.e_inhalation[nuclide] = {}
+            self.e_surface[nuclide] = {}
+            self.e_cloud[nuclide] = {}
+            self.e_food[nuclide] = {}
+            self.concentration_integrals[nuclide] = {}
+            self.depositions[nuclide] = {}
+            self.full_depletions[nuclide] = {}
+
     e_max_10_acute = 0
-    e_total_10_acute = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_total_10_acute = {}
     e_max_10_period = 0
-    e_total_10_period = dict.fromkeys(pasquill_gifford_classes, 0)
-    e_inhalation = dict.fromkeys(pasquill_gifford_classes, 0)
-    e_surface = dict.fromkeys(pasquill_gifford_classes, 0)
-    e_cloud = dict.fromkeys(pasquill_gifford_classes, 0)
-    e_food = dict.fromkeys(pasquill_gifford_classes, 0)
-    concentration_integrals = dict.fromkeys(pasquill_gifford_classes, 0)
-    depositions = dict.fromkeys(pasquill_gifford_classes, 0)
-    full_depletions = dict.fromkeys(pasquill_gifford_classes, 0)
+    e_total_10_period = {}
+    e_inhalation = {}
+    e_surface = {}
+    e_cloud = {}
+    e_food = {}
+    concentration_integrals = {}
+    depositions = {}
+    full_depletions = {}
 
 
 class Model:
@@ -154,7 +166,7 @@ class Model:
         self._ed_acute()
         self._ed_for_period()
 
-        self._update_results()
+        self._update_results(inp.nuclides)
 
         return True
 
@@ -176,11 +188,42 @@ class Model:
         log(f"invalid input: {inp}")
         return False
 
-    def _update_results(self):
+    def _update_results(self, nuclides: Tuple[str]):
         """Update results attribute"""
-        self._results.e_max_10_acute = self._ed_acute.result()
-        self._results.e_max_10_period = self._ed_for_period.result()
-        pass
+        results = Results(nuclides)
+        results.e_max_10_acute = self._ed_acute.result()
+        results.e_max_10_period = self._ed_for_period.result()
+        x_max = self._x_max.result()
+        for nuclide in nuclides:
+            for aclass in pasquill_gifford_classes:
+                results.e_total_10_acute[nuclide][
+                    aclass
+                ] = self._ed_total_acute.result((aclass, nuclide))
+                results.e_total_10_period[nuclide][
+                    aclass
+                ] = self._ed_total_period.result((aclass, nuclide))
+                results.e_inhalation[nuclide][aclass] = self._ed_inh.result(
+                    (aclass, nuclide)
+                )
+                results.e_surface[nuclide][aclass] = self._ed_surf.result(
+                    (aclass, nuclide)
+                )
+                results.e_cloud[nuclide][aclass] = self._ed_cloud.result(
+                    (aclass, nuclide)
+                )
+                results.e_food[nuclide][aclass] = self._ed_food.result(
+                    (aclass, nuclide, x_max)
+                )
+                results.concentration_integrals[nuclide][
+                    aclass
+                ] = self._ci.result((aclass, nuclide, x_max))
+                results.depositions[nuclide][aclass] = self._deposition.result(
+                    (aclass, nuclide)
+                )
+                results.full_depletions[nuclide][
+                    aclass
+                ] = self._depletion.result((aclass, nuclide, x_max))
+        self._results = results
 
     def _set_dispersion_coeffs(self):
         """Set dispersion coefficients lazy evaluation"""
