@@ -1,6 +1,2 @@
 __pycache__/
 .pytest_cache/
-local-*
-data/
-!data/simple-input.json
-!data/compass.png
