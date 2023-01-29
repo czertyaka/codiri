@@ -22,8 +22,8 @@
             { "food_category": "meat", "intake": 16.4 },
             { "food_category": "milk", "intake": 19.3 },
             { "food_category": "wheat", "intake": 93.6 },
-            { "food_category": "cucumbers", "intake": 32.2 },
-            { "food_category": "cabbage", "intake": 32.2 },
+            { "food_category": "cucumber", "intake": 32.2 },
+            { "food_category": "cole", "intake": 32.2 },
             { "food_category": "potato", "intake": 59.0 }
         ]
     },

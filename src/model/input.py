@@ -277,7 +277,7 @@ class Input:
             value (Dict[str, float]): adults annual food intake, kg(l)/year
         """
         categories = sorted(
-            ("meat", "milk", "wheat", "cucumbers", "cabbage", "potato")
+            ("meat", "milk", "wheat", "cucumber", "cole", "potato")
         )
         self.__values["adults_annual_food_intake"] = (
             value,
