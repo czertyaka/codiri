@@ -27,3 +27,25 @@ than of user input.
 It is expected to be database formed with [dataset](https://dataset.readthedocs.io/en/latest/#) `Python` package.
 It's structure and ways of it's provisioning may be found [here]().
 I will refer to the database as `reference.db` later.
+
+### Requirments
+
+It is, as usual, strongly recommended for you to use `Python` virtual environment or container
+(for now, it is up to user to write `Dockerfile`).
+Further code snippets assume that you chose to work in `venv`.
+
+At first, activate virtual environment.
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Since we will not return to `venv` anymore, here's how you exit virtual environment when yot're done.
+```bash
+deactivate
+```
+
+Install required packages:
+```bash
+pip install -r <codiri path>/requirements.txt
+```
