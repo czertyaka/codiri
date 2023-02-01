@@ -28,7 +28,7 @@ It is expected to be database formed with [dataset](https://dataset.readthedocs.
 It's structure and ways of it's provisioning may be found [here]().
 I will refer to the database as `reference.db` later.
 
-### Requirments
+### Requirements
 
 It is, as usual, strongly recommended for you to use `Python` virtual environment or container
 (for now, it is up to user to write `Dockerfile`).
@@ -40,7 +40,7 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-Since we will not return to `venv` anymore, here's how you exit virtual environment when yot're done.
+Since we will not return to `venv` anymore, here's how you exit virtual environment when you're done.
 ```bash
 deactivate
 ```
