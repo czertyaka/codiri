@@ -33,9 +33,42 @@ So I obey.
 
 ## Usage
 
+### Requirements
+
+It is, as usual, strongly recommended for you to use `Python` virtual environment or container
+(for now, it is up to user to write `Dockerfile`).
+Further code snippets assume that you chose to work in `venv`.
+
+At first, activate virtual environment.
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Since we will not return to `venv` anymore, here's how you exit virtual environment when you're done.
+```bash
+deactivate
+```
+
+Install required packages:
+```bash
+pip install -r <codiri path>/requirements.txt
+```
+
+### Testing
+
+It's smart to run some sanity check before wasting a lot of time preparing input files.
+You can use unit-tests for such purpose.
+```bash
+cd <codiri path>/tests
+pytest .
+```
+
+You'll now if something went wrong.
+
 ### Preparations
 
-At first, one needs to prepare few input binary files.
+Then, you need to prepare few input binary files.
 
 * First one is geospatial raster file which will be used to form activity map, typically it has `.tif` extension.
 It, of course, should cover area of interest, e.g. basins you need to calculate dose from.
@@ -58,25 +91,3 @@ It contains all the values that can not be considered as reference
 Since you will probably need to change one or two of them regularly they are stored in `json` file.
 List of these variables, theirs units and hierarchy you may find [here]().
 I'm not only extremely smart, but also very kind, so I provide this [template]().
-
-### Requirements
-
-It is, as usual, strongly recommended for you to use `Python` virtual environment or container
-(for now, it is up to user to write `Dockerfile`).
-Further code snippets assume that you chose to work in `venv`.
-
-At first, activate virtual environment.
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-Since we will not return to `venv` anymore, here's how you exit virtual environment when you're done.
-```bash
-deactivate
-```
-
-Install required packages:
-```bash
-pip install -r <codiri path>/requirements.txt
-```
