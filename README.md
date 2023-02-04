@@ -2,11 +2,34 @@
 
 ## Introduction
 
-**COntaminated Derelict Incipient Radiation Impact** - just a project I run for my gf master's thesis. Basically it'll do following:
-1. download raster data for required area
-2. find basins and their coastlines with predefined accuracy
-3. add some specific activity measurements bounded with derelict coastline
-4. calcualate effective doses in point of interest at the disaster initial phase due to wind uplift and transport 
+`codiri` stands for "COntaminated Derelict Incipient Radiation Impact".
+Derangment of this name reflects its nature.
+I now must warn you, stranger, this is not for common use.
+Project deals with very specific problem in radiation safety.
+
+Imagine industrial basin near nuclear facility that produces liquid radioactive waste
+and utilize this basin to store it.
+There are certain summer days when sun is so close to these lands of mortals that, once exposed
+to it, you seek shelter in haste.
+The water these days does not bring comfort, on contrary, it becomes warm and nasty, you can even see
+it evaporazing.
+Talking about evaporazing...
+Water level drops down.
+It is about several meters of coastline that was under water back then, but now it sees light.
+So do radioactive wastes. It is considerably safe unless you want to settle down near it for long.
+But wind may take care of such unjustness.
+It may carry wastes hidden in coastline soil up to your doorstep.
+Double-trouble...
+
+So, this code serves for effective dose calculation in such situation.
+This envolves a lot of input data. I mean it. A lot.
+One hardlu be able to use this code unless you fairly familiar with
+calculation model which were taken from certain
+[Russian security manual](https://github.com/czertyaka/codiri/wiki/Reference-Textbooks).
+
+Then again, this is not your case if you wish to perform calculation according to other model.
+But my ~~gf~~ wife along with her scientific advisor wants exactly that.
+So I obey.
 
 ## Usage
 
