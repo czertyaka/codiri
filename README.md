@@ -51,6 +51,14 @@ It is expected to be database formed with [dataset](https://dataset.readthedocs.
 It's structure and ways of it's provisioning may be found [here]().
 I will refer to the database as `reference.db` later.
 
+It's unlikely that you'll need to modify these two very often.
+But there are another file.
+It contains all the values that can not be considered as reference
+(meaning they are specific to you certain situation).
+Since you will probably need to change one or two of them regularly they are stored in `json` file.
+List of these variables, theirs units and hierarchy you may find [here]().
+I'm not only extremely smart, but also very kind, so I provide this [template]().
+
 ### Requirements
 
 It is, as usual, strongly recommended for you to use `Python` virtual environment or container
