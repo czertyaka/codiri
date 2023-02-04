@@ -13,7 +13,7 @@ There are certain summer days when sun is so close to these lands of mortals tha
 to it, you seek shelter in haste.
 The water these days does not bring comfort, on contrary, it becomes warm and nasty, you can even see
 it evaporazing.
-Talking about evaporazing...
+Talking about evaporation...
 Water level drops down.
 It is about several meters of coastline that was under water back then, but now it sees light.
 So do radioactive wastes. It is to a certain extent safe unless you want to settle down near it for long.
