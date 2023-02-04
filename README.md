@@ -91,3 +91,45 @@ It contains all the values that can not be considered as reference
 Since you will probably need to change one or two of them regularly they are stored in `json` file.
 List of these variables, theirs units and hierarchy you may find [here]().
 I'm not only extremely smart, but also very kind, so I provide this [template]().
+Let's assume you gave it name `input.json`
+
+### Calculation
+
+So, I guess you already prepared calculation environment and it looks something like this:
+```
+$ tree -L
+.
+├── codiri
+│   ├── calculate.py
+│   ├── data
+│   ├── __init__.py
+│   ├── main.py
+│   ├── plot.py
+│   ├── __pycache__
+│   ├── pyproject.toml
+│   ├── README.md
+│   ├── requirements.txt
+│   ├── src
+│   ├── tests
+│   └── utils.py
+├── data
+│   ├── README.md
+│   ├── reference_data.db
+│   └── water.tif
+├── input
+│   └── input.json
+└── venv
+    ├── bin
+    ├── include
+    ├── lib
+    ├── lib64 -> lib
+    ├── pyvenv.cfg
+    └── share
+
+14 directories, 13 files
+```
+
+Run calculation like this:
+```bash
+python codiri/calculate.py -i inlut/input.json -o results
+```
