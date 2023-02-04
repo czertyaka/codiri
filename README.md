@@ -133,3 +133,57 @@ Run calculation like this:
 ```bash
 python codiri/calculate.py -i inlut/input.json -o results
 ```
+Output example:
+```
+report directory: results/report_04-02-2023_21-08-25
+map: opened image '/home/czert/projects/codiri/data/water.tif'; bounds = BoundingBox(left=6771550.0, bottom=7480900.0, right=6806900.0, top=7516450.0), crs = EPSG:3857, width = 707 pix, height = 711 pix
+shorelines: found 102 basins
+shorelines: Douglas-Peucker approximation algorithm epsilon = 1%
+shorelines: added 42 basins
+Metlino; Cs-137: acute 1.30e-09; period 7.85e-08; Sr-90: acute 1.41e-11; period 1.86e-07
+Hudaiberdinsky; Cs-137: acute 9.68e-10; period 7.82e-08; Sr-90: acute 8.61e-12; period 1.86e-07
+Novogorny; Cs-137: acute 8.69e-10; period 7.81e-08; Sr-90: acute 7.08e-12; period 1.86e-07
+Ibragimova; Cs-137: acute 7.93e-10; period 7.80e-08; Sr-90: acute 5.99e-12; period 1.86e-07
+NovayaTecha; Cs-137: acute 8.53e-10; period 7.80e-08; Sr-90: acute 6.84e-12; period 1.86e-07
+BolshoyKuyash; Cs-137: acute 7.84e-10; period 7.80e-08; Sr-90: acute 5.87e-12; period 1.86e-07
+Tatysh; Cs-137: acute 6.89e-10; period 7.79e-08; Sr-90: acute 4.66e-12; period 1.86e-07
+Kasli; Cs-137: acute 6.19e-10; period 7.78e-08; Sr-90: acute 3.88e-12; period 1.86e-07
+Kyshtym; Cs-137: acute 5.62e-10; period 7.77e-08; Sr-90: acute 3.28e-12; period 1.86e-07
+map: opened image '/home/czert/projects/codiri/data/water.tif'; bounds = BoundingBox(left=6771550.0, bottom=7480900.0, right=6806900.0, top=7516450.0), crs = EPSG:3857, width = 707 pix, height = 711 pix
+shorelines: found 102 basins
+shorelines: Douglas-Peucker approximation algorithm epsilon = 1%
+shorelines: added 42 basins
+plot: data/compass.png is missing
+plot: data/compass.png is missing
+plot: data/compass.png is missing
+plot: results/report_04-02-2023_21-08-25/bin/coords.npy is missing
+```
+Directiry with results content:
+```
+$ tree results
+results
+└── report_04-02-2023_21-08-25
+    ├── basins.png
+    ├── bin
+    │   ├── Cs-137_actmap.tif
+    │   ├── raster_factors.json
+    │   └── Sr-90_actmap.tif
+    ├── Cs-137_actmap.png
+    ├── input.json
+    ├── special_points.csv
+    └── Sr-90_actmap.png
+
+3 directories, 8 files
+```
+
+Program generated report directory with unique name.
+The output is bunch of plot images and text data.
+The input file were also copied to report just for the record.
+Here is brief explanation for each output file in root directory of report:
+* `basins.png` is a picture of labeled contaminated basins over geographical coordinates;
+* `<nuclide name>_actmap.png` is a heatmap of activity distribution on derelict coastline;
+* `special_points.json` has amount of resulting and intermediate calculated values for
+each point of interest, e.g. effective acute dose, effective dose for 1st year, depletions for
+each atmospheric stability cathegory and so on.
+
+The `bin` directory is not for user's use.
