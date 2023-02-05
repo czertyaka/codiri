@@ -21,7 +21,7 @@ The easiest way to obtain such file is to use Google Earth Engine
 [Code Editor](https://code.earthengine.google.com/).
 Make sure you have access to it and learn some basics on how to use it and you're ready to go.
 I provide
-[this](https://github.com/czertyaka/codiri/blob/master/docs/google-earth-engine-script.js)
+[this](docs/google-earth-engine-script.js)
 script to make your life easier.
 It uses
 [GLCF: Landsat Global Inland Water](https://developers.google.com/earth-engine/datasets/catalog/GLCF_GLS_WATER)

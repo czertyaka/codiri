@@ -73,7 +73,7 @@ Then, you need to prepare few input binary files.
 * First one is geospatial raster file which will be used to form activity map, typically it has `.tif` extension.
 It, of course, should cover area of interest, e.g. basins you need to calculate dose from.
 Basically, each raster unit contains `0` for firm land and `255` for watery surface.
-[Here](https://github.com/czertyaka/codiri/blob/master/docs/basins-raster-file.md)
+[Here](docs/basins-raster-file.md)
 you can find it's specification and ways to obtain it.
 For our usage scenario let's assume it has name `water.tif`.
 
