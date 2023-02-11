@@ -46,13 +46,13 @@ This table defines values needed to model that process.
 |`food_id`|Food category unique identifier|1|
 |`accumulation_factor`|Accumulation factor for given nuclide, source and food|m^2/kg[^2] or m^2/litre[^3]|
 
+[^1]: Note that nuclides names in this table should correspond to ones in [Nuclides](#Nuclides) table.
+[^2]: For solid food such as meat, vegetables.
+[^3]: For liquied food such as milk.
+
 ## Roughness
 
 ## Diffusion coefficients
 
 ## Nuclides
-
-[^1]: Note that nuclides names in this table should correspond to ones in [Nuclides](#Nuclides) table.
-[^2]: For solid food such as meat, vegetables.
-[^3]: For liquied food such as milk.
 
