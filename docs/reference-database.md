@@ -52,7 +52,7 @@ This table defines values needed to model that process.
 
 ## Nuclides
 
-[^1]: Note that nuclides names in this table should correspond to ones in *Nuclides* table.
+[^1]: Note that nuclides names in this table should correspond to ones in [Nuclides](#Nuclides) table.
 [^2]: For solid food such as meat, vegetables.
 [^3]: For liquied food such as milk.
 
