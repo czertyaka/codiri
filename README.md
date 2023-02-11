@@ -82,7 +82,8 @@ age groups, dose coefficients and etc.
 It may need to put some effort into preparing this one since computation model uses much more of reference values
 than of user input.
 It is expected to be database formed with [dataset](https://dataset.readthedocs.io/en/latest/#) `Python` package.
-It's structure and ways of it's provisioning may be found [here]().
+It's structure and ways of it's provisioning may be found
+[here](docs/reference-database.md).
 I will refer to the database as `reference.db` later.
 
 It's unlikely that you'll need to modify these two very often.
