@@ -53,7 +53,7 @@ This table defines values needed to model that process.
 ## Roughness
 
 Terrain roughness values for each terrain type.
-Table should define roughness for at leas four terrain types:
+Table should define roughness for at least four terrain types:
 - greenland;
 - agricultural;
 - forest;
