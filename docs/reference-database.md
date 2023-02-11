@@ -90,15 +90,15 @@ This table provides radioactive nuclides various features.
 |Column|Description|Dimension|
 | --- | --- | --- |
 |`name`|Radioactive nuclide name e.g. *Cs-137*|text|
-|`decay_coeff`|Nuclide's radioactive decay coefficient|s^-1|
-|`R_cloud`|Nuclide's dose conversion factor for external irradiation from radioactive cloud|(Sv\*m³)/(Bq\*s)|
-|`R_surface`|Nuclide's dose conversion factor for external irradiation from soil surface|(Sv\*m²)/(Bq\*s)|
+|`decay_coeff`|Nuclide's radioactive decay coefficient|s⁻¹|
+|`R_cloud`|Nuclide's dose conversion factor for external irradiation from radioactive cloud|(Sv⋅m³)/(Bq⋅s)|
+|`R_surface`|Nuclide's dose conversion factor for external irradiation from soil surface|(Sv⋅m²)/(Bq⋅s)|
 |`R_inh`|Nuclide's dose conversion factor for internal irradiation from air intake|Sv/Bq|
 |`R_food`|Nuclide's dose conversion factor for internal irradiation from food intake|Sv/Bq|
 |`deposition_rate`|Nuclide's deposition rate|m/s|
 |`group`[^5]|Nuclide's chemical form, e.g. *aerosol*, *IRG*|text|
 |`food_critical_age_group`[^6]|Identifier of age group which is considered to be critical to irradiation from food intake|1|
-|`standard_washing_capacity`|Radionuclide's standard washing capacity|hr/(mm\*s)|
+|`standard_washing_capacity`|Radionuclide's standard washing capacity|hr/(mm⋅s)|
 
 [^5]: For now only *aerosol* form is supported.
 [^6]: Foreign key from [Age groups](#Age-groups) table.
