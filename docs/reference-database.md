@@ -13,7 +13,7 @@ DB has 6 tables:
 ## Age groups
 
 |Column|Description|Dimension|
-| --- | --- |
+| --- | --- | --- |
 |`id`|Age group unique identifier|1|
 |`lower_age`|Lower limit of age group|years|
 |`upper_age`|Upper limit of age group|years|
