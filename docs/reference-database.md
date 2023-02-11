@@ -101,5 +101,5 @@ This table provides radioactive nuclides varios features.
 |`standard_washing_capacity`|Radionuclide's standard washing capacity|hr/(mm\*s)|
 
 [^5]: For now only *aerosol* form is supported.
-[^6]: Foreign key from [Age groups][#Age-groups] table.
+[^6]: Foreign key from [Age groups](#Age-groups) table.
 
