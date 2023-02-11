@@ -2,7 +2,7 @@
 
 Reference database file is `sqlite` database made with `dataset` package.
 For now the best way to make it is to do it manually using `dataset`.
-I will now desctibe its' architecture.
+I will now describe its' architecture.
 
 DB has 6 tables:
 ```python
@@ -20,8 +20,8 @@ This table defines bounds of each group and some groups' characteristics.
 |`id`|Age group unique identifier|1|
 |`lower_age`|Lower limit of age group|years|
 |`upper_age`|Upper limit of age group|years|
-|`respiration_rate`|Average respiration rate of the group|m^3/s|
-|`daily_metabolic_cost`|Avertage daily metabolic cost of the group|kcal/day|
+|`respiration_rate`|Average respiration rate of the group|m³/s|
+|`daily_metabolic_cost`|Average daily metabolic cost of the group|kcal/day|
 
 ## Food
 
@@ -44,20 +44,20 @@ This table defines values needed to model that process.
 |`nuclide`|Nuclide name such as *Cs-137*, etc[^1]|text|
 |`accumulation source`|*soil* or *atmosphere*|text|
 |`food_id`|Food category unique identifier|1|
-|`accumulation_factor`|Accumulation factor for given nuclide, source and food|m^2/kg[^2] or m^2/litre[^3]|
+|`accumulation_factor`|Accumulation factor for given nuclide, source and food|m²/kg[^2] or m²/litre[^3]|
 
 [^1]: Note that nuclides names in this table should correspond to ones in [Nuclides](#Nuclides) table.
 [^2]: For solid food such as meat, vegetables.
-[^3]: For liquied food such as milk.
+[^3]: For liquid food such as milk.
 
 ## Roughness
 
 Terrain roughness values for each terrain type.
 Table should define roughness for at least four terrain types:
-- greenland;
-- agricultural;
-- forest;
-- settlement.
+- *greenland*;
+- *agricultural*;
+- *forest*;
+- *settlement*.
 
 |Column|Description|Dimension|
 | --- | --- | --- |
@@ -85,14 +85,14 @@ Atmospheric stability class are *A*..*F*.
 
 ## Nuclides
 
-This table provides radioactive nuclides varios features.
+This table provides radioactive nuclides various features.
 
 |Column|Description|Dimension|
 | --- | --- | --- |
 |`name`|Radioactive nuclide name e.g. *Cs-137*|text|
 |`decay_coeff`|Nuclide's radioactive decay coefficient|s^-1|
-|`R_cloud`|Nuclide's dose conversion factor for external irradiation from radioactive cloud|(Sv\*m^3)/(Bq\*s)|
-|`R_surface`|Nuclide's dose conversion factor for external irradiation from soil surface|(Sv\*m^2)/(Bq\*s)|
+|`R_cloud`|Nuclide's dose conversion factor for external irradiation from radioactive cloud|(Sv\*m³)/(Bq\*s)|
+|`R_surface`|Nuclide's dose conversion factor for external irradiation from soil surface|(Sv\*m²)/(Bq\*s)|
 |`R_inh`|Nuclide's dose conversion factor for internal irradiation from air intake|Sv/Bq|
 |`R_food`|Nuclide's dose conversion factor for internal irradiation from food intake|Sv/Bq|
 |`deposition_rate`|Nuclide's deposition rate|m/s|
