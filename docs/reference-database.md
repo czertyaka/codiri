@@ -68,7 +68,9 @@ Table should define roughness for at least four terrain types:
 
 That one defines diffusion coefficients for each atmospheric stability class.
 Latter four columns names were taken directly from Gauss model.
-Refer to Safety manual at wiki to obtain them.
+Refer to
+[Safety manual](https://github.com/czertyaka/codiri/wiki/Reference-Textbooks)
+at wiki to obtain them (Appendix 5, Table 5).
 Atmospheric stability class are *A*..*F*.
 
 |Column|Description|Dimension|
