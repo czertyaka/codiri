@@ -52,6 +52,18 @@ This table defines values needed to model that process.
 
 ## Roughness
 
+Terrain roughness values for each terrain type.
+Table should define roughness for at leas four terrain types:
+- greenland;
+- agricultural;
+- forest;
+- settlement.
+
+|Column|Description|Dimension|
+| --- | --- | --- |
+|`terrain`|Terrain type|text|
+|`roughness`|Roughness of relief|m|
+
 ## Diffusion coefficients
 
 ## Nuclides
