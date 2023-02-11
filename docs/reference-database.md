@@ -17,11 +17,11 @@ This table defines bounds of each group and some groups' characteristics.
 
 |Column|Description|Dimension|
 | --- | --- | --- |
-|`id`|Age group unique identifier|1|
-|`lower_age`|Lower limit of age group|years|
-|`upper_age`|Upper limit of age group|years|
-|`respiration_rate`|Average respiration rate of the group|m³/s|
-|`daily_metabolic_cost`|Average daily metabolic cost of the group|kcal/day|
+|`id`|Age group unique identifier|$1$|
+|`lower_age`|Lower limit of age group|$years$|
+|`upper_age`|Upper limit of age group|$years$|
+|`respiration_rate`|Average respiration rate of the group|$m^3/s$|
+|`daily_metabolic_cost`|Average daily metabolic cost of the group|$kcal/day$|
 
 ## Food
 
@@ -30,8 +30,8 @@ as foreign key.
 
 |Column|Description|Dimension|
 | --- | --- | --- |
-|`id`|Food category unique identifier|1|
-|`food category`|Short food category name such as *meat*, *milk*, etc|text|
+|`id`|Food category unique identifier|$1$|
+|`food category`|Short food category name such as *meat*, *milk*, etc|$text$|
 
 ## Accumulation factors
 
@@ -40,11 +40,11 @@ This table defines values needed to model that process.
 
 |Column|Description|Dimension|
 | --- | --- | --- |
-|`id`|Accumulation factor unique identifier|1|
-|`nuclide`|Nuclide name such as *Cs-137*, etc[^1]|text|
-|`accumulation source`|*soil* or *atmosphere*|text|
-|`food_id`|Food category unique identifier|1|
-|`accumulation_factor`|Accumulation factor for given nuclide, source and food|m²/kg[^2] or m²/litre[^3]|
+|`id`|Accumulation factor unique identifier|$1$|
+|`nuclide`|Nuclide name such as *Cs-137*, etc[^1]|$text$|
+|`accumulation source`|*soil* or *atmosphere*|$text$|
+|`food_id`|Food category unique identifier|$1$|
+|`accumulation_factor`|Accumulation factor for given nuclide, source and food|$m^2/kg$[^2] or $m^2/litre$[^3]|
 
 [^1]: Note that nuclides names in this table should correspond to ones in [Nuclides](#Nuclides) table.
 [^2]: For solid food such as meat, vegetables.
@@ -61,8 +61,8 @@ Table should define roughness for at least four terrain types:
 
 |Column|Description|Dimension|
 | --- | --- | --- |
-|`terrain`|Terrain type|text|
-|`roughness`|Roughness of relief|m|
+|`terrain`|Terrain type|$text$|
+|`roughness`|Roughness of relief|$m$|
 
 ## Diffusion coefficients
 
@@ -75,11 +75,11 @@ Atmospheric stability class are *A*..*F*.
 
 |Column|Description|Dimension|
 | --- | --- | --- |
-|`a_class`|Atmospheric stability class e.g. *A*, *B*, etc.|text|
-|`p_z`[^4]||1|
-|`q_z`[^4]||1|
-|`p_y`[^4]||1|
-|`q_y`[^4]||1|
+|`a_class`|Atmospheric stability class e.g. *A*, *B*, etc.|$text$|
+|`p_z`[^4]||$1$|
+|`q_z`[^4]||$1$|
+|`p_y`[^4]||$1$|
+|`q_y`[^4]||$1$|
 
 [^4]: Meaningful description can not be provided.
 
@@ -89,16 +89,16 @@ This table provides radioactive nuclides various features.
 
 |Column|Description|Dimension|
 | --- | --- | --- |
-|`name`|Radioactive nuclide name e.g. *Cs-137*|text|
-|`decay_coeff`|Nuclide's radioactive decay coefficient|s⁻¹|
-|`R_cloud`|Nuclide's dose conversion factor for external irradiation from radioactive cloud|(Sv⋅m³)/(Bq⋅s)|
-|`R_surface`|Nuclide's dose conversion factor for external irradiation from soil surface|(Sv⋅m²)/(Bq⋅s)|
-|`R_inh`|Nuclide's dose conversion factor for internal irradiation from air intake|Sv/Bq|
-|`R_food`|Nuclide's dose conversion factor for internal irradiation from food intake|Sv/Bq|
-|`deposition_rate`|Nuclide's deposition rate|m/s|
-|`group`[^5]|Nuclide's chemical form, e.g. *aerosol*, *IRG*|text|
-|`food_critical_age_group`[^6]|Identifier of age group which is considered to be critical to irradiation from food intake|1|
-|`standard_washing_capacity`|Radionuclide's standard washing capacity|hr/(mm⋅s)|
+|`name`|Radioactive nuclide name e.g. *Cs-137*|$text$|
+|`decay_coeff`|Nuclide's radioactive decay coefficient|$s^{-1}$|
+|`R_cloud`|Nuclide's dose conversion factor for external irradiation from radioactive cloud|$(Sv⋅m^3)/(Bq⋅s)$|
+|`R_surface`|Nuclide's dose conversion factor for external irradiation from soil surface|$(Sv⋅m^2)/(Bq⋅s)$|
+|`R_inh`|Nuclide's dose conversion factor for internal irradiation from air intake|$Sv/Bq$|
+|`R_food`|Nuclide's dose conversion factor for internal irradiation from food intake|$Sv/Bq$|
+|`deposition_rate`|Nuclide's deposition rate|$m/s$|
+|`group`[^5]|Nuclide's chemical form, e.g. *aerosol*, *IRG*|$text$|
+|`food_critical_age_group`[^6]|Identifier of age group which is considered to be critical to irradiation from food intake|$1$|
+|`standard_washing_capacity`|Radionuclide's standard washing capacity|$hr/(mm⋅s)$|
 
 [^5]: For now only *aerosol* form is supported.
 [^6]: Foreign key from [Age groups](#Age-groups) table.
