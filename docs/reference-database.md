@@ -12,6 +12,9 @@ DB has 6 tables:
 
 ## Age groups
 
+Dose is calculated separately for different population age groups.
+This table defines bounds of each group and some groups' characteristics.
+
 |Column|Description|Dimension|
 | --- | --- | --- |
 |`id`|Age group unique identifier|1|
@@ -22,17 +25,34 @@ DB has 6 tables:
 
 ## Food
 
+This table simply defines identifiers of food categories which other tables use
+as foreign key.
+
 |Column|Description|Dimension|
 | --- | --- | --- |
 |`id`|Food category unique identifier|1|
-|`food category`|Short food category name such as 'meat', 'milk', etc|text|
+|`food category`|Short food category name such as *meat*, *milk*, etc|text|
+
+## Accumulation factors
+
+Nuclides are being accumulated in food.
+This table defines values needed to model that process.
+
+|Column|Description|Dimension|
+| --- | --- | --- |
+|`id`|Accumulation factor unique identifier|1|
+|`nuclide`|Nuclide name such as *Cs-137*, etc[^1]|text|
+|`accumulation source`|*soil* or *atmosphere*|text|
+|`food_id`|Food category unique identifier|1|
+|`accumulation_factor`|Accumulation factor for given nuclide, source and food|m^2/kg[^2] or m^2/litre[^3]|
 
 ## Roughness
 
 ## Diffusion coefficients
 
-## Accumulation factors
-
 ## Nuclides
 
+[^1]: Note that nuclides names in this table should correspond to ones in *Nuclides* table.
+[^2]: For solid food such as meat, vegetables.
+[^3]: For liquied food such as milk.
 
