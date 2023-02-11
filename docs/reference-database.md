@@ -22,6 +22,11 @@ DB has 6 tables:
 
 ## Food
 
+|Column|Description|Dimension|
+| --- | --- | --- |
+|`id`|Food category unique identifier|1|
+|`food category`|Short food category name such as 'meat', 'milk', etc|text|
+
 ## Roughness
 
 ## Diffusion coefficients
